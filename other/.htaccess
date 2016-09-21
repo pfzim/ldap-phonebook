@@ -1,0 +1,9 @@
+RewriteEngine On
+
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteRule . index.php
+
+RewriteRule ^/?$ pb.php
+RewriteRule ^logon/?$ pb.php?action=logon
+RewriteRule ^logoff/?$ pb.php?action=logoff
