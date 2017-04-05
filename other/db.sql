@@ -13,6 +13,8 @@ CREATE TABLE  `pb`.`pb_contacts` (
   `pcell` varchar(255) NOT NULL DEFAULT '',
   `mail` varchar(255) NOT NULL DEFAULT '',
   `bday` date DEFAULT NULL,
-  `visible` int(10) unsigned NOT NULL DEFAULT '0',
+  `mime` varchar(255) NOT NULL DEFAULT '',
+  `photo` blob NOT NULL,
+  `visible` int(10) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
