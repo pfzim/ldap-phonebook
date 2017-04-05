@@ -158,7 +158,7 @@
 			$query = rpv_v2("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", array($id));
 			$res = db_put($query);
 			db_disconnect();
-			echo '{"result": 0, "message": "Hide ID '.$id.'"}';
+			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
 			exit;
 	}
 

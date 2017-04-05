@@ -1,5 +1,6 @@
 <?php include("tpl.header.php"); ?>
 <script>
+
 function si(ev, img)
 {
 	if(img)
@@ -8,8 +9,18 @@ function si(ev, img)
 		el.src = img;
 		el = document.getElementById('imgblock');
 		imgblock.style.display = 'block';
-		imgblock.style.left = ev.clientX  + "px";
-		imgblock.style.top = ev.clientY  + "px";
+		imgblock.style.left = (ev.clientX+10)  + "px";
+		imgblock.style.top = (ev.clientY+10)  + "px";
+	}
+}
+
+function mi(ev)
+{
+	var el = document.getElementById('imgblock');
+	if(el)
+	{
+		el.style.left = (ev.clientX+10)  + "px";
+		el.style.top = (ev.clientY+10)  + "px";
 	}
 }
 
@@ -72,7 +83,7 @@ function filter_table() {
 			<tbody>
 		<?php $i = 0; if($res !== FALSE) foreach($res as $row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>">
-				<td onmouseover="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseout="hide();" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+				<td onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
@@ -86,9 +97,25 @@ function filter_table() {
 			</tbody>
 		</table>
 		<script>
-			$(".cmd_hide").click(function() { var id = $(this).parent().data('id'); $.get("pb.php", {'action': 'hide', 'id': id }, function(data) { 
-				$("#error").html($.parseJSON(data).message).show(); 
-				$("#row"+id).remove();
-				} ) });
+			$(".cmd_hide").click(
+				function()
+				{
+					var id = $(this).parent().data('id');
+					$.get("pb.php", {'action': 'hide', 'id': id },
+						function(data)
+						{ 
+							$.notify(data.message, "success");
+							$("#row"+id).remove();
+						},
+						'json'
+					)
+					.fail(
+						function()
+						{
+							$.notify("Failed AJAX request", "error");
+						}
+					)
+				}
+			);
 		</script>
 <?php include("tpl.footer.php"); ?>
