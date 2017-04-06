@@ -142,6 +142,7 @@
 									}
 								}
 							}
+							ldap_free_result($sr);
 						}
 						ldap_control_paged_result_response($ldap, $sr, $cookie);
 

@@ -114,7 +114,7 @@ function sortTable(n) {
 </script>
 		<h3 align="center">LDAP phonebook</h3>
 		<div id="imgblock" style="position: fixed; display: none; border: 0px solid black; padding: 0px; margin: 0px;"><img id="userphoto" src=""/></div>
-		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search for names..">
+		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search..">
 		<table id="table" class="main-table">
 			<thead>
 			<tr>

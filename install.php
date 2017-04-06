@@ -216,6 +216,36 @@ EOT;
 					echo '{"result": 0, "status": "OK"}';
 				}
 				exit;
+				case 'check_ldap':
+				{
+					if(empty($_POST['ldaphost'])) throw new Exception('LDAP Host value not defined!');
+					if(empty($_POST['ldapport'])) throw new Exception('LDAP Port value not defined!');
+					if(empty($_POST['ldapuser'])) throw new Exception('LDAP User value not defined!');
+					if(empty($_POST['ldappwd'])) throw new Exception('LDAP Password value not defined!');
+					if(empty($_POST['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
+
+					$ldap = ldap_connect(@$_POST['ldaphost'], @$_POST['ldapport']);
+					if($ldap)
+					{
+						ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+						ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+						if(ldap_bind($ldap, @$_POST['ldapuser'], @$_POST['ldappwd']))
+						{
+							$cookie = '';
+							ldap_control_paged_result($ldap, 200, true, $cookie);
+								
+							$sr = ldap_search($ldap, @$_POST['ldapbase'], @$_POST['ldapfilter'], explode(',', 'samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto'));
+							if($sr)
+							{
+								echo '{"result": 0, "status": "OK (Entries founded: '.ldap_count_entries($ldap, $sr).')"}';
+								ldap_free_result($sr);
+								exit;
+							}
+						}
+					}
+					throw new Exception("FAILED");
+				}
+				exit;
 				case 'save_config':
 				{
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
@@ -239,6 +269,15 @@ EOT;
 						throw new Exception("Save config error");
 					}
 					
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
+				case 'remove_self':
+				{
+					if(!unlink('install.php'))
+					{
+						throw new Exception("FAILED");
+					}
 					echo '{"result": 0, "status": "OK"}';
 				}
 				exit;
@@ -365,6 +404,14 @@ EOT;
 					+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
 			}
 
+			function f_check_ldap(id)
+			{
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				f_post(id, "check_ldap", 'ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
+			}
+
 			function f_save_config(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
@@ -372,6 +419,13 @@ EOT;
 				f_post(id, "save_config", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
 					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
+			}
+
+			function f_remove_self(id)
+			{
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				f_post(id, "remove_self", 'goodbay=script');
 			}
 		</script>
 	</head>
@@ -386,13 +440,13 @@ EOT;
 			<div class="form-group">
 				<label for="host" class="control-label col-sm-2">Host:</label>
 				<div class="col-sm-5"> 
-					<input id="host" class="form-control" type="text" value="" />
+					<input id="host" class="form-control" type="text" value="localhost" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="user_root" class="control-label col-sm-2">Login:</label>
 				<div class="col-sm-5"> 
-					<input id="user_root" class="form-control" type="text" value="" />
+					<input id="user_root" class="form-control" type="text" value="root" />
 				</div>
 			</div>
 			<div class="form-group">
@@ -409,7 +463,7 @@ EOT;
 			<div class="form-group">
 				<label for="db_scheme" class="control-label col-sm-2">DB name:</label>
 				<div class="col-sm-5"> 
-					<input id="db_scheme" class="form-control" type="text" value="" />
+					<input id="db_scheme" class="form-control" type="text" value="pb" />
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -425,7 +479,7 @@ EOT;
 			<div class="form-group">
 				<label for="db_user" class="control-label col-sm-2">Login:</label>
 				<div class="col-sm-5"> 
-					<input id="db_user" class="form-control" type="text" value="" />
+					<input id="db_user" class="form-control" type="text" value="pbuser" />
 				</div>
 			</div>
 			<div class="form-group">
@@ -452,19 +506,19 @@ EOT;
 			<div class="form-group">
 				<label for="ldap_host" class="control-label col-sm-2">Host:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_host" class="form-control" type="text" value="" />
+					<input id="ldap_host" class="form-control" type="text" value="dc" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_port" class="control-label col-sm-2">Port:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_port" class="form-control" type="text" value="" />
+					<input id="ldap_port" class="form-control" type="text" value="389" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_user" class="control-label col-sm-2">User:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_user" class="form-control" type="text" value="" />
+					<input id="ldap_user" class="form-control" type="text" value="domain\user" />
 				</div>
 			</div>
 			<div class="form-group">
@@ -476,18 +530,28 @@ EOT;
 			<div class="form-group">
 				<label for="ldap_base" class="control-label col-sm-2">Base DN:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_base" class="form-control" type="text" value="" />
+					<input id="ldap_base" class="form-control" type="text" value="DC=company,DC=local" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_filter" class="control-label col-sm-2">Filter:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_filter" class="form-control" type="text" value="" />
+					<input id="ldap_filter" class="form-control" type="text" value="(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" />
 				</div>
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_save_config(5);'>5. Save config</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_check_ldap(5);'>5. Check LDAP connection</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_save_config(6);'>6. Save config</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_remove_self(7);'>7. Remove this script</button><div id="result_7" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>
