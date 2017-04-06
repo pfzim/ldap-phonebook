@@ -99,8 +99,8 @@ class MySQLDB
 	}
 	private function error($str)
 	{
-		$this->error_msg = $str;
-		//throw new Exception(__CLASS__.": ".$str);
+		//$this->error_msg = $str;
+		throw new Exception($str); //__CLASS__.": ".$str
 	}
 }
 
@@ -150,112 +150,71 @@ EOT;
 		$action = $_GET['action'];
 	}
 
-	switch($action)
+	try
 	{
-		case 'check_db':
+		switch($action)
 		{
-			header("Content-Type: text/plain; charset=utf-8");
-			$db = new MySQLDB();
-			if($db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']))
+			case 'check_db':
 			{
+				header("Content-Type: text/plain; charset=utf-8");
+				$db = new MySQLDB();
+				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 				echo '{"result": 0, "status": "OK"}';
 			}
-			else
+			exit;
+			case 'create_db':
 			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-			}
-		}
-		exit;
-		case 'create_db':
-		{
-			header("Content-Type: text/plain; charset=utf-8");
+				header("Content-Type: text/plain; charset=utf-8");
 
-			$db = new MySQLDB();
-			if(!$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']))
+				$db = new MySQLDB();
+				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+				$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8;');
+				$db->select_db(@$_POST['db']);
+				$db->put($db_table);
+
+				echo '{"result": 0, "status": "OK"}';
+			}
+			exit;
+			case 'create_db_user':
 			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
+				header("Content-Type: text/plain; charset=utf-8");
 
-			if(!$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8;'))
+				$db = new MySQLDB();
+				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+				$db->put("CREATE USER '".@$_POST['dbuser']."'@'%' IDENTIFIED BY '".@$_POST['dbpwd']."'");
+
+				echo '{"result": 0, "status": "OK"}';
+			}
+			exit;
+			case 'grant_access':
 			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
+				header("Content-Type: text/plain; charset=utf-8");
 
-			if(!$db->select_db(@$_POST['db']))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			if(!$db->put($db_table))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			echo '{"result": 0, "status": "OK"}';
-		}
-		exit;
-		case 'create_db_user':
-		{
-			header("Content-Type: text/plain; charset=utf-8");
-
-			$db = new MySQLDB();
-			if(!$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			if(!$db->put("CREATE USER '".@$_POST['dbuser']."'@'%' IDENTIFIED BY '".@$_POST['dbpwd']."'"))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			echo '{"result": 0, "status": "OK"}';
-		}
-		exit;
-		case 'grant_access':
-		{
-			header("Content-Type: text/plain; charset=utf-8");
-
-			$db = new MySQLDB();
-			if(!$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			if(!$db->put("GRANT ALL PRIVILEGES ON ".@$_POST['db'].".* TO '".@$_POST['dbuser']."'@'%'"))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
-
-			if(!$db->put("FLUSH PRIVILEGES"))
-			{
-				echo '{"result": 1, "status": "'.$db->get_last_error().'"}';
-				exit;
-			}
+				$db = new MySQLDB();
+				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+				$db->put("GRANT ALL PRIVILEGES ON ".@$_POST['db'].".* TO '".@$_POST['dbuser']."'@'%'");
+				$db->put("FLUSH PRIVILEGES");
 			
-			echo '{"result": 0, "status": "OK"}';
-		}
-		exit;
-		case 'save_config':
-		{
-			header("Content-Type: text/plain; charset=utf-8");
-			
-			if(file_put_contents('test.txt', $config) === FALSE)
-			{
-				echo '{"result": 1, "status": "Error save file"}';
-				exit;
+				echo '{"result": 0, "status": "OK"}';
 			}
-			
-			echo '{"result": 0, "status": "OK"}';
+			exit;
+			case 'save_config':
+			{
+				header("Content-Type: text/plain; charset=utf-8");
+				
+				if(file_put_contents('test.txt', $config) === FALSE)
+				{
+					throw new Exception("Error save file");
+				}
+				
+				echo '{"result": 0, "status": "OK"}';
+			}
+			exit;
 		}
+	}
+	catch(Exception $e)
+	{
+		echo '{"result": 1, "status": "'.$e->getMessage().'"}';
 		exit;
 	}
 	
@@ -264,8 +223,11 @@ EOT;
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>Installation script</title>
+		<meta charset="utf-8"> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link type="text/css" href="templ/bootstrap.min.css" rel="stylesheet" />
 		<script type="text/javascript">
 			function gi(name)
 			{
@@ -332,6 +294,7 @@ EOT;
 			function f_check_db_conn(id)
 			{
 				gi("result_"+id).textContent = 'Wait...';
+				gi("result_"+id).style.display = 'block';
 				f_post(id, 'check_db', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value));
 			}
 
@@ -364,17 +327,91 @@ EOT;
 		</script>
 	</head>
 	<body>
-		<input id="host" type="text" value="" /><br />
-		<input id="user_root" type="text" value="" /><br />
-		<input id="pwd_root" type="text" value="" /><br />
-		<button type="button" onclick='f_check_db_conn(1);'>Check DB connection</button><span id="result_1"></span><br />
-		<input id="db_scheme" type="text" value="" /><br />
-		<button type="button" onclick='f_create_db(2);'>Create database and tables</button><span id="result_2"></span><br />
-		<input id="db_user" type="text" value="" /><br />
-		<input id="db_pwd" type="text" value="" /><br />
-		<button type="button" onclick='f_create_db_user(3);'>Create DB user</button><span id="result_3"></span><br />
-		<button type="button" onclick='f_grant_access(4);'>Grant access to database</button><span id="result_4"></span><br />
-		<input id="ldap_host" type="text" value="" /><br />
-		<button type="button" onclick='f_save_config(5);'>Save config</button><span id="result_5"></span><br />
+		<div class="container">
+		<div class="form-horizontal">
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>MySQL settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="host" class="control-label col-sm-2">Host:</label>
+				<div class="col-sm-5"> 
+					<input id="host" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="user_root" class="control-label col-sm-2">Login:</label>
+				<div class="col-sm-5"> 
+					<input id="user_root" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="pwd_root" class="control-label col-sm-2">Password:</label>
+				<div class="col-sm-5"> 
+					<input id="pwd_root" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_check_db_conn(1);'>1. Check DB connection</button><div id="result_1" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="db_scheme" class="control-label col-sm-2">DB name:</label>
+				<div class="col-sm-5"> 
+					<input id="db_scheme" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_create_db(2);'>2. Create database and tables</button><div id="result_2" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>New DB user</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="db_user" class="control-label col-sm-2">Login:</label>
+				<div class="col-sm-5"> 
+					<input id="db_user" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="db_pwd" class="control-label col-sm-2">Password:</label>
+				<div class="col-sm-5"> 
+					<input id="db_pwd" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_create_db_user(3);'>3. Create DB user</button><div id="result_3" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_grant_access(4);'>4. Grant access to database</button><div id="result_4" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>LDAP settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_host" class="control-label col-sm-2">Host:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_host" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_save_config(5);'>5. Save config</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+		</div>
+		</div>
 	</body>
 </html>
