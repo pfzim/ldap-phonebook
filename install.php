@@ -104,7 +104,7 @@ class MySQLDB
 	}
 }
 
-$db_table = <<<EOT
+$db_table = <<<'EOT'
 CREATE TABLE  `pb_contacts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `samname` varchar(255) NOT NULL DEFAULT '',
@@ -126,96 +126,119 @@ EOT;
 
 $config = <<<'EOT'
 <?php
-	define("LDAP_HOST", "dc-01");
-	define("LDAP_PORT", 389);
-	define("LDAP_USER", "domain\\login");
-	define("LDAP_PASSWD", "password");
-	define("LDAP_BASE_DN", "DC=domain,DC=local");
-	define("LDAP_FILTER", "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))");
+	define("LDAP_HOST", "#ldap_host#");
+	define("LDAP_PORT", #ldap_port#);
+	define("LDAP_USER", "#ldap_user#");
+	define("LDAP_PASSWD", "#ldap_password#");
+	define("LDAP_BASE_DN", "#ldap_base#");
+	define("LDAP_FILTER", "#ldap_filter#");
 	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto");
 
-	define("DB_HOST", "localhost");
-	define("DB_USER", "root");
-	define("DB_PASSWD", "");
-	define("DB_NAME", "pb");
+	define("DB_HOST", "#host#");
+	define("DB_USER", "#login#");
+	define("DB_PASSWD", "#password#");
+	define("DB_NAME", "#db#");
 	define("DB_CPAGE", "utf8");
 EOT;
 
 
 	error_reporting(0);
 	
-	$action = "";
 	if(isset($_GET['action']))
 	{
 		$action = $_GET['action'];
-	}
-
-	try
-	{
-		switch($action)
+		try
 		{
-			case 'check_db':
-			{
-				header("Content-Type: text/plain; charset=utf-8");
-				$db = new MySQLDB();
-				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-				echo '{"result": 0, "status": "OK"}';
-			}
-			exit;
-			case 'create_db':
-			{
-				header("Content-Type: text/plain; charset=utf-8");
-
-				$db = new MySQLDB();
-				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-				$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8;');
-				$db->select_db(@$_POST['db']);
-				$db->put($db_table);
-
-				echo '{"result": 0, "status": "OK"}';
-			}
-			exit;
-			case 'create_db_user':
-			{
-				header("Content-Type: text/plain; charset=utf-8");
-
-				$db = new MySQLDB();
-				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-				$db->put("CREATE USER '".@$_POST['dbuser']."'@'%' IDENTIFIED BY '".@$_POST['dbpwd']."'");
-
-				echo '{"result": 0, "status": "OK"}';
-			}
-			exit;
-			case 'grant_access':
-			{
-				header("Content-Type: text/plain; charset=utf-8");
-
-				$db = new MySQLDB();
-				$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-				$db->put("GRANT ALL PRIVILEGES ON ".@$_POST['db'].".* TO '".@$_POST['dbuser']."'@'%'");
-				$db->put("FLUSH PRIVILEGES");
+			header("Content-Type: text/plain; charset=utf-8");
 			
-				echo '{"result": 0, "status": "OK"}';
-			}
-			exit;
-			case 'save_config':
+			switch($action)
 			{
-				header("Content-Type: text/plain; charset=utf-8");
-				
-				if(file_put_contents('test.txt', $config) === FALSE)
+				case 'check_db':
 				{
-					throw new Exception("Error save file");
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
+					
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+					echo '{"result": 0, "status": "OK"}';
 				}
+				exit;
+				case 'create_db':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
+					
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+					$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8;');
+					$db->select_db(@$_POST['db']);
+					$db->put($db_table);
+
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
+				case 'create_db_user':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['dbuser'])) throw new Exception('Login value not defined!');
+
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+					$db->put("CREATE USER '".@$_POST['dbuser']."'@'%' IDENTIFIED BY '".@$_POST['dbpwd']."'");
+
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
+				case 'grant_access':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
+					if(empty($_POST['dbuser'])) throw new Exception('Login value not defined!');
+
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+					$db->put("GRANT ALL PRIVILEGES ON ".@$_POST['db'].".* TO '".@$_POST['dbuser']."'@'%'");
+					$db->put("FLUSH PRIVILEGES");
 				
-				echo '{"result": 0, "status": "OK"}';
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
+				case 'save_config':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
+					if(empty($_POST['dbuser'])) throw new Exception('Login value not defined!');
+
+					if(empty($_POST['ldaphost'])) throw new Exception('LDAP Host value not defined!');
+					if(empty($_POST['ldapport'])) throw new Exception('LDAP Port value not defined!');
+					if(empty($_POST['ldapuser'])) throw new Exception('LDAP User value not defined!');
+					if(empty($_POST['ldappwd'])) throw new Exception('LDAP Password value not defined!');
+					if(empty($_POST['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
+
+					$config = str_replace(
+						array('#host#', '#login#', '#password#', '#db#', '#ldap_host#', '#ldap_port#', '#ldap_user#', '#ldap_password#', '#ldap_base#', '#ldap_filter#'), 
+						array(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db'], @$_POST['ldaphost'], @$_POST['ldapport'], @$_POST['ldapuser'], @$_POST['ldappwd'], @$_POST['ldapbase'], @$_POST['ldapfilter']), 
+						$config
+					);
+					
+					if(file_put_contents('inc.db.conf.php', $config) === FALSE)
+					{
+						throw new Exception("Save config error");
+					}
+					
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
 			}
+		}
+		catch(Exception $e)
+		{
+			echo '{"result": 1, "status": "'.$e->getMessage().'"}';
 			exit;
 		}
-	}
-	catch(Exception $e)
-	{
-		echo '{"result": 1, "status": "'.$e->getMessage().'"}';
-		exit;
 	}
 	
 	header("Content-Type: text/html; charset=utf-8");
@@ -279,6 +302,16 @@ EOT;
 							if(this.status == 200)
 							{
 								var result = JSON.parse(this.responseText);
+								if(result.result)
+								{
+									gi("result_"+id).classList.remove('alert-success');
+									gi("result_"+id).classList.add('alert-danger');
+								}
+								else
+								{
+									gi("result_"+id).classList.remove('alert-danger');
+									gi("result_"+id).classList.add('alert-success');
+								}
 								gi("result_"+id).textContent = result.status;
 							}
 						}
@@ -293,36 +326,42 @@ EOT;
 
 			function f_check_db_conn(id)
 			{
-				gi("result_"+id).textContent = 'Wait...';
+				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
 				f_post(id, 'check_db', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value));
 			}
 
 			function f_create_db(id)
 			{
-				gi("result_"+id).textContent = 'Wait...';
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
 				f_post(id, 'create_db', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
 					+'&db='+encodeURIComponent(gi('db_scheme').value));
 			}
 
 			function f_create_db_user(id)
 			{
-				gi("result_"+id).textContent = 'Wait...';
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
 				f_post(id, 'create_db_user', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
 					+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
 			}
 
 			function f_grant_access(id)
 			{
-				gi("result_"+id).textContent = 'Wait...';
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
 				f_post(id, 'grant_access', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
 					+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
 			}
 
 			function f_save_config(id)
 			{
-				gi("result_"+id).textContent = 'Wait...';
-				f_post(id, "save_config", encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				f_post(id, "save_config", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
 			}
 		</script>
 	</head>
@@ -349,7 +388,7 @@ EOT;
 			<div class="form-group">
 				<label for="pwd_root" class="control-label col-sm-2">Password:</label>
 				<div class="col-sm-5"> 
-					<input id="pwd_root" class="form-control" type="text" value="" />
+					<input id="pwd_root" class="form-control" type="password" value="" />
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -382,7 +421,7 @@ EOT;
 			<div class="form-group">
 				<label for="db_pwd" class="control-label col-sm-2">Password:</label>
 				<div class="col-sm-5"> 
-					<input id="db_pwd" class="form-control" type="text" value="" />
+					<input id="db_pwd" class="form-control" type="password" value="" />
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -404,6 +443,36 @@ EOT;
 				<label for="ldap_host" class="control-label col-sm-2">Host:</label>
 				<div class="col-sm-5"> 
 					<input id="ldap_host" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_port" class="control-label col-sm-2">Port:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_port" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_user" class="control-label col-sm-2">User:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_user" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_pwd" class="control-label col-sm-2">Password:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_pwd" class="form-control" type="password" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_base" class="control-label col-sm-2">Base DN:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_base" class="form-control" type="text" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="ldap_filter" class="control-label col-sm-2">Filter:</label>
+				<div class="col-sm-5"> 
+					<input id="ldap_filter" class="form-control" type="text" value="" />
 				</div>
 			</div>
 			<div class="form-group"> 
