@@ -104,8 +104,13 @@ class MySQLDB
 	}
 }
 
-$db_table = <<<'EOT'
-CREATE TABLE  `pb_contacts` (
+$sql = array(
+<<<'EOT'
+CREATE DATABASE `#DB_NAME#` DEFAULT CHARACTER SET 'utf8'
+EOT
+,
+<<<'EOT'
+CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `samname` varchar(255) NOT NULL DEFAULT '',
   `fname` varchar(255) NOT NULL DEFAULT '',
@@ -122,7 +127,8 @@ CREATE TABLE  `pb_contacts` (
   `visible` int(10) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-EOT;
+EOT
+);
 
 $config = <<<'EOT'
 <?php
@@ -171,9 +177,13 @@ EOT;
 					
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-					$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8;');
-					$db->select_db(@$_POST['db']);
-					$db->put($db_table);
+					foreach($sql as $query)
+					{
+						$db->put(str_replace('#DB_NAME#', @$_POST['db'], $query));
+					}
+					//$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8');
+					//$db->select_db(@$_POST['db']);
+					//$db->put($db_table);
 
 					echo '{"result": 0, "status": "OK"}';
 				}
