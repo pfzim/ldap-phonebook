@@ -59,11 +59,6 @@ function filter_table() {
 
 </script>
 		<h3 align="center">LDAP phonebook</h3>
-		<div class="alert alert-success alert-dismissable collapse" role="alert" id="error">
-		  <span>
-		  <p>Looks like the passwords you entered don't match!</p>
-		  </span>
-		</div>
 		<div id="imgblock" style="position: fixed; display: none; border: 0px solid black; padding: 0px; margin: 0px;"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search for names..">
 		<table id="table" class="main-table">
