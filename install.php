@@ -1,5 +1,11 @@
 <?php
 
+if(file_exist('inc.config.php'))
+{
+	echo 'Configuration file exist. Remove inc.config.php before running installation';
+	exit;
+}
+
 class MySQLDB
 {
 	private $link = NULL;
@@ -536,7 +542,7 @@ EOT;
 			<div class="form-group">
 				<label for="ldap_filter" class="control-label col-sm-2">Filter:</label>
 				<div class="col-sm-5"> 
-					<input id="ldap_filter" class="form-control" type="text" value="(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" />
+					<input id="ldap_filter" class="form-control" type="text" value="(&amp;(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" />
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -547,11 +553,6 @@ EOT;
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_save_config(6);'>6. Save config</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_remove_self(7);'>7. Remove this script</button><div id="result_7" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>

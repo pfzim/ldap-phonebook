@@ -17,6 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+if(!file_exist('inc.config.php'))
+{
+	header('Location: /install.php');
+	exit;
+}
+
 	session_name("ZID");
 	session_start();
 	error_reporting(E_ALL);
