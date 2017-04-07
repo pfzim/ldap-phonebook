@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if(!file_exist('inc.config.php'))
+if(!file_exists('inc.config.php'))
 {
-	header('Location: /install.php');
+	header('Location: install.php');
 	exit;
 }
 
@@ -156,6 +156,7 @@ if(!file_exist('inc.config.php'))
 					while($cookie !== null && $cookie != '');
 					
 					db_disconnect();
+					ldap_unbind($ldap);
 				}
 			}
 			exit;

@@ -1,6 +1,6 @@
 <?php
 
-if(file_exist('inc.config.php'))
+if(file_exists('inc.config.php'))
 {
 	echo 'Configuration file exist. Remove inc.config.php before running installation';
 	exit;
