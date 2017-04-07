@@ -270,7 +270,7 @@ EOT;
 						$config
 					);
 					
-					if(file_put_contents('inc.db.conf.php', $config) === FALSE)
+					if(file_put_contents('inc.config.php', $config) === FALSE)
 					{
 						throw new Exception("Save config error");
 					}

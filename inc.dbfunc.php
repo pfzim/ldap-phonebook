@@ -1,5 +1,5 @@
 <?php
-require_once("inc.db.conf.php");
+require_once("inc.config.php");
 
 $link = NULL;
 
