@@ -4,7 +4,7 @@ require_once("inc.config.php");
 class MySQLDB
 {
 	private $link = NULL;
-	public $data = NULL;
+	public $data = FALSE;
 	private $error_msg = "";
 
 	function __construct()
