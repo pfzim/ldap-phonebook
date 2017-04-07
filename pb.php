@@ -28,8 +28,6 @@ if(!file_exists('inc.config.php'))
 	error_reporting(E_ALL);
 	define("Z_PROTECTED", "YES");
 
-	header("Content-Type: text/html; charset=utf-8");
-
 	$self = $_SERVER['PHP_SELF'];
 
 	$uid = 0;
@@ -87,7 +85,7 @@ if(!file_exists('inc.config.php'))
 	{
 		case 'sync':
 		{
-			header("Content-Type: text/plain;");
+			header("Content-Type: text/plain; charset=utf-8");
 			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
 			if($ldap)
 			{
@@ -158,20 +156,35 @@ if(!file_exists('inc.config.php'))
 					ldap_unbind($ldap);
 				}
 			}
-			exit;
 		}
+		exit;
+		case 'export':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			$db->connect();
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
+			
+			include('templ/tpl.export.php');
+						
+			$db->disconnect();
+		}
+		exit;
 		case 'hide':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
 			$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 			$db->disconnect();
 			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
-			exit;
+		}
+		exit;
 	}
 
+	header("Content-Type: text/html; charset=utf-8");
+
 	$db->connect();
-	
 	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
-	//$res = $db->data;
 	$db->disconnect();
+
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');
