@@ -48,8 +48,9 @@ if(!file_exists('inc.config.php'))
 		$ip = @$_SERVER['REMOTE_ADDR'];
 	}
 
-	include('inc.dbfunc.php');
-	include('inc.utils.php');
+	require_once('inc.db.php');
+	require_once('inc.dbfunc.php');
+	require_once('inc.utils.php');
 
 	$action = "";
 	if(isset($_GET['action']))
@@ -63,21 +64,22 @@ if(!file_exists('inc.config.php'))
 		$id = $_GET['id'];
 	}
 
+	$db = new MySQLDB();
+		
 	if(empty($uid))
 	{
 		if(!empty(@$_COOKIE['zh']) && !empty(@$_COOKIE['zl']))
 		{
-			db_connect();
-			$query = rpv_v2("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", array($_COOKIE['zl'], $_COOKIE['zh']));
-			$res = db_select($query);
-			db_disconnect();
-			if($res !== FALSE)
+			$db->connect();
+			
+			if($db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", $_COOKIE['zl'], $_COOKIE['zh'])))
 			{
-				$_SESSION['uid'] = $res[0][0];
+				$_SESSION['uid'] = $db->data[0][0];
 				$uid = $_SESSION['uid'];
 				setcookie("zh", @$_COOKIE['zh'], time()+2592000, '/');
 				setcookie("zl", @$_COOKIE['zl'], time()+2592000, '/');
 			}
+			$db->disconnect();
 		}
 	}
 
@@ -93,7 +95,7 @@ if(!file_exists('inc.config.php'))
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					db_connect();
+					$db->connect();
 					$finfo = new finfo(FILEINFO_MIME_TYPE);
 
 					$cookie = '';
@@ -134,17 +136,17 @@ if(!file_exists('inc.config.php'))
 										echo "MIME: ".$mime . "\n";
 									}
 									
-									$query = rpv_v2("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", array($account['samaccountname'][0]));
-									$res = db_select($query);
-									if($res !== FALSE)
+									
+									
+									if($db->select(rpv("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $account['samaccountname'][0])))
 									{
-										$query = rpv_v2("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = !, `visible` = 1 WHERE `samname` = ! LIMIT 1", array(@$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0]), @$account['samaccountname'][0]));
-										$res = db_put($query);
+										
+										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = !, `visible` = 1 WHERE `samname` = ! LIMIT 1", @$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0]), @$account['samaccountname'][0]));
 									}
 									else
 									{
-										$query = rpv_v2("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, 1)", array(@$account['samaccountname'][0], @$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0])));
-										$res = db_put($query);
+										
+										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, 1)", @$account['samaccountname'][0], @$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0])));
 									}
 								}
 							}
@@ -155,27 +157,25 @@ if(!file_exists('inc.config.php'))
 					}
 					while($cookie !== null && $cookie != '');
 					
-					db_disconnect();
+					$db->disconnect();
 					ldap_unbind($ldap);
 				}
 			}
 			exit;
 		}
 		case 'hide':
-			db_connect();
-			$query = rpv_v2("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", array($id));
-			$res = db_put($query);
-			db_disconnect();
+			$db->connect();
+			
+			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
+			$db->disconnect();
 			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
 			exit;
 	}
 
-	db_connect();
-	$query = rpv_v2("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array());
-	$res = db_select($query);
-	db_disconnect();
-	if($res === FALSE)
-	{
-	}
+	$db->connect();
+	
+	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
+	$res = $db->data;
+	$db->disconnect();
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');

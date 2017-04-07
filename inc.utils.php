@@ -24,7 +24,7 @@ function fseekline($fh, $line, $flag)
 			{
 				$prev[1] = $prev[1];
 				$prev[1] = $buf[$i];
-			
+
 				if(($prev[0] == "\r") && ($prev[1] == "\n"))
 				{
 					$ln++;
@@ -59,7 +59,7 @@ function fseekline($fh, $line, $flag)
 			{
 				$prev[1] = $prev[0];
 				$prev[0] = $buf[$i];
-			
+
 				if(($prev[0] == "\r") && ($prev[1] == "\n"))
 				{
 					$line++;
@@ -216,19 +216,19 @@ function incday(&$d, &$m, &$y)
 function getprevweek()
 {
 	$out = array();
-	
+
 	$today = getdate();
-	
+
 	$d = $today["mday"];
 	$m = $today["mon"];
 	$y = $today["year"];
-	
+
 	datesub($d, $m, $y, $today["wday"]);
-	
+
 	$out[] = array($d, $m, $y, 0, 0, 0);
 
 	datesub($d, $m, $y, 7);
-	
+
 	$out[0][3] = $d;
 	$out[0][4] = $m;
 	$out[0][5] = $y;
@@ -242,17 +242,17 @@ function datecheck($d, $m, $y)
 	{
 		return FALSE;
 	}
-	
+
 	if(($m < 1) || ($m > 12))
 	{
 		return FALSE;
 	}
-	
+
 	if(($d < 1) || ($d > dpm($m, $y)))
 	{
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
@@ -272,7 +272,7 @@ function datesub(&$d, &$m, &$y, $del)
 		}
 		$d = dpm($m, $y);
 	}
-	
+
 	if($del > 0)
 	{
 		$d -= $del;
@@ -292,7 +292,7 @@ function dateadd(&$d, &$m, &$y, $del)
 			$y++;
 		}
 	}
-	
+
 	if($del > 0)
 	{
 		$d += $del;
@@ -375,7 +375,7 @@ function rpv_v1($string, $data)
 	$n = 0;
 	$len = strlen($string);
 	$sc = 0;
-	
+
 	while($i < $len)
 	{
 		if($string[$i] === "?")
@@ -442,7 +442,7 @@ function rpv_v1($string, $data)
 			$i++;
 		}
 	}
-	
+
 	return $string;
 }
 
@@ -452,7 +452,7 @@ function rpv_v2($string, $data)
 	$n = 0;
 	$len = strlen($string);
 	$sc = 0;
-	
+
 	while($i < $len)
 	{
 		if($string[$i] === "?")			// unsafe injection
@@ -554,7 +554,7 @@ function rpv_v2($string, $data)
 			$i++;
 		}
 	}
-	
+
 	return $string;
 }
 
@@ -565,44 +565,108 @@ function build_query($qa)
 	{
 		$out .= empty($out)?"?":"&".urlencode($name)."=".urlencode($val);
 	}
-	
+
 	return $out;
 }
 
-function rpv_v3()
-{
-	
-}
 
-/*
-function rpv_prefix($pfx)
-{
-	if(empty($pfx))
-	{
-		define("RPV_PREFIX", "");
-	}
-	else
-	{
-		define("RPV_PREFIX", $pfx);
-	}
-}
-*/
+
 
 function eh($str)
 {
 	echo htmlspecialchars($str);
 }
 
-function formatBytes($bytes, $precision = 3) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+function formatBytes($bytes, $precision = 3) {
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
     $bytes /= pow(1024, $pow);
-    // $bytes /= (1 << (10 * $pow)); 
+    // $bytes /= (1 << (10 * $pow));
 
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
-} 
+    return round($bytes, $precision) . ' ' . $units[$pow];
+}
+
+function json_escape($value) //json_escape
+{
+    $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");
+    $replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
+    $result = str_replace($escapers, $replacements, $value);
+    return $result;
+}
+
+function sql_escape($value)
+{
+    $escapers = array("\\", "\"", "\n", "\r", "\t", "\x08", "\x0c", "'", "\x1A", "\x00"); // "%", "_"
+    $replacements = array("\\\\", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b", "\\'", "\\Z", "\\0");
+    $result = str_replace($escapers, $replacements, $value);
+    return $result;
+}
+
+function rpv()
+{
+	$data = func_get_args();
+	$string = $data[0];
+	$i = 0;
+	$n = 1;
+	$len = strlen($string);
+	$sc = 0;
+
+	while($i < $len)
+	{
+		if($string[$i] === "?")			// unsafe injection
+		{
+			$val = isset($data[$n])?$data[$n]:"";
+			$string = substr_replace($string, $val, $i, 1);
+			$dl = strlen($val);
+			$i += $dl;
+			$len += $dl-1;
+			$n++;
+		}
+		else if($string[$i] === "!")	// safe string
+		{
+			$val = "'".(isset($data[$n])?sql_escape(trim($data[$n])):"")."'";
+			$string = substr_replace($string, $val, $i, 1);
+			$dl = strlen($val);
+			$i += $dl;
+			$len += $dl-1;
+			$n++;
+		}
+		else if($string[$i] === "#")	// safe integer
+		{
+			$val = (isset($data[$n])?intval($data[$n]):"0");
+			$string = substr_replace($string, $val, $i, 1);
+			$dl = strlen($val);
+			$i += $dl;
+			$len += $dl-1;
+			$n++;
+		}
+		else if($string[$i] === "~")	// safe float
+		{
+			$val = (isset($data[$n])?floatval($data[$n]):"0");
+			$string = substr_replace($string, $val, $i, 1);
+			$dl = strlen($val);
+			$i += $dl;
+			$len += $dl-1;
+			$n++;
+		}
+		else if($string[$i] === "@")
+		{
+			$val = defined("DB_PREFIX")?DB_PREFIX:"";
+			$string = substr_replace($string, $val, $i, 1);
+			$dl = strlen($val);
+			$i += $dl;
+			$len += $dl-1;
+		}
+		else
+		{
+			$i++;
+		}
+	}
+
+	return $string;
+}
