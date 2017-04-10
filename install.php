@@ -2,6 +2,7 @@
 
 if(file_exists('inc.config.php'))
 {
+	header("Content-Type: text/plain; charset=utf-8");
 	echo 'Configuration file exist. Remove inc.config.php before running installation';
 	exit;
 }
