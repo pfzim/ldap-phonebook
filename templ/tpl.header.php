@@ -16,7 +16,7 @@
 			<?php } ?>
 			<ul style="float:right;list-style-type:none;">
 				<?php if($uid) { ?>
-				<li><a href="?action=logout">Log Out</a></li>
+				<li><a href="?action=logoff">Log Out</a></li>
 				<?php } else { ?>
 				<li><a href="?action=login">Log In</a></li>
 				<?php } ?>

@@ -68,8 +68,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		$uid = $_SESSION['uid'];
 	}
 
-	$uid = 1;
-
 	if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
 		$ip = $_SERVER['HTTP_CLIENT_IP'];
 	} elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -145,8 +143,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					include('templ/tpl.login.php');
 					exit;
 				}
-
-				delete_expired($db);
 
 				if(!$db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
 				{
@@ -236,11 +232,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					}
 				}
 			}
-		}
-		case 'login': // activate account after registartion
-		{
-			include('templ/tpl.login.php'); // show login form
-			exit;
+			case 'login': // activate account after registartion
+			{
+				include('templ/tpl.login.php'); // show login form
+				exit;
+			}
 		}
 	}
 
