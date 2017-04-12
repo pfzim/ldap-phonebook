@@ -135,10 +135,28 @@ CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOT
+,
+<<<'EOT'
+CREATE TABLE  `#DB_NAME#`.`pb_users` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `login` varchar(255) NOT NULL,
+  `passwd` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `mail` varchar(1024) CHARACTER SET latin1 NOT NULL,
+  `sid` varchar(15) DEFAULT NULL,
+  `deleted` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+EOT
 );
 
 $config = <<<'EOT'
 <?php
+	define("DB_HOST", "#host#");
+	define("DB_USER", "#login#");
+	define("DB_PASSWD", "#password#");
+	define("DB_NAME", "#db#");
+	define("DB_CPAGE", "utf8");
+
 	define("LDAP_HOST", "#ldap_host#");
 	define("LDAP_PORT", #ldap_port#);
 	define("LDAP_USER", "#ldap_user#");
@@ -147,11 +165,18 @@ $config = <<<'EOT'
 	define("LDAP_FILTER", "#ldap_filter#");
 	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto");
 
-	define("DB_HOST", "#host#");
-	define("DB_USER", "#login#");
-	define("DB_PASSWD", "#password#");
-	define("DB_NAME", "#db#");
-	define("DB_CPAGE", "utf8");
+	define("MAIL_HOST", "#mail_host#");
+	define("MAIL_FROM", "#mail_from#");
+	define("MAIL_FROM_NAME", "#mail_from_name#");
+	define("MAIL_ADMIN", "#mail_admin#");
+	define("MAIL_ADMIN_NAME", "#mail_admin_name#");
+	define("MAIL_AUTH", #mail_auth#);
+	define("MAIL_LOGIN", "#mail_user#");
+	define("MAIL_PASSWD", "#mail_password#");
+	define("MAIL_SECURE", "#mail_secure#");
+	define("MAIL_PORT", #mail_port#);
+
+	define("ALLOW_MAILS", '#allow_mails#');
 EOT;
 
 
@@ -419,13 +444,30 @@ EOT;
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
 			}
 
+			function f_check_mail(id)
+			{
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				var ms = gi("mail_secure");
+				f_post(id, "check_mail",
+					'mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
+					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
+					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
+				);
+			}
+
 			function f_save_config(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
 				f_post(id, "save_config", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
 					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
-					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
+					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
+					+'&mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
+					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
+					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
+					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+				);
 			}
 
 			function f_remove_self(id)
@@ -553,7 +595,75 @@ EOT;
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_save_config(6);'>6. Save config</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
+					<h3>Mail settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_host" class="control-label col-sm-2">Host:</label>
+				<div class="col-sm-5">
+					<input id="mail_host" class="form-control" type="text" value="smtp.example.com" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_port" class="control-label col-sm-2">Port:</label>
+				<div class="col-sm-5">
+					<input id="mail_port" class="form-control" type="text" value="25" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_user" class="control-label col-sm-2">User:</label>
+				<div class="col-sm-5">
+					<input id="mail_user" class="form-control" type="text" value="robot@example.com" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_pwd" class="control-label col-sm-2">Password:</label>
+				<div class="col-sm-5">
+					<input id="mail_pwd" class="form-control" type="password" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_from" class="control-label col-sm-2">From address:</label>
+				<div class="col-sm-5">
+					<input id="mail_from" class="form-control" type="text" value="robot@example.com" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_from_name" class="control-label col-sm-2">From name:</label>
+				<div class="col-sm-5">
+					<input id="mail_from_name" class="form-control" type="text" value="Robot" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_admin" class="control-label col-sm-2">Admin address:</label>
+				<div class="col-sm-5">
+					<input id="mail_admin" class="form-control" type="text" value="admin@example.com" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_admin_name" class="control-label col-sm-2">Admin name:</label>
+				<div class="col-sm-5">
+					<input id="mail_admin_name" class="form-control" type="text" value="Admin" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="mail_secure" class="control-label col-sm-2">Secure:</label>
+				<div class="col-sm-5">
+					<select id="mail_secure" class="form-control">
+						<option value="" selected="selected">None</option>
+						<option value="tls">STARTLS</option>
+						<option value="ssl">SSL</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_check_mail(6);'>6. Check mail connection</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_save_config(7);'>7. Save config</button><div id="result_7" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>

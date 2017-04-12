@@ -18,3 +18,14 @@ CREATE TABLE  `pb`.`pb_contacts` (
   `visible` int(10) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `pb`.`pb_users`;
+CREATE TABLE  `pb`.`pb_users` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `login` varchar(255) NOT NULL,
+  `passwd` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `mail` varchar(1024) CHARACTER SET latin1 NOT NULL,
+  `sid` varchar(15) DEFAULT NULL,
+  `deleted` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

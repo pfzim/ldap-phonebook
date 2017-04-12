@@ -23,6 +23,38 @@ if(!file_exists('inc.config.php'))
 	exit;
 }
 
+function php_mailer($to, $name, $subject, $html, $plain)
+{
+	require_once 'libs/PHPMailer/PHPMailerAutoload.php';
+
+	$mail = new PHPMailer;
+
+	$mail->isSMTP();
+	$mail->Host = MAIL_HOST;
+	$mail->SMTPAuth = MAIL_AUTH;
+	if(MAIL_AUTH)
+	{
+		$mail->Username = MAIL_LOGIN;
+		$mail->Password = MAIL_PASSWD;
+	}
+
+	$mail->SMTPSecure = MAIL_SECURE;
+	$mail->Port = MAIL_PORT;
+
+	$mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+	$mail->addAddress($to, $name);
+	//$mail->addReplyTo('helpdesk@example.com', 'Information');
+
+	$mail->isHTML(true);
+
+	$mail->Subject = $subject;
+	$mail->Body    = $html;
+	$mail->AltBody = $plain;
+
+	return $mail->send();
+}
+
+
 	session_name("ZID");
 	session_start();
 	error_reporting(E_ALL);
@@ -61,28 +93,169 @@ if(!file_exists('inc.config.php'))
 	{
 		$id = $_GET['id'];
 	}
+	
+	if($action == "message")
+	{
+		switch($id)
+		{
+			case 1:
+				$error_msg = "Registration is complete. Wait for the administrator to activate your account.";
+				break;
+			default:
+				$error_msg = "Unknown error";
+				break;
+		}
+		
+		include('templ/tpl.message.php');
+		exit;
+	}
 
 	$db = new MySQLDB();
+	$db->connect();
 		
+	$uid = 0;
+	if(isset($_SESSION['uid']))
+	{
+		$uid = $_SESSION['uid'];
+	}
+
 	if(empty($uid))
 	{
-		if(!empty(@$_COOKIE['zh']) && !empty(@$_COOKIE['zl']))
+		if(!empty($_COOKIE['zh']) && !empty($_COOKIE['zl']))
 		{
-			$db->connect();
-			
-			if($db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", $_COOKIE['zl'], $_COOKIE['zh'])))
+			if($db->select(rpv("SELECT m.`id` FROM zxs_users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", $_COOKIE['zl'], $_COOKIE['zh'])))
 			{
 				$_SESSION['uid'] = $db->data[0][0];
 				$uid = $_SESSION['uid'];
-				setcookie("zh", @$_COOKIE['zh'], time()+2592000, '/');
-				setcookie("zl", @$_COOKIE['zl'], time()+2592000, '/');
+				setcookie("zh", $_COOKIE['zh'], time()+2592000, '/');
+				setcookie("zl", $_COOKIE['zl'], time()+2592000, '/');
 			}
-			$db->disconnect();
+		}
+	}
+
+	if(empty($uid))
+	{
+		switch($action)
+		{
+			case 'logon':
+			{
+				if(empty($_POST['login']) || empty($_POST['passwd']))
+				{
+					$error_msg = "Неверное имя пользователя или пароль!";
+					include('templ/tpl.login.php');
+					exit;
+				}
+
+				delete_expired($db);
+
+				if(!$db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
+				{
+					//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_FAILED, 0, $ip));
+					$error_msg = "Неверное имя пользователя или пароль!";
+					include('templ/tpl.login.php');
+					exit;
+				}
+
+				$_SESSION['uid'] = $db->data[0][0];
+				$uid = $_SESSION['uid'];
+
+				$sid = uniqid();
+				setcookie("zh", $sid, time()+2592000, '/');
+				setcookie("zl", @$_POST['login'], time()+2592000, '/');
+
+				$db->put(rpv("UPDATE pb_users SET `sid` = ! WHERE `id` = # LIMIT 1", $sid, $uid));
+				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", $uid, LOG_LOGIN, 0, $ip));
+
+				header('Location: /');
+				exit;
+			}
+			case 'register': // show registartion form
+			{
+				include('templ/tpl.register.php');
+				exit;
+			}
+			case 'reg': // register new account
+			{
+				if(empty($_POST['login']) || empty($_POST['passwd']) || empty($_POST['mail']) || !preg_match('/'.ALLOW_MAILS.'/i', $_POST['mail']))
+				{
+					$error_msg = "Указаны неверные данные!";
+					include('templ/tpl.register.php');
+					exit;
+				}
+
+				if($db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login`= ! OR m.`mail` = ! LIMIT 1", @$_POST['login'], @$_POST['mail'])))
+				{
+					$res = $db->data;
+					$error_msg = "Пользователь существует!";
+					include('templ/tpl.register.php');
+					exit;
+				}
+				$db->put(rpv("INSERT INTO pb_users (login, passwd, mail, deleted) VALUES (!, PASSWORD(!), !, 1)", @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
+				$uid = $db->last_id();
+
+				// send mail to admin for accept registration
+				if(!php_mailer(
+					MAIL_ADMIN, MAIL_ADMIN_NAME,
+					'Accept new registration',
+					'Hello, Admin!<br /><br />New user wish to register.<br />Login: <b>'.@$_POST['login'].'</b><br />E-Mail: <b>'.@$_POST['mail'].'</b><br/><br/>Accept registration: <a href="'.$self.'?action=activate&amp;login='.@$_POST['login'].'&amp;id='.$uid.'">Accept</a>',
+					'Hello, Admin! New user wish to register. Accept registration: '.$self.'?action=activate&amp;login='.@$_POST['login'].'&amp;id='.$uid
+				))
+				{
+					$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
+					include('templ/tpl.register.php');
+					exit;
+				}
+
+				header("Location: $self?action=message&id=1");
+				exit;
+			}
+			case 'activate': // activate account after registartion
+			{
+				if(empty($_GET['login']) || empty($id))
+				{
+					$error_msg = "Неверные данные активации!";
+					include('templ/tpl.error.php');
+					exit;
+				}
+
+				$db->put(rpv("UPDATE pb_users SET `deleted` = 0 WHERE `login` = ! AND `id` = #", @$_GET['login'], $id));
+				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_ACTIVATE, $id, $ip));
+
+				if($db->select(rpv("SELECT m.`id`, m.`mail` FROM pb_users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1", @$_GET['login'], $id)))
+				{
+					if(!php_mailer(
+						$db->data[0][1], @$_GET['login'],
+						'Registration accepted',
+						'Hello!<br /><br />You account activated.<br /><br/><a href="'.$self.'">Login</a>',
+						'Hello! You account activated.'
+					))
+					{
+						$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
+						include('templ/tpl.error.php');
+						exit;
+					}
+				}
+			}
+		}
+		case 'login': // activate account after registartion
+		{
+			include('templ/tpl.login.php'); // show login form
+			exit;
 		}
 	}
 
 	switch($action)
 	{
+		case 'logoff':
+		{
+			$db->put(rpv("UPDATE pb_users SET `sid` = NULL WHERE `id` = # LIMIT 1", $uid));
+			$_SESSION['uid'] = 0;
+			$uid = $_SESSION['uid'];
+			setcookie("zh", NULL, time()-60, '/');
+			setcookie("zl", NULL, time()-60, '/');
+
+			break;
+		}
 		case 'sync':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
@@ -93,7 +266,7 @@ if(!file_exists('inc.config.php'))
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					$db->connect();
+					//$db->connect();
 					$finfo = new finfo(FILEINFO_MIME_TYPE);
 
 					$cookie = '';
@@ -152,7 +325,7 @@ if(!file_exists('inc.config.php'))
 					}
 					while($cookie !== null && $cookie != '');
 
-					$db->disconnect();
+					//$db->disconnect();
 					ldap_unbind($ldap);
 				}
 			}
@@ -161,20 +334,20 @@ if(!file_exists('inc.config.php'))
 		case 'export':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
-			$db->connect();
+			//$db->connect();
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
 			
 			include('templ/tpl.export.php');
 						
-			$db->disconnect();
+			//$db->disconnect();
 		}
 		exit;
 		case 'hide':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
-			$db->connect();
+			//$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
-			$db->disconnect();
+			//$db->disconnect();
 			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
 		}
 		exit;
@@ -182,9 +355,9 @@ if(!file_exists('inc.config.php'))
 
 	header("Content-Type: text/html; charset=utf-8");
 
-	$db->connect();
+	//$db->connect();
 	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
-	$db->disconnect();
+	//$db->disconnect();
 
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');
