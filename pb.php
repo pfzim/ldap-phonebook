@@ -162,7 +162,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				$db->put(rpv("UPDATE pb_users SET `sid` = ! WHERE `id` = # LIMIT 1", $sid, $uid));
 				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", $uid, LOG_LOGIN, 0, $ip));
 
-				header('Location: /');
+				header('Location: '.$self);
 				exit;
 			}
 			case 'register': // show registartion form

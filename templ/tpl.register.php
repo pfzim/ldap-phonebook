@@ -10,6 +10,6 @@
 				<?php } ?>
 				<input type="submit" value="Register" /><br />
 			</form>
-			<a href="<?php eh("$self"); ?>">Login</a>
+			<a href="<?php eh("$self?action=login"); ?>">Login</a>
 		</div>
 <?php include("tpl.footer.php"); ?>
