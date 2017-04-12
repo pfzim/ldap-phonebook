@@ -205,33 +205,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				header("Location: $self?action=message&id=1");
 				exit;
 			}
-			case 'activate': // activate account after registartion
-			{
-				if(empty($_GET['login']) || empty($id))
-				{
-					$error_msg = "Неверные данные активации!";
-					include('templ/tpl.error.php');
-					exit;
-				}
-
-				$db->put(rpv("UPDATE pb_users SET `deleted` = 0 WHERE `login` = ! AND `id` = #", @$_GET['login'], $id));
-				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_ACTIVATE, $id, $ip));
-
-				if($db->select(rpv("SELECT m.`id`, m.`mail` FROM pb_users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1", @$_GET['login'], $id)))
-				{
-					if(!php_mailer(
-						$db->data[0][1], @$_GET['login'],
-						'Registration accepted',
-						'Hello!<br /><br />You account activated.<br /><br/><a href="'.$self.'">Login</a>',
-						'Hello! You account activated.'
-					))
-					{
-						$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
-						include('templ/tpl.error.php');
-						exit;
-					}
-				}
-			}
 			case 'login': // activate account after registartion
 			{
 				include('templ/tpl.login.php'); // show login form
@@ -251,6 +224,39 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			setcookie("zl", NULL, time()-60, '/');
 
 			break;
+		}
+		case 'activate': // activate account after registartion
+		{
+			if(empty($_GET['login']) || empty($id))
+			{
+				$error_msg = "Неверные данные активации!";
+				include('templ/tpl.error.php');
+				exit;
+			}
+
+			$db->put(rpv("UPDATE pb_users SET `deleted` = 0 WHERE `login` = ! AND `id` = #", @$_GET['login'], $id));
+			//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_ACTIVATE, $id, $ip));
+
+			if($db->select(rpv("SELECT m.`id`, m.`mail` FROM pb_users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1", @$_GET['login'], $id)))
+			{
+				if(!php_mailer(
+					$db->data[0][1], @$_GET['login'],
+					'Registration accepted',
+					'Hello!<br /><br />You account activated.<br /><br/><a href="'.$self.'">Login</a>',
+					'Hello! You account activated.'
+				))
+				{
+					$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
+					include('templ/tpl.error.php');
+					exit;
+				}
+			}
+			break;
+		}
+		case 'login': // activate account after registartion
+		{
+			include('templ/tpl.login.php'); // show login form
+			exit;
 		}
 		case 'sync':
 		{

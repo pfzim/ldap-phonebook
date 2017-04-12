@@ -13,6 +13,7 @@
 			<li><a href="/">Home</a></li>
 			<?php if($uid == 1) { ?>
 			<li><a href="?action=sync">Sync</a></li>
+			<li><a href="?action=export">Export</a></li>
 			<?php } ?>
 			<ul style="float:right;list-style-type:none;">
 				<?php if($uid) { ?>
