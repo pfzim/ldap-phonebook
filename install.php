@@ -131,6 +131,8 @@ CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   `bday` date DEFAULT NULL,
   `mime` varchar(255) NOT NULL DEFAULT '',
   `photo` blob NOT NULL,
+  `x` int(10) unsigned NOT NULL DEFAULT '0',
+  `y` int(10) unsigned NOT NULL DEFAULT '0',
   `visible` int(10) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

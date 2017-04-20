@@ -24,6 +24,19 @@ function mi(ev)
 	}
 }
 
+function sm(x, y)
+{
+	var el = document.getElementById('map');
+	el.style.display = 'block';
+	el = document.getElementById('map-spot');
+	var map = document.getElementById('map-img');
+	if(el)
+	{
+		el.style.left = (map.offsetLeft + x - el.width/2)  + "px";
+		el.style.top = (map.offsetTop + y - el.height)  + "px";
+	}
+}
+
 function hide(img)
 {
 	var el = document.getElementById('imgblock');
@@ -132,24 +145,31 @@ function sortTable(n) {
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>">
-				<td onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+				<td <?php if(!empty($row[11]) || !empty($row[12])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
-				<td class="command cmd_hide">Hide</td>
+				<td><span class="command cmd_hide">Hide</span> <span class="command cmd_loc">Loc</span></td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
 			</tbody>
 		</table>
+		<div id="map" class="map" style="display:none" onclick="document.getElementById('map').style.display='none'">
+				<img id="map-img" class="map-img" src="templ/map1.png"/>
+				<img id="map-spot" class="map-spot" src="templ/marker.png"/>
+		</div>
+		<div id="map2" class="map" style="display:none">
+				<img id="map-img2" class="map-img" src="templ/map1.png"/>
+		</div>
 		<script>
 			$(".cmd_hide").click(
 				function()
 				{
-					var id = $(this).parent().data('id');
+					var id = $(this).parent().parent().data('id');
 					$.get("pb.php", {'action': 'hide', 'id': id },
 						function(data)
 						{ 
@@ -162,6 +182,33 @@ function sortTable(n) {
 						function()
 						{
 							$.notify("Failed AJAX request", "error");
+						}
+					)
+				}
+			);
+			
+			$(".cmd_loc").click(
+				function()
+				{
+					var id = $(this).parent().parent().data('id');
+					document.getElementById('map2').style.display='block';
+					$("#map-img2").click(
+						function(event)
+						{
+							$.get("pb.php", {'action': 'setlocation', 'id': id, 'x': event.clientX - $('#map-img2').offset().left, 'y': event.clientY - $('#map-img2').offset().top },
+								function(data)
+								{
+									$.notify(data.message, "success");
+								},
+								'json'
+							)
+							.fail(
+								function()
+								{
+									$.notify("Failed AJAX request", "error");
+								}
+							)
+							document.getElementById('map2').style.display='none';
 						}
 					)
 				}
