@@ -24,12 +24,13 @@ function mi(ev)
 	}
 }
 
-function sm(x, y)
+function sm(id, x, y)
 {
 	var el = document.getElementById('map');
 	el.style.display = 'block';
 	el = document.getElementById('map-spot');
 	var map = document.getElementById('map-img');
+	map.src = 'templ/map' + id + '.png';
 	if(el)
 	{
 		el.style.left = (map.offsetLeft + x - el.width/2)  + "px";
@@ -145,14 +146,14 @@ function sortTable(n) {
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>">
-				<td <?php if(!empty($row[11]) || !empty($row[12])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+				<td <?php if(!empty($row[13]) || !empty($row[14])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13].', '.$row[14]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
-				<td><span class="command cmd_hide">Hide</span> <span class="command cmd_loc">Loc</span></td>
+				<td><span class="command cmd_hide">Hide</span> <span class="command cmd_loc">Map</span></td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
@@ -195,7 +196,7 @@ function sortTable(n) {
 					$("#map-img2").click(
 						function(event)
 						{
-							$.get("pb.php", {'action': 'setlocation', 'id': id, 'x': event.clientX - $('#map-img2').offset().left, 'y': event.clientY - $('#map-img2').offset().top },
+							$.post("pb.php?action=setlocation&id="+id, {'map': 1, 'x': event.clientX - $('#map-img2').offset().left, 'y': event.clientY - $('#map-img2').offset().top },
 								function(data)
 								{
 									$.notify(data.message, "success");

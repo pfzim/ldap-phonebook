@@ -117,6 +117,10 @@ table {
     vertical-align: top;
 }
 
+.main-table tr:hover
+{
+	background-color: #E0E0E0;
+}
 .expand-list {
     font-size: 8pt;
     padding: 0px 0px 0px 0px;
@@ -370,13 +374,16 @@ table {
 	height: 100%;
 	background: rgba(0,0,0,0.7);
 	z-index:1001;
-	text-align:center;
 }
 .map-img {
-	position: relative;
+	position: absolute;
 	z-index:1002;
 	overflow: auto;
-	padding-top: 10;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
 }
 .map-spot {
 	position: fixed;
