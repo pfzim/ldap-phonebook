@@ -196,7 +196,7 @@ function sortTable(n) {
 					$("#map-img2").click(
 						function(event)
 						{
-							$.post("pb.php?action=setlocation&id="+id, {'map': 1, 'x': event.clientX - $('#map-img2').offset().left, 'y': event.clientY - $('#map-img2').offset().top },
+							$.post("pb.php?action=setlocation&id="+id, {'map': 1, 'x': event.pageX - $('#map-img2').offset().left, 'y': event.pageY - $('#map-img2').offset().top },
 								function(data)
 								{
 									$.notify(data.message, "success");
