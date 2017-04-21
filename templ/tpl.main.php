@@ -29,18 +29,17 @@ function sm(id, x, y)
 	var el = document.getElementById('map');
 	el.style.display = 'block';
 	var map = document.getElementById('map-img');
-	$("#map-img").load(
+	map.onload =
 		function()
 		{
-			alert("ok");
-			el = document.getElementById('map-spot');
+			var el = document.getElementById('map-spot');
 			if(el)
 			{
-				el.style.left = ($(this).offsetLeft + x - el.width/2)  + "px";
-				el.style.top = ($(this).offsetTop + y - el.height)  + "px";
+				el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
+				el.style.top = (this.offsetTop + y - el.height)  + "px";
 			}
 		}
-	);
+	;
 	map.src = 'templ/map' + id + '.png';
 }
 
@@ -211,13 +210,13 @@ function sortTable(n) {
 				}
 			);
 			
-			$(".cmd_loc_1").click(
+			$(".cmd_loc_1").unbind('click').click(
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
 					document.getElementById('map-img2').src = 'templ/map1.png';
 					document.getElementById('map2').style.display='block';
-					$("#map-img2").click(
+					$("#map-img2").unbind('click').click(
 						function(event)
 						{
 							f_set_location(id, 1, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
@@ -227,17 +226,15 @@ function sortTable(n) {
 				}
 			);
 			
-			$(".cmd_loc_2").click(
+			$(".cmd_loc_2").unbind('click').click(
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
 					document.getElementById('map-img2').src = 'templ/map2.png';
 					document.getElementById('map2').style.display='block';
-					alert($('#map-img2').offset().left);
-					$("#map-img2").click(
+					$("#map-img2").unbind('click').click(
 						function(event)
 						{
-							alert($('#map-img2').offset().left);
 							f_set_location(id, 2, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
 							document.getElementById('map2').style.display='none';
 						}
@@ -245,13 +242,13 @@ function sortTable(n) {
 				}
 			);
 			
-			$(".cmd_loc_3").click(
+			$(".cmd_loc_3").unbind('click').click(
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
 					document.getElementById('map-img2').src = 'templ/map3.png';
 					document.getElementById('map2').style.display='block';
-					$("#map-img2").click(
+					$("#map-img2").unbind('click').click(
 						function(event)
 						{
 							f_set_location(id, 3, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
@@ -261,7 +258,7 @@ function sortTable(n) {
 				}
 			);
 			
-			$(".cmd_loc_4").click(
+			$(".cmd_loc_4").unbind('click').click(
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
@@ -277,13 +274,13 @@ function sortTable(n) {
 				}
 			);
 			
-			$(".cmd_loc_5").click(
+			$(".cmd_loc_5").unbind('click').click(
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
 					document.getElementById('map-img2').src = 'templ/map5.png';
 					document.getElementById('map2').style.display='block';
-					$("#map-img2").click(
+					$("#map-img2").unbind('click').click(
 						function(event)
 						{
 							f_set_location(id, 5, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
