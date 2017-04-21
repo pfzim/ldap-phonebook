@@ -45,6 +45,7 @@ function sm(id, x, y)
 
 function f_set_location(id, map, x, y)
 {
+	//alert("map: "+map+"    x: "+x+"    y: "+y);
 	$.post("pb.php?action=setlocation&id="+id, {'map': map, 'x': x, 'y': y },
 		function(data)
 		{
@@ -264,7 +265,7 @@ function sortTable(n) {
 					var id = $(this).parent().parent().data('id');
 					document.getElementById('map-img2').src = 'templ/map4.png';
 					document.getElementById('map2').style.display='block';
-					$("#map-img2").click(
+					$("#map-img2").unbind('click').click(
 						function(event)
 						{
 							f_set_location(id, 4, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
