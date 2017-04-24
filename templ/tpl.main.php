@@ -35,6 +35,7 @@ function sm(id, x, y)
 			var el = document.getElementById('map-spot');
 			if(el)
 			{
+				el.style.display = 'block';
 				el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
 				el.style.top = (this.offsetTop + y - el.height)  + "px";
 			}
@@ -186,9 +187,6 @@ function sortTable(n) {
 				<img id="map-img" class="map-img" src="templ/map1.png"/>
 				<img id="map-spot" class="map-spot" src="templ/marker.png"/>
 		</div>
-		<div id="map2" class="map" style="display:none">
-				<img id="map-img2" class="map-img" src="templ/map1.png"/>
-		</div>
 		<script>
 			$(".cmd_hide").click(
 				function()
@@ -215,13 +213,22 @@ function sortTable(n) {
 				function()
 				{
 					var id = $(this).parent().parent().data('id');
-					document.getElementById('map-img2').src = 'templ/map1.png';
-					document.getElementById('map2').style.display='block';
-					$("#map-img2").unbind('click').click(
+					document.getElementById('map-img').src = 'templ/map1.png';
+					document.getElementById('map').style.display='block';
+					document.getElementById('map-spot').style.display='none';
+					$("#map-img").unbind('click').click(
 						function(event)
 						{
-							f_set_location(id, 1, event.pageX - $('#map-img2').offset().left, event.pageY - $('#map-img2').offset().top);
-							document.getElementById('map2').style.display='none';
+							document.getElementById('map-spot').style.display='block';
+							document.getElementById('map-spot').style.left = (event.pageX - el.width/2)  + "px";
+							document.getElementById('map-spot').style.top = (event.pageY - el.height)  + "px";
+							$("#map-spot").unbind('click').click(
+								function()
+								{
+									f_set_location(id, 1, event.pageX - $('#map-img').offset().left, event.pageY - $('#map-img').offset().top);
+									document.getElementById('map').style.display='none';
+								}
+							);
 						}
 					)
 				}
