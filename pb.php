@@ -337,7 +337,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			//$db->connect();
-			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
 			
 			include('templ/tpl.export.php');
 						
@@ -351,6 +351,15 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 			//$db->disconnect();
 			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
+		}
+		exit;
+		case 'show':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			//$db->connect();
+			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
+			//$db->disconnect();
+			echo '{"result": 0, "message": "Successful show (ID '.$id.')"}';
 		}
 		exit;
 		case 'setlocation':
@@ -367,7 +376,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	header("Content-Type: text/html; charset=utf-8");
 
 	//$db->connect();
-	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`", array()));
+	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
 	//$db->disconnect();
 
 	include('templ/tpl.main.php');
