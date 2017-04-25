@@ -215,11 +215,11 @@ function sortTable(n) {
 					function()
 					{
 						var id = $(this).parent().parent().data('id');
+						$("#map").attr('onclick','').unbind('click');
+						$("#map-img").attr('onload','').unbind('load');
 						document.getElementById('map-img').src = 'templ/map1.png';
 						document.getElementById('map').style.display='block';
 						document.getElementById('map-spot').style.display='none';
-						$("#map").attr('onclick','').unbind('click');
-						$("#map-img").attr('onload','').unbind('load');
 						$("#map-img").unbind('click').click(
 							function(event)
 							{
@@ -244,11 +244,11 @@ function sortTable(n) {
 					function()
 					{
 						var id = $(this).parent().parent().data('id');
+						$("#map").attr('onclick','').unbind('click');
+						$("#map-img").attr('onload','').unbind('load');
 						document.getElementById('map-img').src = 'templ/map2.png';
 						document.getElementById('map').style.display='block';
 						document.getElementById('map-spot').style.display='none';
-						$("#map").attr('onclick','').unbind('click');
-						$("#map-img").attr('onload','').unbind('load');
 						$("#map-img").unbind('click').click(
 							function(event)
 							{
@@ -272,11 +272,11 @@ function sortTable(n) {
 					function()
 					{
 						var id = $(this).parent().parent().data('id');
+						$("#map").attr('onclick','').unbind('click');
+						$("#map-img").attr('onload','').unbind('load');
 						document.getElementById('map-img').src = 'templ/map3.png';
 						document.getElementById('map').style.display='block';
 						document.getElementById('map-spot').style.display='none';
-						$("#map").attr('onclick','').unbind('click');
-						$("#map-img").attr('onload','').unbind('load');
 						$("#map-img").unbind('click').click(
 							function(event)
 							{
@@ -300,11 +300,11 @@ function sortTable(n) {
 					function()
 					{
 						var id = $(this).parent().parent().data('id');
+						$("#map").attr('onclick','').unbind('click');
+						$("#map-img").attr('onload','').unbind('load');
 						document.getElementById('map-img').src = 'templ/map4.png';
 						document.getElementById('map').style.display='block';
 						document.getElementById('map-spot').style.display='none';
-						$("#map").attr('onclick','').unbind('click');
-						$("#map-img").attr('onload','').unbind('load');
 						$("#map-img").unbind('click').click(
 							function(event)
 							{
@@ -328,11 +328,11 @@ function sortTable(n) {
 					function()
 					{
 						var id = $(this).parent().parent().data('id');
+						$("#map").attr('onclick','').unbind('click');
+						$("#map-img").attr('onload','').unbind('load');
 						document.getElementById('map-img').src = 'templ/map5.png';
 						document.getElementById('map').style.display='block';
 						document.getElementById('map-spot').style.display='none';
-						$("#map").attr('onclick','').unbind('click');
-						$("#map-img").attr('onload','').unbind('load');
 						$("#map-img").unbind('click').click(
 							function(event)
 							{
