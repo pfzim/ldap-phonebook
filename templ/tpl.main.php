@@ -171,7 +171,7 @@ function sortTable(n) {
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>">
-				<td <?php if(!empty($row[13]) || !empty($row[14])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13].', '.$row[14]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+				<td <?php if(!empty($row[12])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13].', '.$row[14]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
