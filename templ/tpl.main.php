@@ -26,23 +26,21 @@ function mi(ev)
 
 function sm(id, x, y)
 {
-	var el = document.getElementById('map');
+	var el = document.getElementById('map-container');
 	el.style.display = 'block';
-	$(el).click(function() {document.getElementById('map').style.display = 'none';});
-	var map = document.getElementById('map-img');
-	map.onload =
-		function()
+	el.onclick = function() {document.getElementById('map-container').style.display = 'none';};
+	var map = document.getElementById('map-image');
+	map.onload = function()
+	{
+		var el = document.getElementById('map-marker');
+		if(el)
 		{
-			var el = document.getElementById('map-spot');
-			if(el)
-			{
-				$(el).unbind('click');
-				el.style.display = 'block';
-				el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
-				el.style.top = (this.offsetTop + y - el.height/2)  + "px";
-			}
+			el.onclick = null;
+			el.style.display = 'block';
+			el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
+			el.style.top = (this.offsetTop + y - el.height/2)  + "px";
 		}
-	;
+	};
 	map.src = 'templ/map' + id + '.png';
 }
 
@@ -179,20 +177,24 @@ function sortTable(n) {
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
-				<td><span class="command cmd_hide">Hide</span> <span class="command cmd_loc_1">Map&nbsp;1</span> <span class="command cmd_loc_2">2</span> <span class="command cmd_loc_3">3</span> <span class="command cmd_loc_4">4</span> <span class="command cmd_loc_5">5</span></td>
+				<td><span class="command" id="cmd_hide">Hide</span> <span class="command cmd_loc_1">Map&nbsp;1</span> <span class="command cmd_loc_2">2</span> <span class="command cmd_loc_3">3</span> <span class="command cmd_loc_4">4</span> <span class="command cmd_loc_5">5</span></td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
 			</tbody>
 		</table>
-		<div id="map" class="map" style="display:none">
-				<img id="map-img" class="map-img" src="templ/map1.png"/>
-				<img id="map-spot" class="map-spot" src="templ/marker.gif"/>
+		<div id="map-container" class="map-container" style="display:none">
+				<img id="map-image" class="map-image" src="templ/map1.png"/>
+				<img id="map-marker" class="map-marker" src="templ/marker.gif"/>
 				<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 		</div>
 		<script>
-			$(".cmd_hide").click(
-				function()
+			var i;
+			var tags;
+			tags = document.getElementsByClassName('cmd_hide');
+			for(i = 0; i < tags.length; i++)
+			{
+				tags[i].onclick = function()
 				{
 					var id = $(this).parent().parent().data('id');
 					$.get("pb.php", {'action': 'hide', 'id': id },
@@ -209,42 +211,40 @@ function sortTable(n) {
 							$.notify("Failed AJAX request", "error");
 						}
 					)
-				}
-			);
+				};
+			}
 			
-			var i;
 			for(i = 1; i <= 5; i++)
 			{
-				$(".cmd_loc_"+i).unbind('click').click(
-					function(i)
+				var j;
+				tags = document.getElementsByClassName('cmd_loc_'+i);
+				for(j = 0; j < tags.length; j++)
+				{
+					tags[j].onclick = function(i)
 					{
 						return function()
 						{
 							var id = $(this).parent().parent().data('id');
-							$("#map").attr('onclick', '').unbind('click');
-							$("#map-img").attr('onload','').unbind('load');
-							document.getElementById('map-img').src = 'templ/map'+i+'.png';
-							document.getElementById('map').style.display='block';
-							document.getElementById('map-spot').style.display='none';
-							$("#map-img").unbind('click').click(
-								function(event)
+							document.getElementById('map-container').onclick = null;
+							document.getElementById('map-image').onload = null;
+							document.getElementById('map-image').src = 'templ/map'+i+'.png';
+							document.getElementById('map-container').style.display='block';
+							document.getElementById('map-marker').style.display='none';
+							document.getElementById('map-image').onclick = function(event)
+							{
+								document.getElementById('map-marker').style.display='block';
+								document.getElementById('map-marker').style.left = (event.clientX - document.getElementById('map-marker').width/2)  + "px";
+								document.getElementById('map-marker').style.top = (event.clientY - document.getElementById('map-marker').height/2)  + "px";
+								document.getElementById('map-marker').onclick = function()
 								{
-									document.getElementById('map-spot').style.display='block';
-									document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-									document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
-									$("#map-spot").unbind('click').click(
-										function()
-										{
-											f_set_location(id, i, event.pageX - $('#map-img').offset().left, event.pageY - $('#map-img').offset().top);
-											document.getElementById('map').style.display='none';
-											$("#map-img").unbind('click');
-										}
-									);
-								}
-							)
+									f_set_location(id, i, event.pageX - $('#map-image').offset().left, event.pageY - $('#map-image').offset().top);
+									document.getElementById('map-container').style.display='none';
+									document.getElementById('map-image').onclick = null;
+								};
+							};
 						};
-					} (i)
-				);
+					} (i);
+				}
 			}
 		</script>
 <?php include("tpl.footer.php"); ?>

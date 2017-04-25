@@ -370,7 +370,7 @@ table {
 }
 
 
-.map {
+.map-container {
 	position: fixed;
 	top: 0%;
 	left: 0%;
@@ -379,7 +379,7 @@ table {
 	background: rgba(0,0,0,0.7);
 	z-index:1001;
 }
-.map-img {
+.map-image {
 	position: absolute;
 	z-index:1002;
 	overflow: auto;
@@ -389,7 +389,7 @@ table {
     bottom:0;
     margin:auto;
 }
-.map-spot {
+.map-marker {
 	position: fixed;
 	z-index:1003;
 	top: 0px;
