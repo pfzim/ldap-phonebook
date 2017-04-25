@@ -38,7 +38,7 @@ function sm(id, x, y)
 			{
 				el.style.display = 'block';
 				el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
-				el.style.top = (this.offsetTop + y - el.height)  + "px";
+				el.style.top = (this.offsetTop + y - el.height/2)  + "px";
 			}
 		}
 	;
@@ -186,7 +186,7 @@ function sortTable(n) {
 		</table>
 		<div id="map" class="map" style="display:none">
 				<img id="map-img" class="map-img" src="templ/map1.png"/>
-				<img id="map-spot" class="map-spot" src="templ/marker.png"/>
+				<img id="map-spot" class="map-spot" src="templ/marker.gif"/>
 				<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 		</div>
 		<script>
@@ -225,7 +225,7 @@ function sortTable(n) {
 							{
 								document.getElementById('map-spot').style.display='block';
 								document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height)  + "px";
+								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
 								$("#map-spot").unbind('click').click(
 									function()
 									{
@@ -254,7 +254,7 @@ function sortTable(n) {
 							{
 								document.getElementById('map-spot').style.display='block';
 								document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height)  + "px";
+								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
 								$("#map-spot").unbind('click').click(
 									function()
 									{
@@ -282,7 +282,7 @@ function sortTable(n) {
 							{
 								document.getElementById('map-spot').style.display='block';
 								document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height)  + "px";
+								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
 								$("#map-spot").unbind('click').click(
 									function()
 									{
@@ -310,7 +310,7 @@ function sortTable(n) {
 							{
 								document.getElementById('map-spot').style.display='block';
 								document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height)  + "px";
+								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
 								$("#map-spot").unbind('click').click(
 									function()
 									{
@@ -338,7 +338,7 @@ function sortTable(n) {
 							{
 								document.getElementById('map-spot').style.display='block';
 								document.getElementById('map-spot').style.left = (event.clientX - document.getElementById('map-spot').width/2)  + "px";
-								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height)  + "px";
+								document.getElementById('map-spot').style.top = (event.clientY - document.getElementById('map-spot').height/2)  + "px";
 								$("#map-spot").unbind('click').click(
 									function()
 									{

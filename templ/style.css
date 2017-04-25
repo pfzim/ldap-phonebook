@@ -216,6 +216,10 @@ table {
         position: absolute;
         top: 5px;
         right: 10px;
+		font-weight: bold;
+		font-size: 24pt;
+		color: white;
+		cursor: pointer;
 	}
 
 #status
