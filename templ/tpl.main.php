@@ -107,6 +107,7 @@ function sortTable(n) {
     //start by saying: no switching is done:
     switching = false;
     rows = table.getElementsByTagName("TR");
+	if(rows.length > 300) return;
     /*Loop through all table rows (except the
     first, which contains table headers):*/
     for (i = 1; i < (rows.length - 1); i++) {
@@ -150,7 +151,7 @@ function sortTable(n) {
   }
 }
 </script>
-		<h3 align="center">LDAP phonebook</h3>
+		<h3 align="center">LDAP Phonebook</h3>
 		<div id="imgblock" style="position: fixed; display: none; border: 0px solid black; padding: 0px; margin: 0px;"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search..">
 		<table id="table" class="main-table">
@@ -196,7 +197,7 @@ function sortTable(n) {
 			{
 				tags[i].onclick = function()
 				{
-					var id = $(this).parent().parent().data('id');
+					var id = this.parentNode.parentNode.dataset.id;
 					$.get("pb.php", {'action': 'hide', 'id': id },
 						function(data)
 						{ 
@@ -224,7 +225,7 @@ function sortTable(n) {
 					{
 						return function()
 						{
-							var id = $(this).parent().parent().data('id');
+							var id = this.parentNode.parentNode.dataset.id;
 							document.getElementById('map-container').onclick = null;
 							document.getElementById('map-image').onload = null;
 							document.getElementById('map-image').src = 'templ/map'+i+'.png';
@@ -237,7 +238,7 @@ function sortTable(n) {
 								document.getElementById('map-marker').style.top = (event.clientY - document.getElementById('map-marker').height/2)  + "px";
 								document.getElementById('map-marker').onclick = function()
 								{
-									f_set_location(id, i, event.pageX - $('#map-image').offset().left, event.pageY - $('#map-image').offset().top);
+									f_set_location(id, i, event.pageX - document.getElementById('map-image').offsetLeft, event.pageY - document.getElementById('map-image').offsetTop);
 									document.getElementById('map-container').style.display='none';
 									document.getElementById('map-image').onclick = null;
 								};
