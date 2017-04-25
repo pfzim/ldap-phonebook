@@ -198,6 +198,7 @@ function sortTable(n) {
 				tags[i].onclick = function()
 				{
 					var id = this.parentNode.parentNode.dataset.id;
+					this.textContent = 'Show';
 					$.get("pb.php", {'action': 'hide', 'id': id },
 						function(data)
 						{ 
@@ -220,6 +221,7 @@ function sortTable(n) {
 				tags[i].onclick = function()
 				{
 					var id = this.parentNode.parentNode.dataset.id;
+					this.textContent = 'Hide';
 					$.get("pb.php", {'action': 'show', 'id': id },
 						function(data)
 						{ 
