@@ -187,6 +187,7 @@ function sortTable(n) {
 		<div id="map" class="map" style="display:none">
 				<img id="map-img" class="map-img" src="templ/map1.png"/>
 				<img id="map-spot" class="map-spot" src="templ/marker.png"/>
+				<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 		</div>
 		<script>
 			$(".cmd_hide").click(
