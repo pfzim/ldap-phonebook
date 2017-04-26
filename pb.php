@@ -260,6 +260,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		}
 		case 'sync':
 		{
+			if(!$uid) break;
 			header("Content-Type: text/plain; charset=utf-8");
 			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
 			if($ldap)
@@ -346,6 +347,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'hide':
 		{
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, login"}';
+				exit;
+			}
 			header("Content-Type: text/plain; charset=utf-8");
 			//$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
@@ -355,6 +361,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'show':
 		{
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, login"}';
+				exit;
+			}
 			header("Content-Type: text/plain; charset=utf-8");
 			//$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
@@ -364,6 +375,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'setlocation':
 		{
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, login"}';
+				exit;
+			}
 			header("Content-Type: text/plain; charset=utf-8");
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
