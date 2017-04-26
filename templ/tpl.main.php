@@ -68,6 +68,52 @@ function hide(img)
 	imgblock.style.display = 'none';
 }
 
+function h(ev)
+{
+	var id = ev.target.parentNode.parentNode.dataset.id;
+	$.get("pb.php", {'action': 'hide', 'id': id },
+		function(el)
+		{
+			return function(data)
+			{ 
+				$.notify(data.message, "success");
+				el.textContent = 'Show';
+				el.onclick = function(event) { s(event); };
+			}
+		}(ev.target),
+		'json'
+	)
+	.fail(
+		function()
+		{
+			$.notify("Failed AJAX request", "error");
+		}
+	)
+};
+
+function s(ev)
+{
+	var id = ev.target.parentNode.parentNode.dataset.id;
+	$.get("pb.php", {'action': 'show', 'id': id },
+		function(el)
+		{
+			return function(data)
+			{
+				$.notify(data.message, "success");
+				el.textContent = 'Hide';
+				el.onclick = function(event) { h(event); };
+			}
+		}(ev.target),
+		'json'
+	)
+	.fail(
+		function()
+		{
+			$.notify("Failed AJAX request", "error");
+		}
+	)
+};
+
 function filter_table() {
   // Declare variables 
   var input, filter, table, tr, td, i;
@@ -195,47 +241,13 @@ function sortTable(n) {
 			tags = document.getElementsByClassName('cmd_hide');
 			for(i = 0; i < tags.length; i++)
 			{
-				tags[i].onclick = function()
-				{
-					var id = this.parentNode.parentNode.dataset.id;
-					this.textContent = 'Show';
-					$.get("pb.php", {'action': 'hide', 'id': id },
-						function(data)
-						{ 
-							$.notify(data.message, "success");
-						},
-						'json'
-					)
-					.fail(
-						function()
-						{
-							$.notify("Failed AJAX request", "error");
-						}
-					)
-				};
+				tags[i].onclick = function(event) { h(event); };
 			}
 			
 			tags = document.getElementsByClassName('cmd_show');
 			for(i = 0; i < tags.length; i++)
 			{
-				tags[i].onclick = function()
-				{
-					var id = this.parentNode.parentNode.dataset.id;
-					this.textContent = 'Hide';
-					$.get("pb.php", {'action': 'show', 'id': id },
-						function(data)
-						{ 
-							$.notify(data.message, "success");
-						},
-						'json'
-					)
-					.fail(
-						function()
-						{
-							$.notify("Failed AJAX request", "error");
-						}
-					)
-				};
+				tags[i].onclick = function(event) { s(event); };
 			}
 
 			for(i = 1; i <= 5; i++)
