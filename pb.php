@@ -371,6 +371,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"result": 0, "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
+		case 'map':
+		{
+			header("Content-Type: text/html; charset=utf-8");
+			//$db->connect();
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHARE m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
+			
+			include('templ/tpl.map.php');
+						
+			//$db->disconnect();
+		}
+		exit;
 	}
 
 	header("Content-Type: text/html; charset=utf-8");
