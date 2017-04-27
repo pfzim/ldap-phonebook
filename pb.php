@@ -352,6 +352,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		case 'export':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
 			//$db->connect();
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
 			
