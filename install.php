@@ -180,6 +180,7 @@ $config = <<<'EOT'
 	define("MAIL_PORT", #mail_port#);
 
 	define("ALLOW_MAILS", '#allow_mails#');
+	define("PB_MAPS_COUNT", 5);
 EOT;
 
 
@@ -654,7 +655,7 @@ EOT;
 				<div class="col-sm-5">
 					<select id="mail_secure" class="form-control">
 						<option value="" selected="selected">None</option>
-						<option value="tls">STARTLS</option>
+						<option value="tls">TLS</option>
 						<option value="ssl">SSL</option>
 					</select>
 				</div>

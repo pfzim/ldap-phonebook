@@ -224,7 +224,7 @@ function sortTable(n) {
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
-				<td><span class="command cmd_loc_1">Map&nbsp;1</span> <span class="command cmd_loc_2">2</span> <span class="command cmd_loc_3">3</span> <span class="command cmd_loc_4">4</span> <span class="command cmd_loc_5">5</span> <?php if($row[15]) { ?><span class="command cmd_hide">Hide</span><?php } else { ?><span class="command cmd_show">Show</span><?php } ?></td>
+				<td><span class="command cmd_loc_1">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command cmd_loc_<?php eh($i); ?>"><?php eh($i); ?></span> <?php } if($row[15]) { ?><span class="command cmd_hide">Hide</span><?php } else { ?><span class="command cmd_show">Show</span><?php } ?></td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
@@ -250,7 +250,7 @@ function sortTable(n) {
 				tags[i].onclick = function(event) { s(event); };
 			}
 
-			for(i = 1; i <= 5; i++)
+			for(i = 1; i <= <?php eh(PB_MAPS_COUNT); ?>; i++)
 			{
 				var j;
 				tags = document.getElementsByClassName('cmd_loc_'+i);

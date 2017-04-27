@@ -362,12 +362,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'hide':
 		{
+			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
 				echo '{"result": 1, "message": "Please, login"}';
 				exit;
 			}
-			header("Content-Type: text/plain; charset=utf-8");
 			//$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 			//$db->disconnect();
@@ -376,12 +376,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'show':
 		{
+			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
 				echo '{"result": 1, "message": "Please, login"}';
 				exit;
 			}
-			header("Content-Type: text/plain; charset=utf-8");
 			//$db->connect();
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
 			//$db->disconnect();
@@ -390,12 +390,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 		case 'setlocation':
 		{
+			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
 				echo '{"result": 1, "message": "Please, login"}';
 				exit;
 			}
-			header("Content-Type: text/plain; charset=utf-8");
+			if($id > PB_MAPS_COUNT)
+			{
+				echo '{"result": 1, "message": "Invalid map identifier"}';
+				exit;
+			}
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
 
