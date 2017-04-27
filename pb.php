@@ -309,6 +309,16 @@ function php_mailer($to, $name, $subject, $html, $plain)
 										$mime = $finfo->buffer($account['thumbnailphoto'][0]);
 										echo "MIME: ".$mime . "\n";
 									}
+									
+									$s_first_name = ;
+									$s_last_name = ;
+									$s_department = ;
+									$s_organization = ;
+									$s_position = ;
+									$s_phone_internal = ;
+									$s_phone_mobile = ;
+									$s_mail = ;
+									$s_photo = ;
 
 									if($db->select(rpv("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $account['samaccountname'][0])))
 									{

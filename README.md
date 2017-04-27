@@ -2,5 +2,10 @@
 
 This service import users info from LDAP/AD to MySQL DB
 
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_0.png)
+
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_1.png)
+
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_2.png)
 
 Dmitry V. Zimin <pfzim@mail.ru>

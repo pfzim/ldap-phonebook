@@ -15,6 +15,7 @@ CREATE TABLE  `pb`.`pb_contacts` (
   `bday` date DEFAULT NULL,
   `mime` varchar(255) NOT NULL DEFAULT '',
   `photo` blob NOT NULL,
+  `map` int(10) unsigned NOT NULL DEFAULT '0',
   `x` int(10) unsigned NOT NULL DEFAULT '0',
   `y` int(10) unsigned NOT NULL DEFAULT '0',
   `visible` int(10) unsigned NOT NULL DEFAULT '1',
