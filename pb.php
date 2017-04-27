@@ -302,31 +302,36 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									echo "\n";
 									/**/
 
-									$mime = '';
 									print_r($account);
+
+									// *********************************************************
+									$s_mime = '';
 									if(isset($account['thumbnailphoto'][0]))
 									{
-										$mime = $finfo->buffer($account['thumbnailphoto'][0]);
+										$s_mime = $finfo->buffer($account['thumbnailphoto'][0]);
 										echo "MIME: ".$mime . "\n";
 									}
 									
-									$s_first_name = ;
-									$s_last_name = ;
-									$s_department = ;
-									$s_organization = ;
-									$s_position = ;
-									$s_phone_internal = ;
-									$s_phone_mobile = ;
-									$s_mail = ;
-									$s_photo = ;
+									$s_login = @$account['samaccountname'][0];
+									$s_first_name = @$account['givenname'][0];
+									$s_last_name = @$account['sn'][0];
+									$s_department = @$account['department'][0];
+									$s_organization = @$account['company'][0];
+									$s_position = @$account['title'][0];
+									$s_phone_internal = @$account['telephonenumber'][0];
+									$s_phone_mobile = @$account['mobile'][0];
+									$s_mail = @$account['mail'][0];
+									$s_photo = @$account['thumbnailphoto'][0];
+									
+									// *********************************************************
 
-									if($db->select(rpv("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $account['samaccountname'][0])))
+									if($db->select(rpv("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
 									{
-										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `samname` = ! LIMIT 1", @$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0]), @$account['samaccountname'][0]));
+										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $s_login));
 									}
 									else
 									{
-										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, !, 1)", @$account['samaccountname'][0], @$account['givenname'][0], @$account['sn'][0], @$account['department'][0], @$account['company'][0], @$account['title'][0], @$account['telephonenumber'][0], @$account['mobile'][0], @$account['mail'][0], $mime, base64_encode(@$account['thumbnailphoto'][0])));
+										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, !, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
 									}
 									//echo "\r\n".$db->get_last_error()."\r\n";
 								}
