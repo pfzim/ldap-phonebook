@@ -18,7 +18,14 @@
 
 Карты хранятся в файлах templ/map[1-5].png
 
+# Системные требования
+Apache, MySQL, PHP
+Подключить модули расширения в php.ini или скомпилировать PHP с поддержкой LDAP
+- extension=php_ldap.dll
+- extension=php_fileinfo.dll
 
+# Установка
+Открыть install.php
 
 
 
