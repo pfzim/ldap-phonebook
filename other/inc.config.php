@@ -25,5 +25,4 @@
 	define("MAIL_PORT", 587);
 
 	define("ALLOW_MAILS", '^.+@.+$');
-	
 	define("PB_MAPS_COUNT", 5);

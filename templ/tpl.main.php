@@ -1,8 +1,18 @@
 <?php include("tpl.header.php"); ?>
 <script>
 
-function si(ev, img)
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+}
+
+function f_sw_img(ev)
 {
+	var img = ev.target.parentNode.dataset.photo;
 	if(img)
 	{
 		var el = document.getElementById('userphoto');
@@ -14,7 +24,7 @@ function si(ev, img)
 	}
 }
 
-function mi(ev)
+function f_mv_img(ev)
 {
 	var el = document.getElementById('imgblock');
 	if(el)
@@ -24,24 +34,34 @@ function mi(ev)
 	}
 }
 
-function sm(id, x, y)
+function f_sw_map(ev)
 {
-	var el = document.getElementById('map-container');
-	el.style.display = 'block';
-	el.onclick = function() {document.getElementById('map-container').style.display = 'none';};
-	var map = document.getElementById('map-image');
-	map.onload = function()
+	var id = parseInt(ev.target.parentNode.dataset.map, 10);
+	if(id)
 	{
-		var el = document.getElementById('map-marker');
-		if(el)
+		var el = document.getElementById('map-container');
+		var x = parseInt(ev.target.parentNode.dataset.x, 10);
+		var y = parseInt(ev.target.parentNode.dataset.y, 10);
+		el.style.display = 'block';
+		el.onclick = function() {document.getElementById('map-container').style.display = 'none';};
+		var map = document.getElementById('map-image');
+		map.onload = function(x, y)
 		{
-			el.onclick = null;
-			el.style.display = 'block';
-			el.style.left = (this.offsetLeft + x - el.width/2)  + "px";
-			el.style.top = (this.offsetTop + y - el.height/2)  + "px";
-		}
-	};
-	map.src = 'templ/map' + id + '.png';
+			return function(ev)
+			{
+				var el = document.getElementById('map-marker');
+				if(el)
+				{
+					el.onclick = null;
+					el.style.display = 'block';
+					el.style.left = (ev.target.offsetLeft + x - el.width/2)  + "px";
+					el.style.top = (ev.target.offsetTop + y - el.height/2)  + "px";
+					//alert("    x: "+(ev.target.offsetLeft + x) +"    y: "+(ev.target.offsetTop + y));
+				}
+			}
+		}(x, y);
+		map.src = 'templ/map' + id + '.png';
+	}
 }
 
 function f_set_location(id, map, x, y)
@@ -51,6 +71,13 @@ function f_set_location(id, map, x, y)
 		function(data)
 		{
 			$.notify(data.message, data.result?"error":"success");
+			var row = document.getElementById('row'+data.id);
+			if(row)
+			{
+				row.setAttribute("data-map", data.map);
+				row.setAttribute("data-x", data.x);
+				row.setAttribute("data-y", data.y);
+			}
 		},
 		'json'
 	)
@@ -62,13 +89,30 @@ function f_set_location(id, map, x, y)
 	)
 }
 
-function hide(img)
+function f_map_set(ev)
 {
-	var el = document.getElementById('imgblock');
-	imgblock.style.display = 'none';
-}
+	var id = ev.target.parentNode.parentNode.dataset.id;
+	var map = ev.target.dataset.map;
+	document.getElementById('map-container').onclick = null;
+	document.getElementById('map-image').onload = null;
+	document.getElementById('map-image').src = 'templ/map'+map+'.png';
+	document.getElementById('map-container').style.display='block';
+	document.getElementById('map-marker').style.display='none';
+	document.getElementById('map-image').onclick = function(event)
+	{
+		document.getElementById('map-marker').style.display='block';
+		document.getElementById('map-marker').style.left = (event.clientX - document.getElementById('map-marker').width/2)  + "px";
+		document.getElementById('map-marker').style.top = (event.clientY - document.getElementById('map-marker').height/2)  + "px";
+		document.getElementById('map-marker').onclick = function()
+		{
+			f_set_location(id, map, event.pageX - document.getElementById('map-image').offsetLeft, event.pageY - document.getElementById('map-image').offsetTop);
+			document.getElementById('map-container').style.display='none';
+			document.getElementById('map-image').onclick = null;
+		};
+	};
+};
 
-function h(ev)
+function f_hide(ev)
 {
 	var id = ev.target.parentNode.parentNode.dataset.id;
 	$.get("pb.php", {'action': 'hide', 'id': id },
@@ -76,9 +120,9 @@ function h(ev)
 		{
 			return function(data)
 			{ 
-				$.notify(data.message, "success");
+				$.notify(data.message, data.result?"error":"success");
 				el.textContent = 'Show';
-				el.onclick = function(event) { s(event); };
+				el.onclick = function(event) { f_show(event); };
 			}
 		}(ev.target),
 		'json'
@@ -91,7 +135,7 @@ function h(ev)
 	)
 };
 
-function s(ev)
+function f_show(ev)
 {
 	var id = ev.target.parentNode.parentNode.dataset.id;
 	$.get("pb.php", {'action': 'show', 'id': id },
@@ -99,9 +143,9 @@ function s(ev)
 		{
 			return function(data)
 			{
-				$.notify(data.message, "success");
+				$.notify(data.message, data.result?"error":"success");
 				el.textContent = 'Hide';
-				el.onclick = function(event) { h(event); };
+				el.onclick = function(event) { f_hide(event); };
 			}
 		}(ev.target),
 		'json'
@@ -113,6 +157,191 @@ function s(ev)
 		}
 	)
 };
+
+function f_delete(ev)
+{
+	var id = ev.target.parentNode.parentNode.dataset.id;
+	$.get("pb.php", {'action': 'delete', 'id': id },
+		function(el)
+		{
+			return function(data)
+			{
+				$.notify(data.message, data.result?"error":"success");
+				if(!data.result)
+				{
+					var row = el.parentNode.parentNode;
+					row.parentNode.removeChild(row);
+
+				}
+			}
+		}(ev.target),
+		'json'
+	)
+	.fail(
+		function()
+		{
+			$.notify("Failed AJAX request", "error");
+		}
+	)
+};
+
+function f_save()
+{
+	$.post("pb.php?action=save&id="+document.getElementById('edit_id').value, 
+		{
+			'firstname': document.getElementById('firstname').value,
+			'lastname': document.getElementById('lastname').value,
+			'department': document.getElementById('department').value,
+			'company': document.getElementById('company').value,
+			'position': document.getElementById('position').value,
+			'phone': document.getElementById('phone').value,
+			'mobile': document.getElementById('mobile').value,
+			'mail': document.getElementById('mail').value
+		},
+		function(data)
+		{
+			$.notify(data.message, data.result?"error":"success");
+			if(!data.result)
+			{
+				document.getElementById('edit-container').style.display='none';
+				f_update_row(data.id);
+			}
+		},
+		'json'
+	)
+	.fail(
+		function()
+		{
+			$.notify("Failed AJAX request", "error");
+		}
+	)
+}
+
+function f_update_row(id)
+{
+	$.get("pb.php", {'action': 'get', 'id': id },
+		function(val)
+		{
+			return function(data)
+			{
+				if(data.result)
+				{
+					$.notify(data.message, "error");
+				}
+				else
+				{
+					var row = document.getElementById('row'+data.id);
+					if(!row)
+					{
+						row = document.getElementById("table-data").insertRow(0);
+						row.insertCell(0);
+						row.insertCell(1);
+						row.insertCell(2);
+						row.insertCell(3);
+						row.insertCell(4);
+						row.insertCell(5);
+						row.insertCell(6);
+					}
+					
+					row.id = 'row'+data.id;
+					row.setAttribute("data-id", data.id);
+					row.setAttribute("data-map", data.map);
+					row.setAttribute("data-x", data.x);
+					row.setAttribute("data-y", data.y);
+					row.setAttribute("data-photo", data.photo?'data:'+data.mime+';base64,'+data.photo:'');
+					row.cells[0].textContent = data.firstname + ' ' + data.lastname;
+					if(data.photo)
+					{
+						row.cells[0].className = 'userwithphoto';
+					}
+					row.cells[0].style.cursor = 'pointer';
+					row.cells[0].onclick = function(event) { f_sw_map(event); };
+					row.cells[0].onmouseenter = function(event) { f_sw_img(event); };
+					row.cells[0].onmouseleave = function(event) { document.getElementById('imgblock').style.display = 'none'; };
+					row.cells[0].onmousemove = function(event) { f_mv_img(event); };
+					
+					row.cells[1].textContent = data.phone;
+					row.cells[2].textContent = data.mobile;
+					row.cells[3].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
+					row.cells[4].textContent = data.position;
+					row.cells[5].textContent = data.department;
+					if(parseInt(data.visible, 10))
+					{
+						row.cells[6].innerHTML = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span><?php } ?> <span class="command" onclick="f_hide(event);">Hide</span>';
+					}
+					else
+					{
+						row.cells[6].innerHTML = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span><?php } ?> <span class="command" onclick="f_show(event);">Show</span>';
+					}
+					//row.cells[6].onclick = function(event) { h(event); };
+				}
+			}
+		}(0),
+		'json'
+	)
+	.fail(
+		function()
+		{
+			$.notify("Failed AJAX request", "error");
+		}
+	)
+}
+
+function f_edit(ev)
+{
+	var id = 0;
+	if(ev)
+	{
+		id = ev.target.parentNode.parentNode.dataset.id;
+	}
+	document.getElementById('edit_id').value = id;
+	if(!id)
+	{
+		document.getElementById('firstname').value = '';
+		document.getElementById('lastname').value = '';
+		document.getElementById('department').value = '';
+		document.getElementById('company').value = '';
+		document.getElementById('position').value = '';
+		document.getElementById('phone').value = '';
+		document.getElementById('mobile').value = '';
+		document.getElementById('mail').value = '';
+		document.getElementById('edit-container').style.display='block';
+	}
+	else
+	{
+		$.get("pb.php", {'action': 'get', 'id': id },
+			function(el)
+			{
+				return function(data)
+				{
+					if(data.result)
+					{
+						$.notify(data.message, "error");
+					}
+					else
+					{
+						document.getElementById('firstname').value = data.firstname;
+						document.getElementById('lastname').value = data.lastname;
+						document.getElementById('department').value = data.department;
+						document.getElementById('company').value = data.company;
+						document.getElementById('position').value = data.position;
+						document.getElementById('phone').value = data.phone;
+						document.getElementById('mobile').value = data.mobile;
+						document.getElementById('mail').value = data.mail;
+						document.getElementById('edit-container').style.display='block';
+					}
+				}
+			}(ev.target),
+			'json'
+		)
+		.fail(
+			function()
+			{
+				$.notify("Failed AJAX request", "error");
+			}
+		)
+	}
+}
 
 function filter_table() {
   // Declare variables 
@@ -199,6 +428,9 @@ function sortTable(n) {
 </script>
 		<h3 align="center">LDAP Phonebook</h3>
 		<div id="imgblock" style="position: fixed; display: none; border: 0px solid black; padding: 0px; margin: 0px;"><img id="userphoto" src=""/></div>
+		<?php if($uid) { ?>
+		<span class="command" onclick="f_edit(null);">Add contact</span><br />
+		<?php } ?>
 		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search..">
 		<table id="table" class="main-table">
 			<thead>
@@ -216,71 +448,61 @@ function sortTable(n) {
 			</thead>
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
-			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>">
-				<td <?php if(!empty($row[12])) { ?> onclick="sm(<?php eh($row[12].', '.$row[13].', '.$row[14]);?>);" <?php } ?>onmouseenter="si(event, '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>');" onmouseleave="hide();" onmousemove="mi(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>" data-map="<?php eh($row[12]); ?>" data-x="<?php eh($row[13]); ?>" data-y="<?php eh($row[14]); ?>" data-photo="<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>">
+				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="document.getElementById('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
-				<td><span class="command cmd_loc_1">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command cmd_loc_<?php eh($i); ?>"><?php eh($i); ?></span> <?php } if($row[15]) { ?><span class="command cmd_hide">Hide</span><?php } else { ?><span class="command cmd_show">Show</span><?php } ?></td>
+				<td>
+					<?php if(empty($row[1])) { ?>
+						<span class="command" onclick="f_edit(event);">Edit</span>
+						<span class="command" onclick="f_delete(event);">Delete</span>
+					<?php } ?>
+					<span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>
+					<?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?>
+						<span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span>
+					<?php } ?>
+					<?php if($row[15]) { ?>
+						<span class="command" onclick="f_hide(event);">Hide</span>
+					<?php } else { ?>
+						<span class="command" onclick="f_show(event);">Show</span>
+					<?php } ?>
+				</td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
 			</tbody>
 		</table>
-		<div id="map-container" class="map-container" style="display:none">
-				<img id="map-image" class="map-image" src="templ/map1.png"/>
-				<img id="map-marker" class="map-marker" src="templ/marker.gif"/>
-				<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
+		<div id="edit-container" class="map-container" style="display: none">
+			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
+			<div class="modal-content">
+				<h3>Contact</h3>
+				<input id="edit_id" type="hidden" value=""/>
+				<div class="form-title"><label for="firstname">First name:</label></div>
+				<input class="form-field" id="firstname" type="edit" value=""/>
+				<div class="form-title"><label for="lastname">Last name:</label></div>
+				<input class="form-field" id="lastname" type="edit" value=""/>
+				<div class="form-title"><label for="company">Company:</label></div>
+				<input class="form-field" id="company" type="edit" value=""/>
+				<div class="form-title"><label for="department">Department:</label></div>
+				<input class="form-field" id="department" type="edit" value=""/>
+				<div class="form-title"><label for="position">Position:</label></div>
+				<input class="form-field" id="position" type="edit" value=""/>
+				<div class="form-title"><label for="phone">Phone:</label></div>
+				<input class="form-field" id="phone" type="edit" value=""/>
+				<div class="form-title"><label for="mobile">Mobile:</label></div>
+				<input class="form-field" id="mobile" type="edit" value=""/>
+				<div class="form-title"><label for="mail">E-mail:</label></div>
+				<input class="form-field" id="mail" type="edit" value=""/><br />
+				<button class="form-button" type="button" onclick="f_save();">Save</button>
+			</div>
 		</div>
-		<script>
-			var i;
-			var tags;
-			tags = document.getElementsByClassName('cmd_hide');
-			for(i = 0; i < tags.length; i++)
-			{
-				tags[i].onclick = function(event) { h(event); };
-			}
-			
-			tags = document.getElementsByClassName('cmd_show');
-			for(i = 0; i < tags.length; i++)
-			{
-				tags[i].onclick = function(event) { s(event); };
-			}
-
-			for(i = 1; i <= <?php eh(PB_MAPS_COUNT); ?>; i++)
-			{
-				var j;
-				tags = document.getElementsByClassName('cmd_loc_'+i);
-				for(j = 0; j < tags.length; j++)
-				{
-					tags[j].onclick = function(i)
-					{
-						return function()
-						{
-							var id = this.parentNode.parentNode.dataset.id;
-							document.getElementById('map-container').onclick = null;
-							document.getElementById('map-image').onload = null;
-							document.getElementById('map-image').src = 'templ/map'+i+'.png';
-							document.getElementById('map-container').style.display='block';
-							document.getElementById('map-marker').style.display='none';
-							document.getElementById('map-image').onclick = function(event)
-							{
-								document.getElementById('map-marker').style.display='block';
-								document.getElementById('map-marker').style.left = (event.clientX - document.getElementById('map-marker').width/2)  + "px";
-								document.getElementById('map-marker').style.top = (event.clientY - document.getElementById('map-marker').height/2)  + "px";
-								document.getElementById('map-marker').onclick = function()
-								{
-									f_set_location(id, i, event.pageX - document.getElementById('map-image').offsetLeft, event.pageY - document.getElementById('map-image').offsetTop);
-									document.getElementById('map-container').style.display='none';
-									document.getElementById('map-image').onclick = null;
-								};
-							};
-						};
-					} (i);
-				}
-			}
-		</script>
+		<div id="map-container" class="map-container" style="display:none">
+			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
+			<img id="map-image" class="map-image" src="templ/map1.png"/>
+			<img id="map-marker" class="map-marker" src="templ/marker.gif"/>
+		</div>
 <?php include("tpl.footer.php"); ?>

@@ -397,7 +397,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				echo '{"result": 1, "message": "Please, login"}';
 				exit;
 			}
-			if($id > PB_MAPS_COUNT)
+			if(@$_POST['map'] > PB_MAPS_COUNT)
 			{
 				echo '{"result": 1, "message": "Invalid map identifier"}';
 				exit;
@@ -405,10 +405,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
 
-			echo '{"result": 0, "message": "Location set (ID '.$id.')"}';
+			echo '{"result": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
-		case 'add':
+		case 'save':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
@@ -416,30 +416,33 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				echo '{"result": 1, "message": "Please, login"}';
 				exit;
 			}
+
+			$s_first_name = @$_POST['firstname'];
+			$s_last_name = @$_POST['lastname'];
+			$s_department = @$_POST['department'];
+			$s_organization = @$_POST['company'];
+			$s_position = @$_POST['position'];
+			$s_phone_internal = @$_POST['phone'];
+			$s_phone_mobile = @$_POST['mobile'];
+			$s_mail = @$_POST['mail'];
+			$s_photo = '';
+			$s_mime = '';
+
 			if(!$id)
 			{
-				//echo '{"result": 1, "message": "Invalid identifier"}';
-				//exit;
+				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, !, !, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
+				$id = $db->last_id(); 
+				echo '{"result": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
+			}
+			else
+			{
+				$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $id));
+				echo '{"result": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
 			}
 
-
-									$s_first_name = @$_POST['firstname'];
-									$s_last_name = @$_POST['lastname'];
-									$s_department = @$_POST['department'];
-									$s_organization = @$_POST['company'];
-									$s_position = @$_POST['title'];
-									$s_phone_internal = @$_POST['phone'];
-									$s_phone_mobile = @$_POST['mobile'];
-									$s_mail = @$_POST['mail'];
-									$s_photo = '';
-									$s_mime = '';
-
-			$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, !, !, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
-
-			echo '{"result": 0, "message": "Added (ID '.$db->last_id.')"}';
 		}
 		exit;
-		case 'edit':
+		case 'delete':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
@@ -453,20 +456,27 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-									$s_first_name = @$_POST['firstname'];
-									$s_last_name = @$_POST['lastname'];
-									$s_department = @$_POST['department'];
-									$s_organization = @$_POST['company'];
-									$s_position = @$_POST['title'];
-									$s_phone_internal = @$_POST['phone'];
-									$s_phone_mobile = @$_POST['mobile'];
-									$s_mail = @$_POST['mail'];
-									$s_photo = '';
-									$s_mime = '';
+			$db->put(rpv("DELETE FROM `pb_contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $id));
+			echo '{"result": 0, "message": "Deleted (ID '.$id.')"}';
+		}
+		exit;
+		case 'get':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$id)
+			{
+				echo '{"result": 1, "message": "Invalid identifier"}';
+				exit;
+			}
 
-			echo '{"result": 0, "message": "Updated (ID '.$id.')"}';
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # ORDER BY m.`lname`, m.`fname`", $id)))
+			{
+				echo '{"result": 1, "message": "DB error"}';
+				exit;
+			}
+
+			echo '{"result": 0, "id": "'.json_escape($db->data[0][0]).'", "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "mime": "'.json_escape($db->data[0][10]).'", "photo": "'.json_escape($db->data[0][11]).'", "map": "'.json_escape($db->data[0][12]).'", "x": "'.json_escape($db->data[0][13]).'", "y": "'.json_escape($db->data[0][14]).'", "visible": "'.json_escape($db->data[0][15]).'"}';
 		}
 		exit;
 		case 'map':

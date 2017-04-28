@@ -395,3 +395,33 @@ table {
 	top: 0px;
 	left: 0px;
 }
+
+.modal-content {
+    background-color: white;
+    margin: 10px auto;
+    padding: 20px;
+	position:fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+.form-title {
+   margin-bottom:3px;
+   }
+.form-field {
+   border: 1px solid black;
+   border-radius: 3px;
+   padding:8px;
+   margin-bottom:5px;
+   width:280px;
+   }
+
+   .form-button {
+   background-color: #d3f2bf;
+   color: black;
+   border: 1px solid black;
+   border-radius: 3px;
+   padding:5px;
+   margin-bottom:5px;
+   width:280px;
+   }
