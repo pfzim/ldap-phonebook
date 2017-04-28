@@ -408,6 +408,67 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"result": 0, "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
+		case 'add':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, login"}';
+				exit;
+			}
+			if(!$id)
+			{
+				//echo '{"result": 1, "message": "Invalid identifier"}';
+				//exit;
+			}
+
+
+									$s_first_name = @$_POST['firstname'];
+									$s_last_name = @$_POST['lastname'];
+									$s_department = @$_POST['department'];
+									$s_organization = @$_POST['company'];
+									$s_position = @$_POST['title'];
+									$s_phone_internal = @$_POST['phone'];
+									$s_phone_mobile = @$_POST['mobile'];
+									$s_mail = @$_POST['mail'];
+									$s_photo = '';
+									$s_mime = '';
+
+			$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, !, !, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
+
+			echo '{"result": 0, "message": "Added (ID '.$db->last_id.')"}';
+		}
+		exit;
+		case 'edit':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, login"}';
+				exit;
+			}
+			if(!$id)
+			{
+				echo '{"result": 1, "message": "Invalid identifier"}';
+				exit;
+			}
+
+									$s_first_name = @$_POST['firstname'];
+									$s_last_name = @$_POST['lastname'];
+									$s_department = @$_POST['department'];
+									$s_organization = @$_POST['company'];
+									$s_position = @$_POST['title'];
+									$s_phone_internal = @$_POST['phone'];
+									$s_phone_mobile = @$_POST['mobile'];
+									$s_mail = @$_POST['mail'];
+									$s_photo = '';
+									$s_mime = '';
+
+			$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $id));
+
+			echo '{"result": 0, "message": "Updated (ID '.$id.')"}';
+		}
+		exit;
 		case 'map':
 		{
 			header("Content-Type: text/html; charset=utf-8");
