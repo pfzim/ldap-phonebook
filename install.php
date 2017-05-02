@@ -335,7 +335,300 @@ EOT;
 		<meta charset="utf-8"> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link type="text/css" href="templ/bootstrap.min.css" rel="stylesheet" />
+		<style type="text/css">
+			html {
+				font-family: sans-serif;
+				-webkit-text-size-adjust: 100%;
+				-ms-text-size-adjust: 100%
+			}
+			body {
+				margin: 0
+			}
+			button,
+			input,
+			select {
+				margin: 0;
+				font: inherit;
+				color: inherit
+			}
+			button {
+				overflow: visible
+			}
+			button,
+			select {
+				text-transform: none
+			}
+			button {
+				-webkit-appearance: button;
+				cursor: pointer
+			}
+			button::-moz-focus-inner,
+			input::-moz-focus-inner {
+				padding: 0;
+				border: 0
+			}
+			input {
+				line-height: normal
+			}
+
+			@media print {
+				*,
+				:after,
+				:before {
+					color: #000!important;
+					text-shadow: none!important;
+					background: 0 0!important;
+					-webkit-box-shadow: none!important;
+					box-shadow: none!important
+				}
+				h3 {
+					orphans: 3;
+					widows: 3
+				}
+				h3 {
+					page-break-after: avoid
+				}
+			}
+			@font-face {
+				font-family: 'Glyphicons Halflings';
+				src: url(../fonts/glyphicons-halflings-regular.eot);
+				src: url(../fonts/glyphicons-halflings-regular.eot?#iefix) format('embedded-opentype'), url(../fonts/glyphicons-halflings-regular.woff2) format('woff2'), url(../fonts/glyphicons-halflings-regular.woff) format('woff'), url(../fonts/glyphicons-halflings-regular.ttf) format('truetype'), url(../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular) format('svg')
+			}
+			* {
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box
+			}
+			:after,
+			:before {
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box
+			}
+			html {
+				font-size: 10px;
+				-webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+			}
+			body {
+				font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+				font-size: 14px;
+				line-height: 1.42857143;
+				color: #333;
+				background-color: #fff
+			}
+			button,
+			input,
+			select {
+				font-family: inherit;
+				font-size: inherit;
+				line-height: inherit
+			}
+			h3 {
+				font-family: inherit;
+				font-weight: 500;
+				line-height: 1.1;
+				color: inherit
+			}
+			h3 {
+				margin-top: 20px;
+				margin-bottom: 10px
+			}
+			h3 {
+				font-size: 24px
+			}
+			.container {
+				padding-right: 15px;
+				padding-left: 15px;
+				margin-right: auto;
+				margin-left: auto
+			}
+			@media (min-width: 768px) {
+				.container {
+					width: 750px
+				}
+			}
+			@media (min-width: 992px) {
+				.container {
+					width: 970px
+				}
+			}
+			@media (min-width: 1200px) {
+				.container {
+					width: 1170px
+				}
+			}
+			.col-sm-2,
+			.col-sm-5 {
+				position: relative;
+				min-height: 1px;
+				padding-right: 15px;
+				padding-left: 15px
+			}
+			@media (min-width: 768px) {
+				.col-sm-2,
+				.col-sm-5 {
+					float: left
+				}
+				.col-sm-5 {
+					width: 41.66666667%
+				}
+				.col-sm-2 {
+					width: 16.66666667%
+				}
+				.col-sm-offset-2 {
+					margin-left: 16.66666667%
+				}
+			}
+			label {
+				display: inline-block;
+				max-width: 100%;
+				margin-bottom: 5px;
+				font-weight: 700
+			}
+			.form-control {
+				display: block;
+				width: 100%;
+				height: 34px;
+				padding: 6px 12px;
+				font-size: 14px;
+				line-height: 1.42857143;
+				color: #555;
+				background-color: #fff;
+				background-image: none;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+				box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+				-webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+				-o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+				transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+			}
+			.form-control:focus {
+				border-color: #66afe9;
+				outline: 0;
+				-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+				box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6)
+			}
+			.form-control::-moz-placeholder {
+				color: #999;
+				opacity: 1
+			}
+			.form-control:-ms-input-placeholder {
+				color: #999
+			}
+			.form-control::-webkit-input-placeholder {
+				color: #999
+			}
+			.form-control::-ms-expand {
+				background-color: transparent;
+				border: 0
+			}
+			.form-group {
+				margin-bottom: 15px
+			}
+			.form-horizontal .form-group {
+				margin-right: -15px;
+				margin-left: -15px
+			}
+			@media (min-width: 768px) {
+				.form-horizontal .control-label {
+					padding-top: 7px;
+					margin-bottom: 0;
+					text-align: right
+				}
+			}
+			.btn {
+				display: inline-block;
+				padding: 6px 12px;
+				margin-bottom: 0;
+				font-size: 14px;
+				font-weight: 400;
+				line-height: 1.42857143;
+				text-align: center;
+				white-space: nowrap;
+				vertical-align: middle;
+				-ms-touch-action: manipulation;
+				touch-action: manipulation;
+				cursor: pointer;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				background-image: none;
+				border: 1px solid transparent;
+				border-radius: 4px
+			}
+			.btn:active:focus,
+			.btn:focus {
+				outline: 5px auto -webkit-focus-ring-color;
+				outline-offset: -2px
+			}
+			.btn:focus,
+			.btn:hover {
+				color: #333;
+				text-decoration: none
+			}
+			.btn:active {
+				background-image: none;
+				outline: 0;
+				-webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+				box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125)
+			}
+			.btn-primary {
+				color: #fff;
+				background-color: #337ab7;
+				border-color: #2e6da4
+			}
+			.btn-primary:focus {
+				color: #fff;
+				background-color: #286090;
+				border-color: #122b40
+			}
+			.btn-primary:hover {
+				color: #fff;
+				background-color: #286090;
+				border-color: #204d74
+			}
+			.btn-primary:active {
+				color: #fff;
+				background-color: #286090;
+				border-color: #204d74
+			}
+			.btn-primary:active:focus,
+			.btn-primary:active:hover {
+				color: #fff;
+				background-color: #204d74;
+				border-color: #122b40
+			}
+			.btn-primary:active {
+				background-image: none
+			}
+			.alert {
+				padding: 15px;
+				margin-bottom: 20px;
+				border: 1px solid transparent;
+				border-radius: 4px
+			}
+			.alert-danger {
+				color: #a94442;
+				background-color: #f2dede;
+				border-color: #ebccd1
+			}
+			.container:after,
+			.container:before,
+			.form-horizontal .form-group:after,
+			.form-horizontal .form-group:before {
+				display: table;
+				content: " "
+			}
+			.container:after,
+			.form-horizontal .form-group:after {
+				clear: both
+			}
+			@-ms-viewport {
+				width: device-width
+			}
+		</style>
 		<script type="text/javascript">
 			function gi(name)
 			{
