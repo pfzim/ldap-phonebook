@@ -1,6 +1,11 @@
 <?php include("tpl.header.php"); ?>
 <script>
 
+function gi(name)
+{
+	return document.getElementById(name);
+}
+
 function escapeHtml(text) {
   return text
       .replace(/&/g, "&amp;")
@@ -15,9 +20,9 @@ function f_sw_img(ev)
 	var img = ev.target.parentNode.dataset.photo;
 	if(img)
 	{
-		var el = document.getElementById('userphoto');
+		var el = gi('userphoto');
 		el.src = img;
-		el = document.getElementById('imgblock');
+		el = gi('imgblock');
 		imgblock.style.display = 'block';
 		imgblock.style.left = (ev.clientX+10)  + "px";
 		imgblock.style.top = (ev.clientY+10)  + "px";
@@ -26,7 +31,7 @@ function f_sw_img(ev)
 
 function f_mv_img(ev)
 {
-	var el = document.getElementById('imgblock');
+	var el = gi('imgblock');
 	if(el)
 	{
 		el.style.left = (ev.clientX+10)  + "px";
@@ -39,17 +44,17 @@ function f_sw_map(ev)
 	var id = parseInt(ev.target.parentNode.dataset.map, 10);
 	if(id)
 	{
-		var el = document.getElementById('map-container');
+		var el = gi('map-container');
 		var x = parseInt(ev.target.parentNode.dataset.x, 10);
 		var y = parseInt(ev.target.parentNode.dataset.y, 10);
 		el.style.display = 'block';
-		el.onclick = function() {document.getElementById('map-container').style.display = 'none';};
-		var map = document.getElementById('map-image');
+		el.onclick = function() {gi('map-container').style.display = 'none';};
+		var map = gi('map-image');
 		map.onload = function(x, y)
 		{
 			return function(ev)
 			{
-				var el = document.getElementById('map-marker');
+				var el = gi('map-marker');
 				if(el)
 				{
 					el.onclick = null;
@@ -71,7 +76,7 @@ function f_set_location(id, map, x, y)
 		function(data)
 		{
 			$.notify(data.message, data.result?"error":"success");
-			var row = document.getElementById('row'+data.id);
+			var row = gi('row'+data.id);
 			if(row)
 			{
 				row.setAttribute("data-map", data.map);
@@ -93,21 +98,21 @@ function f_map_set(ev)
 {
 	var id = ev.target.parentNode.parentNode.dataset.id;
 	var map = ev.target.dataset.map;
-	document.getElementById('map-container').onclick = null;
-	document.getElementById('map-image').onload = null;
-	document.getElementById('map-image').src = 'templ/map'+map+'.png';
-	document.getElementById('map-container').style.display='block';
-	document.getElementById('map-marker').style.display='none';
-	document.getElementById('map-image').onclick = function(event)
+	gi('map-container').onclick = null;
+	gi('map-image').onload = null;
+	gi('map-image').src = 'templ/map'+map+'.png';
+	gi('map-container').style.display='block';
+	gi('map-marker').style.display='none';
+	gi('map-image').onclick = function(event)
 	{
-		document.getElementById('map-marker').style.display='block';
-		document.getElementById('map-marker').style.left = (event.clientX - document.getElementById('map-marker').width/2)  + "px";
-		document.getElementById('map-marker').style.top = (event.clientY - document.getElementById('map-marker').height/2)  + "px";
-		document.getElementById('map-marker').onclick = function()
+		gi('map-marker').style.display='block';
+		gi('map-marker').style.left = (event.clientX - gi('map-marker').width/2)  + "px";
+		gi('map-marker').style.top = (event.clientY - gi('map-marker').height/2)  + "px";
+		gi('map-marker').onclick = function()
 		{
-			f_set_location(id, map, event.pageX - document.getElementById('map-image').offsetLeft, event.pageY - document.getElementById('map-image').offsetTop);
-			document.getElementById('map-container').style.display='none';
-			document.getElementById('map-image').onclick = null;
+			f_set_location(id, map, event.pageX - gi('map-image').offsetLeft, event.pageY - gi('map-image').offsetTop);
+			gi('map-container').style.display='none';
+			gi('map-image').onclick = null;
 		};
 	};
 };
@@ -187,23 +192,23 @@ function f_delete(ev)
 
 function f_save()
 {
-	$.post("pb.php?action=save&id="+document.getElementById('edit_id').value, 
+	$.post("pb.php?action=save&id="+gi('edit_id').value, 
 		{
-			'firstname': document.getElementById('firstname').value,
-			'lastname': document.getElementById('lastname').value,
-			'department': document.getElementById('department').value,
-			'company': document.getElementById('company').value,
-			'position': document.getElementById('position').value,
-			'phone': document.getElementById('phone').value,
-			'mobile': document.getElementById('mobile').value,
-			'mail': document.getElementById('mail').value
+			'firstname': gi('firstname').value,
+			'lastname': gi('lastname').value,
+			'department': gi('department').value,
+			'company': gi('company').value,
+			'position': gi('position').value,
+			'phone': gi('phone').value,
+			'mobile': gi('mobile').value,
+			'mail': gi('mail').value
 		},
 		function(data)
 		{
 			$.notify(data.message, data.result?"error":"success");
 			if(!data.result)
 			{
-				document.getElementById('edit-container').style.display='none';
+				gi('edit-container').style.display='none';
 				f_update_row(data.id);
 			}
 		},
@@ -230,10 +235,10 @@ function f_update_row(id)
 				}
 				else
 				{
-					var row = document.getElementById('row'+data.id);
+					var row = gi('row'+data.id);
 					if(!row)
 					{
-						row = document.getElementById("table-data").insertRow(0);
+						row = gi("table-data").insertRow(0);
 						row.insertCell(0);
 						row.insertCell(1);
 						row.insertCell(2);
@@ -257,7 +262,7 @@ function f_update_row(id)
 					row.cells[0].style.cursor = 'pointer';
 					row.cells[0].onclick = function(event) { f_sw_map(event); };
 					row.cells[0].onmouseenter = function(event) { f_sw_img(event); };
-					row.cells[0].onmouseleave = function(event) { document.getElementById('imgblock').style.display = 'none'; };
+					row.cells[0].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
 					row.cells[0].onmousemove = function(event) { f_mv_img(event); };
 					
 					row.cells[1].textContent = data.phone;
@@ -294,18 +299,18 @@ function f_edit(ev)
 	{
 		id = ev.target.parentNode.parentNode.dataset.id;
 	}
-	document.getElementById('edit_id').value = id;
+	gi('edit_id').value = id;
 	if(!id)
 	{
-		document.getElementById('firstname').value = '';
-		document.getElementById('lastname').value = '';
-		document.getElementById('department').value = '';
-		document.getElementById('company').value = '';
-		document.getElementById('position').value = '';
-		document.getElementById('phone').value = '';
-		document.getElementById('mobile').value = '';
-		document.getElementById('mail').value = '';
-		document.getElementById('edit-container').style.display='block';
+		gi('firstname').value = '';
+		gi('lastname').value = '';
+		gi('department').value = '';
+		gi('company').value = '';
+		gi('position').value = '';
+		gi('phone').value = '';
+		gi('mobile').value = '';
+		gi('mail').value = '';
+		gi('edit-container').style.display='block';
 	}
 	else
 	{
@@ -320,15 +325,15 @@ function f_edit(ev)
 					}
 					else
 					{
-						document.getElementById('firstname').value = data.firstname;
-						document.getElementById('lastname').value = data.lastname;
-						document.getElementById('department').value = data.department;
-						document.getElementById('company').value = data.company;
-						document.getElementById('position').value = data.position;
-						document.getElementById('phone').value = data.phone;
-						document.getElementById('mobile').value = data.mobile;
-						document.getElementById('mail').value = data.mail;
-						document.getElementById('edit-container').style.display='block';
+						gi('firstname').value = data.firstname;
+						gi('lastname').value = data.lastname;
+						gi('department').value = data.department;
+						gi('company').value = data.company;
+						gi('position').value = data.position;
+						gi('phone').value = data.phone;
+						gi('mobile').value = data.mobile;
+						gi('mail').value = data.mail;
+						gi('edit-container').style.display='block';
 					}
 				}
 			}(ev.target),
@@ -346,9 +351,9 @@ function f_edit(ev)
 function filter_table() {
   // Declare variables 
   var input, filter, table, tr, td, i;
-  input = document.getElementById("search");
+  input = gi("search");
   filter = input.value.toLowerCase();
-  table = document.getElementById("table-data");
+  table = gi("table-data");
   tr = table.getElementsByTagName("tr");
 
   // Loop through all table rows, and hide those who don't match the search query
@@ -372,7 +377,7 @@ function filter_table() {
 
 function sortTable(n) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("table");
+  table = gi("table");
   switching = true;
   //Set the sorting direction to ascending:
   dir = "asc"; 
@@ -428,10 +433,10 @@ function sortTable(n) {
 </script>
 		<h3 align="center">LDAP Phonebook</h3>
 		<div id="imgblock" style="position: fixed; display: none; border: 0px solid black; padding: 0px; margin: 0px;"><img id="userphoto" src=""/></div>
+		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
 		<?php if($uid) { ?>
-		<span class="command" onclick="f_edit(null);">Add contact</span><br />
+		<span class="command f-right" onclick="f_edit(null);">Add contact</span>
 		<?php } ?>
-		<input type="text" id="search" onkeyup="filter_table()" placeholder="Search..">
 		<table id="table" class="main-table">
 			<thead>
 			<tr>
@@ -449,7 +454,7 @@ function sortTable(n) {
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>" data-map="<?php eh($row[12]); ?>" data-x="<?php eh($row[13]); ?>" data-y="<?php eh($row[14]); ?>" data-photo="<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>">
-				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="document.getElementById('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
@@ -476,7 +481,7 @@ function sortTable(n) {
 		<?php } ?>
 			</tbody>
 		</table>
-		<div id="edit-container" class="map-container" style="display: none">
+		<div id="edit-container" class="modal-container" style="display: none">
 			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 			<div class="modal-content">
 				<h3>Contact</h3>
@@ -500,7 +505,7 @@ function sortTable(n) {
 				<button class="form-button" type="button" onclick="f_save();">Save</button>
 			</div>
 		</div>
-		<div id="map-container" class="map-container" style="display:none">
+		<div id="map-container" class="modal-container" style="display:none">
 			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 			<img id="map-image" class="map-image" src="templ/map1.png"/>
 			<img id="map-marker" class="map-marker" src="templ/marker.gif"/>

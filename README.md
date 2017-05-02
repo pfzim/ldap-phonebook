@@ -45,4 +45,9 @@ Show selected contact on map
 
 ![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_2.png)
 
+Installation
+
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_3.png)
+
+
 Dmitry V. Zimin <pfzim@mail.ru>

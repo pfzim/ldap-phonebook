@@ -309,7 +309,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									if(isset($account['thumbnailphoto'][0]))
 									{
 										$s_mime = $finfo->buffer($account['thumbnailphoto'][0]);
-										echo "MIME: ".$mime . "\n";
+										echo "MIME: ".$s_mime . "\n";
 									}
 									
 									$s_login = @$account['samaccountname'][0];

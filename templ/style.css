@@ -370,7 +370,7 @@ table {
 }
 
 
-.map-container {
+.modal-container {
 	position: fixed;
 	top: 0%;
 	left: 0%;
@@ -409,7 +409,7 @@ table {
    margin-bottom:3px;
    }
 .form-field {
-   border: 1px solid black;
+   border: 1px solid #ccc;
    border-radius: 3px;
    padding:8px;
    margin-bottom:5px;
@@ -419,7 +419,7 @@ table {
    .form-button {
    background-color: #d3f2bf;
    color: black;
-   border: 1px solid black;
+   border: 1px solid #ccc;
    border-radius: 3px;
    padding:5px;
    margin-bottom:5px;
