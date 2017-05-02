@@ -366,7 +366,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, login"}';
+				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
 			//$db->connect();
@@ -380,7 +380,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, login"}';
+				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
 			//$db->connect();
@@ -394,7 +394,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, login"}';
+				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(@$_POST['map'] > PB_MAPS_COUNT)
@@ -408,12 +408,59 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"result": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
+		case 'setphoto':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, log in"}';
+				exit;
+			}
+			if(!$id)
+			{
+				echo '{"result": 1, "message": "Invalid identifier"}';
+				exit;
+			}
+			if(!file_exists(@$_FILES['photo']['tmp_name']))
+			{
+				echo '{"result": 1, "message": "Invalid photo"}';
+				exit;
+			}
+
+			$finfo = new finfo(FILEINFO_MIME_TYPE);
+			$s_photo = file_get_contents(@$_FILES['photo']['tmp_name']);
+			$s_mime = $finfo->buffer($s_photo);
+
+			$db->put(rpv("UPDATE `pb_contacts` SET `mime` = !, `photo` = ! WHERE `id` = # LIMIT 1", $s_mime, base64_encode($s_photo), $id));
+
+			echo '{"result": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
+		}
+		exit;
+		case 'deletephoto':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$uid)
+			{
+				echo '{"result": 1, "message": "Please, log in"}';
+				exit;
+			}
+			if(!$id)
+			{
+				echo '{"result": 1, "message": "Invalid identifier"}';
+				exit;
+			}
+
+			$db->put(rpv("UPDATE `pb_contacts` SET `mime` = '', `photo` = '' WHERE `id` = # LIMIT 1", $id));
+
+			echo '{"result": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
+		}
+		exit;
 		case 'save':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, login"}';
+				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
 
@@ -447,7 +494,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, login"}';
+				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(!$id)

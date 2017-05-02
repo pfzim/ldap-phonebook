@@ -272,7 +272,7 @@ function f_update_row(id)
 					row.cells[5].textContent = data.department;
 					if(parseInt(data.visible, 10))
 					{
-						row.cells[6].innerHTML = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span><?php } ?> <span class="command" onclick="f_hide(event);">Hide</span>';
+						row.cells[6].innerHTML = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span><?php } ?> <span class="command" onclick="f_hide(event);">Hide</span>';
 					}
 					else
 					{
@@ -345,6 +345,47 @@ function f_edit(ev)
 				$.notify("Failed AJAX request", "error");
 			}
 		)
+	}
+}
+
+function f_upload(id)
+{
+	var fd = new FormData(gi("photo-upload"));
+	$.ajax(
+		{
+			url: "pb.php?action=setphoto&id="+id,
+			type: "POST",
+			data: fd,
+			processData: false,  // tell jQuery not to process the data
+			contentType: false,   // tell jQuery not to set contentType
+			dataType: "json"
+		}
+	).done(function(data)
+	{
+		$.notify(data.message, data.result?"error":"success");
+		if(!data.result)
+		{
+			f_update_row(data.id);
+		}
+	});
+	return false;
+}
+
+function f_photo(ev)
+{
+	var id = 0;
+	if(ev)
+	{
+		id = ev.target.parentNode.parentNode.dataset.id;
+	}
+	if(id)
+	{
+		gi('upload').onchange = function(id) {
+			return function() {
+				f_upload(id);
+			}
+		}(id);
+		gi('upload').click();
 	}
 }
 
@@ -465,6 +506,7 @@ function sortTable(n) {
 					<?php if(empty($row[1])) { ?>
 						<span class="command" onclick="f_edit(event);">Edit</span>
 						<span class="command" onclick="f_delete(event);">Delete</span>
+						<span class="command" onclick="f_photo(event);">Photo</span>
 					<?php } ?>
 					<span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>
 					<?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?>
@@ -510,4 +552,7 @@ function sortTable(n) {
 			<img id="map-image" class="map-image" src="templ/map1.png"/>
 			<img id="map-marker" class="map-marker" src="templ/marker.gif"/>
 		</div>
+		<form method="post" id="photo-upload" name="photo-upload">		
+			<input id="upload" type="file" name="photo" style="display: none"/>
+		</form>
 <?php include("tpl.footer.php"); ?>
