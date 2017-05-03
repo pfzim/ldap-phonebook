@@ -113,10 +113,6 @@ class MySQLDB
 
 $sql = array(
 <<<'EOT'
-CREATE DATABASE `#DB_NAME#` DEFAULT CHARACTER SET 'utf8'
-EOT
-,
-<<<'EOT'
 CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `samname` varchar(255) NOT NULL DEFAULT '',
@@ -205,6 +201,25 @@ EOT;
 				}
 				exit;
 				case 'create_db':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
+					
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
+					//foreach($sql as $query)
+					//{
+					//	$db->put(str_replace('#DB_NAME#', @$_POST['db'], $query));
+					//}
+					$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8');
+					//$db->select_db(@$_POST['db']);
+					//$db->put($db_table);
+
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
+				case 'create_tables':
 				{
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
 					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
@@ -716,6 +731,14 @@ EOT;
 					+'&db='+encodeURIComponent(gi('db_scheme').value));
 			}
 
+			function f_create_tables(id)
+			{
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				f_post(id, 'create_tables', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
+					+'&db='+encodeURIComponent(gi('db_scheme').value));
+			}
+
 			function f_create_db_user(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
@@ -813,7 +836,12 @@ EOT;
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_create_db(2);'>2. Create database and tables</button><div id="result_2" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_create_db(2);'>2. Create database</button><div id="result_2" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_create_tables(3);'>3. Create tables</button><div id="result_3" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -835,12 +863,12 @@ EOT;
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_create_db_user(3);'>3. Create DB user</button><div id="result_3" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_create_db_user(4);'>4. Create DB user</button><div id="result_4" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_grant_access(4);'>4. Grant access to database</button><div id="result_4" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_grant_access(5);'>5. Grant access to database</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group"> 
@@ -886,7 +914,7 @@ EOT;
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_check_ldap(5);'>5. Check LDAP connection</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_check_ldap(6);'>6. Check LDAP connection</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group">
@@ -954,12 +982,12 @@ EOT;
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_check_mail(6);'>6. Check mail connection</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_check_mail(7);'>7. Check mail connection</button><div id="result_7" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_save_config(7);'>7. Save config</button><div id="result_7" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_save_config(8);'>8. Save config</button><div id="result_8" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>
