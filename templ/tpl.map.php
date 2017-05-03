@@ -92,25 +92,25 @@ function f_drag(ev)
 		}
 	}(ev.target.dataset.id);
 
-	ev.target.onmouseup = function(id)
-	{
-		return function(ev) {
-			document.onmousemove = null;
-			var box = document.getElementById('map-image').getBoundingClientRect();
-			//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
-			var x = (ev.pageX - box.left - window.scrollX);
-			var y = (ev.pageY - box.top - window.scrollY);
-			if(x < 0) x = 0;
-			if(y < 0) y = 0;
-			if(x > box.right - box.left) x = box.right - box.left;
-			if(y > box.bottom - box.top) y = box.bottom - box.top;
-			ev.target.style.left = (x - 16)+'px';
-			ev.target.style.top = (y - 22)+'px';
-			f_set_location(id, <?php eh($id);?>, ev.pageX - box.left - window.scrollX, ev.pageY - box.top - window.scrollY);
-			ev.target.style.border="0px dashed black";
-			ev.target.onmouseup = null;
-		}
-	}(ev.target.dataset.id);
+	ev.target.onmouseup = function(ev) { f_drop(ev) };
+}
+
+function f_drop(ev)
+{
+	document.onmousemove = null;
+	var box = document.getElementById('map-image').getBoundingClientRect();
+	//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
+	var x = (ev.pageX - box.left - window.scrollX);
+	var y = (ev.pageY - box.top - window.scrollY);
+	if(x < 0) x = 0;
+	if(y < 0) y = 0;
+	if(x > box.right - box.left) x = box.right - box.left;
+	if(y > box.bottom - box.top) y = box.bottom - box.top;
+	ev.target.style.left = (x - 16)+'px';
+	ev.target.style.top = (y - 22)+'px';
+	f_set_location(ev.target.dataset.id, <?php eh($id);?>, ev.pageX - box.left - window.scrollX, ev.pageY - box.top - window.scrollY);
+	ev.target.style.border="0px dashed black";
+	ev.target.onmouseup = null;
 }
 
 </script>
