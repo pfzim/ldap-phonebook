@@ -18,10 +18,10 @@ function escapeHtml(text) {
 function f_sw_img(ev)
 {
 	var img = ev.target.parentNode.dataset.photo;
-	if(img)
+	if(parseInt(img, 10))
 	{
 		var el = gi('userphoto');
-		el.src = img;
+		el.src = 'photos/t'+ev.target.parentNode.dataset.id+'.jpg';
 		el = gi('imgblock');
 		imgblock.style.display = 'block';
 		imgblock.style.left = (ev.clientX+10)  + "px";
@@ -253,7 +253,7 @@ function f_update_row(id)
 					row.setAttribute("data-map", data.map);
 					row.setAttribute("data-x", data.x);
 					row.setAttribute("data-y", data.y);
-					row.setAttribute("data-photo", data.photo?'data:'+data.mime+';base64,'+data.photo:'');
+					row.setAttribute("data-photo", data.photo);
 					row.cells[0].textContent = data.firstname + ' ' + data.lastname;
 					if(data.photo)
 					{
@@ -270,7 +270,7 @@ function f_update_row(id)
 					row.cells[3].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
 					row.cells[4].textContent = data.position;
 					row.cells[5].textContent = data.department;
-					if(parseInt(data.visible, 10))
+					if(data.visible)
 					{
 						row.cells[6].innerHTML = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span><?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?> <span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span><?php } ?> <span class="command" onclick="f_hide(event);">Hide</span>';
 					}
@@ -494,8 +494,8 @@ function sortTable(n) {
 			</thead>
 			<tbody id="table-data">
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
-			<tr id="<?php eh("row".$row[0]);?>" data-id="<?php eh($row[0]);?>" data-map="<?php eh($row[12]); ?>" data-x="<?php eh($row[13]); ?>" data-y="<?php eh($row[14]); ?>" data-photo="<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>">
-				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(!empty($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
+			<tr id="<?php eh("row".$row[0]);?>" data-id=<?php eh($row[0]);?> data-map=<?php eh($row[11]); ?> data-x=<?php eh($row[12]); ?> data-y=<?php eh($row[13]); ?> data-photo=<?php eh($row[10]); ?>>
+				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(intval($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
@@ -512,7 +512,7 @@ function sortTable(n) {
 					<?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?>
 						<span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span>
 					<?php } ?>
-					<?php if($row[15]) { ?>
+					<?php if($row[14]) { ?>
 						<span class="command" onclick="f_hide(event);">Hide</span>
 					<?php } else { ?>
 						<span class="command" onclick="f_show(event);">Show</span>

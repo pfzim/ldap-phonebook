@@ -1,21 +1,21 @@
 <?php include("tpl.header.php"); ?>
 <script>
-function si(ev, name, position, phone, img)
+function si(ev)
 {
 	document.getElementById('popup').style.display = 'block';
 	document.getElementById('popup').style.left = (ev.pageX+10)  + "px";
 	document.getElementById('popup').style.top = (ev.pageY+10)  + "px";
-	if(img)
+	if(parseInt(ev.target.dataset.photo, 10))
 	{
-		document.getElementById('u_photo').src = img;
+		document.getElementById('u_photo').src = 'photos/t'+ev.target.dataset.id+'.jpg';
 	}
 	else
 	{
 		document.getElementById('u_photo').src = 'templ/nophoto.png';
 	}
-	document.getElementById('u_name').textContent = name;
-	document.getElementById('u_position').textContent = position;
-	document.getElementById('u_phone').textContent = phone;
+	document.getElementById('u_name').textContent = ev.target.dataset.name;
+	document.getElementById('u_position').textContent = ev.target.dataset.position;
+	document.getElementById('u_phone').textContent = ev.target.dataset.phone;
 }
 
 function mi(ev)
@@ -70,7 +70,7 @@ function sel(ev)
 		<div style="position: relative;">
 				<img id="map-image" src="templ/map<?php eh($id);?>.png" style="left: 0px; top: 0px;"/>
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
-				<img id="<?php eh('u'.$row[0]);?>" src="templ/marker-static.png" data-id="<?php eh($row[0]);?>" style="position: absolute; <?php eh('left: '.($row[13]-16).'px; top: '.($row[14]-22).'px');?>" onmouseenter="si(event, '<?php eh($row[2].' '.$row[3]); ?>', '<?php eh($row[6]); ?>', '<?php eh($row[7]); ?>', '<?php if(!empty($row[10])) { eh('data:'.$row[10].';base64,'.$row[11]); } ?>')" onmouseleave="document.getElementById('popup').style.display='none'" onmousemove="mi(event);" onclick="sel(event);"/>
+				<img id="<?php eh('u'.$row[0]);?>" src="templ/marker-static.png" data-id=<?php eh($row[0]);?> data-name="<?php eh($row[2].' '.$row[3]); ?>" data-position="<?php eh($row[6]); ?>" data-phone="<?php eh($row[7]); ?>" data-photo=<?php eh($row[10]); ?> style="position: absolute; <?php eh('left: '.($row[12]-16).'px; top: '.($row[13]-22).'px');?>" onmouseenter="si(event)" onmouseleave="document.getElementById('popup').style.display='none'" onmousemove="mi(event);" onclick="sel(event);"/>
 		<?php } ?>
 		</div>
 		<div id="popup" class="tooltip-user" style="display: none;">

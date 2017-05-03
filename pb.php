@@ -269,8 +269,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					//$db->connect();
-					$finfo = new finfo(FILEINFO_MIME_TYPE);
+					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
 
 					$cookie = '';
 					do
@@ -305,13 +304,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									print_r($account);
 
 									// *********************************************************
-									$s_mime = '';
-									if(isset($account['thumbnailphoto'][0]))
-									{
-										$s_mime = $finfo->buffer($account['thumbnailphoto'][0]);
-										echo "MIME: ".$s_mime . "\n";
-									}
-									
+
 									$s_login = @$account['samaccountname'][0];
 									$s_first_name = @$account['givenname'][0];
 									$s_last_name = @$account['sn'][0];
@@ -325,15 +318,41 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									
 									// *********************************************************
 
-									if($db->select(rpv("SELECT m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
+									if($db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
 									{
-										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $s_login));
+										$id = $db->data[0][0];
+										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
 									}
 									else
 									{
-										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, !, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
+										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
+										$id = $db->last_id();
 									}
 									//echo "\r\n".$db->get_last_error()."\r\n";
+
+									if(isset($account['thumbnailphoto'][0]))
+									{
+										$w = 64;
+										$h = 64;
+										list($width, $height) = getimagesizefromstring($s_photo);
+										$r = $width / $height;
+										if($w/$h > $r)
+										{
+											$newwidth = $h*$r;
+											$newheight = $h;
+										}
+										else
+										{
+											$newheight = $w/$r;
+											$newwidth = $w;
+										}
+										$src = imagecreatefromstring($s_photo);
+										$dst = imagecreatetruecolor($newwidth, $newheight);
+										imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+										imagejpeg($dst, $upload_dir.'/t'.$id.'.jpg', 100);
+										imagedestroy($dst);
+										imagedestroy($src);
+									}
 								}
 							}
 							ldap_control_paged_result_response($ldap, $sr, $cookie);
@@ -343,7 +362,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					}
 					while($cookie !== null && $cookie != '');
 
-					//$db->disconnect();
 					ldap_unbind($ldap);
 				}
 			}
@@ -353,12 +371,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
-			//$db->connect();
+
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
 			
 			include('templ/tpl.export.php');
-						
-			//$db->disconnect();
 		}
 		exit;
 		case 'hide':
@@ -369,9 +385,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
-			//$db->connect();
+
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
-			//$db->disconnect();
+
 			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
 		}
 		exit;
@@ -383,9 +399,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				echo '{"result": 1, "message": "Please, log in"}';
 				exit;
 			}
-			//$db->connect();
+
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
-			//$db->disconnect();
+
 			echo '{"result": 0, "message": "Successful show (ID '.$id.')"}';
 		}
 		exit;
@@ -427,11 +443,29 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$finfo = new finfo(FILEINFO_MIME_TYPE);
 			$s_photo = file_get_contents(@$_FILES['photo']['tmp_name']);
-			$s_mime = $finfo->buffer($s_photo);
+			$w = 64;
+			$h = 64;
+			list($width, $height) = getimagesizefromstring($s_photo);
+			$r = $width / $height;
+			if($w/$h > $r)
+			{
+				$newwidth = $h*$r;
+				$newheight = $h;
+			}
+			else
+			{
+				$newheight = $w/$r;
+				$newwidth = $w;
+			}
+			$src = imagecreatefromstring($s_photo);
+			$dst = imagecreatetruecolor($newwidth, $newheight);
+			imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+			imagejpeg($dst, dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg', 100);
+			imagedestroy($dst);
+			imagedestroy($src);
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `mime` = !, `photo` = ! WHERE `id` = # LIMIT 1", $s_mime, base64_encode($s_photo), $id));
+			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 1 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"result": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
 		}
@@ -450,7 +484,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `mime` = '', `photo` = '' WHERE `id` = # LIMIT 1", $id));
+			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 0 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"result": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
 		}
@@ -472,21 +506,19 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$s_phone_internal = @$_POST['phone'];
 			$s_phone_mobile = @$_POST['mobile'];
 			$s_mail = @$_POST['mail'];
-			$s_photo = '';
-			$s_mime = '';
+			$s_photo = 0;
 
 			if(!$id)
 			{
-				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `mime`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, !, !, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo)));
+				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
 				$id = $db->last_id(); 
 				echo '{"result": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
 			}
 			else
 			{
-				$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `mime` = !, `photo` = ! WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_mime, base64_encode($s_photo), $id));
+				$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $id));
 				echo '{"result": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
 			}
-
 		}
 		exit;
 		case 'delete':
@@ -504,6 +536,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 
 			$db->put(rpv("DELETE FROM `pb_contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
+			
+			$filename = dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg';
+			if(file_exists($filename))
+			{
+				unlink($filename);
+			}
 
 			echo '{"result": 0, "message": "Deleted (ID '.$id.')"}';
 		}
@@ -517,20 +555,20 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # ORDER BY m.`lname`, m.`fname`", $id)))
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # ORDER BY m.`lname`, m.`fname`", $id)))
 			{
 				echo '{"result": 1, "message": "DB error"}';
 				exit;
 			}
 
-			echo '{"result": 0, "id": "'.json_escape($db->data[0][0]).'", "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "mime": "'.json_escape($db->data[0][10]).'", "photo": "'.json_escape($db->data[0][11]).'", "map": "'.json_escape($db->data[0][12]).'", "x": "'.json_escape($db->data[0][13]).'", "y": "'.json_escape($db->data[0][14]).'", "visible": "'.json_escape($db->data[0][15]).'"}';
+			echo '{"result": 0, "id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).'}';
 		}
 		exit;
 		case 'map':
 		{
 			header("Content-Type: text/html; charset=utf-8");
 			//$db->connect();
-			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
 
 			include('templ/tpl.map.php');
 
@@ -542,7 +580,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	header("Content-Type: text/html; charset=utf-8");
 
 	//$db->connect();
-	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`mime`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
+	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
 	//$db->disconnect();
 
 	include('templ/tpl.main.php');
