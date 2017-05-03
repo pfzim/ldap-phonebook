@@ -46,7 +46,8 @@ function f_set_location(id, map, x, y)
 	)
 }
 
-function sel(ev)
+/* old function click-click-move
+function f_click(ev)
 {
 	ev.target.style.border="1px dashed red";
 	ev.target.style.borderRadius = "5px";
@@ -64,13 +65,60 @@ function sel(ev)
 		}
 	}(ev.target.dataset.id);
 }
+*/
+
+function f_drag(ev)
+{
+	ev.target.style.border="1px dashed red";
+	ev.target.style.borderRadius = "5px";
+
+	var box = document.getElementById('map-image').getBoundingClientRect();
+	ev.target.style.left = (ev.pageX - box.left - window.scrollX - 16)+'px';
+	ev.target.style.top = (ev.pageY - box.top - window.scrollY - 22)+'px';
+
+	document.onmousemove = function(id)
+	{
+		return function(ev)
+		{
+			var box = document.getElementById('map-image').getBoundingClientRect();
+			var x = (ev.pageX - box.left - window.scrollX);
+			var y = (ev.pageY - box.top - window.scrollY);
+			if(x < 0) x = 0;
+			if(y < 0) y = 0;
+			if(x > box.right - box.left) x = box.right - box.left;
+			if(y > box.bottom - box.top) y = box.bottom - box.top;
+			document.getElementById('u'+id).style.left = (x - 16)+'px';
+			document.getElementById('u'+id).style.top = (y - 22)+'px';
+		}
+	}(ev.target.dataset.id);
+
+	ev.target.onmouseup = function(id)
+	{
+		return function(ev) {
+			document.onmousemove = null;
+			var box = document.getElementById('map-image').getBoundingClientRect();
+			//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
+			var x = (ev.pageX - box.left - window.scrollX);
+			var y = (ev.pageY - box.top - window.scrollY);
+			if(x < 0) x = 0;
+			if(y < 0) y = 0;
+			if(x > box.right - box.left) x = box.right - box.left;
+			if(y > box.bottom - box.top) y = box.bottom - box.top;
+			ev.target.style.left = (x - 16)+'px';
+			ev.target.style.top = (y - 22)+'px';
+			f_set_location(id, <?php eh($id);?>, ev.pageX - box.left - window.scrollX, ev.pageY - box.top - window.scrollY);
+			ev.target.style.border="0px dashed black";
+			ev.target.onmouseup = null;
+		}
+	}(ev.target.dataset.id);
+}
 
 </script>
 		<h3 align="center">Map<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>&nbsp;<a href="?action=map&amp;id=<?php eh($i);?>"><?php eh($i);?></a><?php } ?></h3>
 		<div style="position: relative;">
 				<img id="map-image" src="templ/map<?php eh($id);?>.png" style="left: 0px; top: 0px;"/>
 		<?php $i = 0; if($db->data !== FALSE) foreach($db->data as $row) { $i++; ?>
-				<img id="<?php eh('u'.$row[0]);?>" src="templ/marker-static.png" data-id=<?php eh($row[0]);?> data-name="<?php eh($row[2].' '.$row[3]); ?>" data-position="<?php eh($row[6]); ?>" data-phone="<?php eh($row[7]); ?>" data-photo=<?php eh($row[10]); ?> style="position: absolute; <?php eh('left: '.($row[12]-16).'px; top: '.($row[13]-22).'px');?>" onmouseenter="si(event)" onmouseleave="document.getElementById('popup').style.display='none'" onmousemove="mi(event);" onclick="sel(event);"/>
+				<img id="<?php eh('u'.$row[0]);?>" src="templ/marker-static.png" data-id=<?php eh($row[0]);?> data-name="<?php eh($row[2].' '.$row[3]); ?>" data-position="<?php eh($row[6]); ?>" data-phone="<?php eh($row[7]); ?>" data-photo=<?php eh($row[10]); ?> style="position: absolute; <?php eh('left: '.($row[12]-16).'px; top: '.($row[13]-22).'px');?>" onmouseenter="si(event)" onmouseleave="document.getElementById('popup').style.display='none'" onmousemove="mi(event);" onmousedown="f_drag(event);" ondragstart="return false;"/>
 		<?php } ?>
 		</div>
 		<div id="popup" class="tooltip-user" style="display: none;">
