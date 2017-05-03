@@ -73,20 +73,25 @@ function f_drag(ev)
 	ev.target.style.borderRadius = "5px";
 
 	var box = document.getElementById('map-image').getBoundingClientRect();
-	ev.target.style.left = (ev.pageX - box.left - window.scrollX - 16)+'px';
-	ev.target.style.top = (ev.pageY - box.top - window.scrollY - 22)+'px';
+	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
+	ev.target.style.left = (ev.pageX - box.left - sx - 16)+'px';
+	ev.target.style.top = (ev.pageY - box.top - sy - 22)+'px';
 
 	document.onmousemove = function(id)
 	{
 		return function(ev)
 		{
 			var box = document.getElementById('map-image').getBoundingClientRect();
-			var x = (ev.pageX - box.left - window.scrollX);
-			var y = (ev.pageY - box.top - window.scrollY);
+			var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+			var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
+			var x = (ev.pageX - box.left - sx);
+			var y = (ev.pageY - box.top - sy);
 			if(x < 0) x = 0;
 			if(y < 0) y = 0;
 			if(x > box.right - box.left) x = box.right - box.left;
 			if(y > box.bottom - box.top) y = box.bottom - box.top;
+			//console.log("onmousemove "+id+"    sx "+sy+"     sY "+window.scrollY);
 			document.getElementById('u'+id).style.left = (x - 16)+'px';
 			document.getElementById('u'+id).style.top = (y - 22)+'px';
 		}
@@ -100,15 +105,17 @@ function f_drop(ev)
 	document.onmousemove = null;
 	var box = document.getElementById('map-image').getBoundingClientRect();
 	//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
-	var x = (ev.pageX - box.left - window.scrollX);
-	var y = (ev.pageY - box.top - window.scrollY);
+	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
+	var x = (ev.pageX - box.left - sx);
+	var y = (ev.pageY - box.top - sy);
 	if(x < 0) x = 0;
 	if(y < 0) y = 0;
 	if(x > box.right - box.left) x = box.right - box.left;
 	if(y > box.bottom - box.top) y = box.bottom - box.top;
 	ev.target.style.left = (x - 16)+'px';
 	ev.target.style.top = (y - 22)+'px';
-	f_set_location(ev.target.dataset.id, <?php eh($id);?>, ev.pageX - box.left - window.scrollX, ev.pageY - box.top - window.scrollY);
+	f_set_location(ev.target.dataset.id, <?php eh($id);?>, ev.pageX - box.left - sx, ev.pageY - box.top - sy);
 	ev.target.style.border="0px dashed black";
 	ev.target.onmouseup = null;
 }

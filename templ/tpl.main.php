@@ -401,11 +401,12 @@ function filter_table() {
   for (i = 0; i < tr.length; i++) {
     tds = tr[i].getElementsByTagName("td");
 	var sh = "none";
-	for (var td of tds)
+	var j;
+	for(j = 0; j < tds.length; j++)
 	{
-		if (td)
+		if(tds[j])
 		{
-		  if (td.textContent.toLowerCase().indexOf(filter) > -1)
+		  if (tds[j].textContent.toLowerCase().indexOf(filter) > -1)
 		  {
 			sh = "";
 			break;
