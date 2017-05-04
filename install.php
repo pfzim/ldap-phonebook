@@ -3,7 +3,7 @@
 if(file_exists('inc.config.php'))
 {
 	header("Content-Type: text/plain; charset=utf-8");
-	echo 'Configuration file exist. Remove inc.config.php before running installation';
+	echo 'Configuration file already exist. Remove inc.config.php before running installation';
 	exit;
 }
 
@@ -111,6 +111,22 @@ class MySQLDB
 	}
 }
 
+function json_escape($value) //json_escape
+{
+    $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");
+    $replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
+    $result = str_replace($escapers, $replacements, $value);
+    return $result;
+}
+
+function sql_escape($value)
+{
+    $escapers = array("\\", "\"", "\n", "\r", "\t", "\x08", "\x0c", "'", "\x1A", "\x00"); // "%", "_"
+    $replacements = array("\\\\", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b", "\\'", "\\Z", "\\0");
+    $result = str_replace($escapers, $replacements, $value);
+    return $result;
+}
+
 $sql = array(
 <<<'EOT'
 CREATE TABLE `#DB_NAME#`.`pb_contacts` (
@@ -179,7 +195,7 @@ $config = <<<'EOT'
 EOT;
 
 
-	error_reporting(0);
+	//error_reporting(0);
 	
 	if(isset($_GET['action']))
 	{
@@ -212,7 +228,7 @@ EOT;
 					//{
 					//	$db->put(str_replace('#DB_NAME#', @$_POST['db'], $query));
 					//}
-					$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8');
+					$db->put('CREATE DATABASE `'.sql_escape(@$_POST['db']).'` DEFAULT CHARACTER SET utf8');
 					//$db->select_db(@$_POST['db']);
 					//$db->put($db_table);
 
@@ -229,7 +245,7 @@ EOT;
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					foreach($sql as $query)
 					{
-						$db->put(str_replace('#DB_NAME#', @$_POST['db'], $query));
+						$db->put(str_replace('#DB_NAME#', sql_escape(@$_POST['db']), $query));
 					}
 					//$db->put('CREATE DATABASE `'.@$_POST['db'].'` DEFAULT CHARACTER SET utf8');
 					//$db->select_db(@$_POST['db']);
@@ -246,7 +262,7 @@ EOT;
 
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-					$db->put("CREATE USER '".@$_POST['dbuser']."'@'%' IDENTIFIED BY '".@$_POST['dbpwd']."'");
+					$db->put("CREATE USER '".sql_escape(@$_POST['dbuser'])."'@'%' IDENTIFIED BY '".sql_escape(@$_POST['dbpwd'])."'");
 
 					echo '{"result": 0, "status": "OK"}';
 				}
@@ -260,7 +276,7 @@ EOT;
 
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-					$db->put("GRANT ALL PRIVILEGES ON ".@$_POST['db'].".* TO '".@$_POST['dbuser']."'@'%'");
+					$db->put("GRANT ALL PRIVILEGES ON ".sql_escape(@$_POST['db']).".* TO '".sql_escape(@$_POST['dbuser'])."'@'%'");
 					$db->put("FLUSH PRIVILEGES");
 				
 					echo '{"result": 0, "status": "OK"}';
@@ -376,7 +392,7 @@ EOT;
 
 					$config = str_replace(
 						array('#host#', '#login#', '#password#', '#db#', '#ldap_host#', '#ldap_port#', '#ldap_user#', '#ldap_password#', '#ldap_base#', '#ldap_filter#', '#mail_host#', '#mail_port#', '#mail_user#', '#mail_password#', '#mail_secure#', '#mail_admin#', '#mail_admin_name#', '#mail_from#', '#mail_from_name#', '#allow_mails#', '#mail_auth#'), 
-						array(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db'], @$_POST['ldaphost'], @$_POST['ldapport'], @$_POST['ldapuser'], @$_POST['ldappwd'], @$_POST['ldapbase'], @$_POST['ldapfilter'], sql_escape(@$_POST['mailhost']), sql_escape(@$_POST['mailport']), sql_escape(@$_POST['mailuser']), sql_escape(@$_POST['mailpwd']), sql_escape(@$_POST['mailsecure']), sql_escape(@$_POST['mailadmin']), sql_escape(@$_POST['mailadminname']), sql_escape(@$_POST['mailfrom']), sql_escape(@$_POST['mailfromname']), sql_escape(@$_POST['uploaddir']), empty(@$_POST['mailuser'])?'false':'true'), 
+						array(sql_escape(@$_POST['host']), sql_escape(@$_POST['dbuser']), sql_escape(@$_POST['dbpwd']), sql_escape(@$_POST['db']), sql_escape(@$_POST['ldaphost']), sql_escape(@$_POST['ldapport']), sql_escape(@$_POST['ldapuser']), sql_escape(@$_POST['ldappwd']), sql_escape(@$_POST['ldapbase']), sql_escape(@$_POST['ldapfilter']), sql_escape(@$_POST['mailhost']), sql_escape(@$_POST['mailport']), sql_escape(@$_POST['mailuser']), sql_escape(@$_POST['mailpwd']), sql_escape(@$_POST['mailsecure']), sql_escape(@$_POST['mailadmin']), sql_escape(@$_POST['mailadminname']), sql_escape(@$_POST['mailfrom']), sql_escape(@$_POST['mailfromname']), sql_escape(@$_POST['uploaddir']), empty(@$_POST['mailuser'])?'false':'true'), 
 						$config
 					);
 					
@@ -401,7 +417,7 @@ EOT;
 		}
 		catch(Exception $e)
 		{
-			echo '{"result": 1, "status": "'.$e->getMessage().'"}';
+			echo '{"result": 1, "status": "'.json_escape($e->getMessage()).'"}';
 			exit;
 		}
 	}
@@ -757,29 +773,34 @@ EOT;
 					xhr.open("post", "install.php?action="+action, true);
 					xhr.onreadystatechange = function(e) {
 						if(this.readyState == 4) {
+							var result;
 							if(this.status == 200)
 							{
-								var result;
 								try
 								{
 									result = JSON.parse(this.responseText);
 								}
 								catch(e)
 								{
-									result = {result: 1, status: this.responseText};
+									result = {result: 1, status: "Response: "+this.responseText};
 								}
-								if(result.result)
-								{
-									gi("result_"+id).classList.remove('alert-success');
-									gi("result_"+id).classList.add('alert-danger');
-								}
-								else
-								{
-									gi("result_"+id).classList.remove('alert-danger');
-									gi("result_"+id).classList.add('alert-success');
-								}
-								gi("result_"+id).textContent = result.status;
 							}
+							else
+							{
+								result = {result: 1, status: "AJAX error code: "+this.status};
+							}
+
+							if(result.result)
+							{
+								gi("result_"+id).classList.remove('alert-success');
+								gi("result_"+id).classList.add('alert-danger');
+							}
+							else
+							{
+								gi("result_"+id).classList.remove('alert-danger');
+								gi("result_"+id).classList.add('alert-success');
+							}
+							gi("result_"+id).textContent = result.status;
 						}
 					};
 					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -794,31 +815,39 @@ EOT;
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, 'check_db', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value));
+				f_post(id, 'check_db',
+					'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
+				);
 			}
 
 			function f_create_db(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, 'create_db', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
-					+'&db='+encodeURIComponent(gi('db_scheme').value));
+				f_post(id, 'create_db',
+					'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
+					+'&db='+encodeURIComponent(gi('db_scheme').value)
+				);
 			}
 
 			function f_create_tables(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, 'create_tables', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
-					+'&db='+encodeURIComponent(gi('db_scheme').value));
+				f_post(id, 'create_tables',
+					'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
+					+'&db='+encodeURIComponent(gi('db_scheme').value)
+				);
 			}
 
 			function f_create_db_user(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, 'create_db_user', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
-					+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
+				f_post(id, 'create_db_user',
+					'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
+					+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+				);
 			}
 
 			function f_grant_access(id)
@@ -826,15 +855,18 @@ EOT;
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
 				f_post(id, 'grant_access', 'host='+encodeURIComponent(gi('host').value)+'&user='+encodeURIComponent(gi('user_root').value)+'&pwd='+encodeURIComponent(gi('pwd_root').value)
-					+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value));
+					+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+				);
 			}
 
 			function f_check_ldap(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, "check_ldap", 'ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
-					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value));
+				f_post(id, "check_ldap",
+					'ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
+				);
 			}
 
 			function f_check_mail(id)
@@ -853,7 +885,8 @@ EOT;
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
-				f_post(id, "add_user", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+				f_post(id, "add_user",
+					'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
 					+'&adminuser='+encodeURIComponent(gi('admin_user').value)+'&adminpwd='+encodeURIComponent(gi('admin_pwd').value)
 					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)
 				);
@@ -864,7 +897,8 @@ EOT;
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
 				var ms = gi("mail_secure");
-				f_post(id, "save_config", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+				f_post(id, "save_config",
+					'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
 					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
 					+'&mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
@@ -931,7 +965,7 @@ EOT;
 			</div>
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
-					<h3>New DB user</h3>
+					<h3>New MySQL DB user or enter existing</h3>
 				</div>
 			</div>
 			<div class="form-group">
