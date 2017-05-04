@@ -4,13 +4,13 @@ require_once("inc.config.php");
 class MySQLDB
 {
 	private $link = NULL;
-	public $data = FALSE;
+	public $data = array();
 	private $error_msg = "";
 
 	function __construct()
 	{
 		$link = NULL;
-		$data = FALSE;
+		$data = array();
 		$error_msg = "";
 	}
 
@@ -36,13 +36,18 @@ class MySQLDB
 
 	public function __destruct()
 	{
-		$this->data = FALSE;
+		$this->data = array();
 		$this->disconnect();
+	}
+
+	public function select_db($db_name)
+	{
+		return mysqli_select_db($this->link, $db_name);
 	}
 
 	public function select($query)
 	{
-		$this->data = FALSE;
+		$this->data = array();
 
 		if(!$this->link)
 		{
@@ -61,9 +66,38 @@ class MySQLDB
 			return FALSE;
 		}
 
+		while($row = mysqli_fetch_row($res))
+		{
+			$this->data[] = $row;
+		}
+
+		mysqli_free_result($res);
+
+		return TRUE;
+	}
+
+	public function select_assoc($query)
+	{
 		$this->data = array();
 
-		while($row = mysqli_fetch_row($res))
+		if(!$this->link)
+		{
+			return FALSE;
+		}
+
+		$res = mysqli_query($this->link, $query);
+		if(!$res)
+		{
+			$this->error(mysqli_error($this->link));
+			return FALSE;
+		}
+
+		if(mysqli_num_rows($res) <= 0)
+		{
+			return FALSE;
+		}
+
+		while($row = mysqli_fetch_assoc($res))
 		{
 			$this->data[] = $row;
 		}
