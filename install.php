@@ -296,6 +296,63 @@ EOT;
 					throw new Exception("FAILED");
 				}
 				exit;
+				case 'check_mail':
+				{
+					if(empty($_POST['mailhost'])) throw new Exception('MAIL Host value not defined!');
+					if(empty($_POST['mailport'])) throw new Exception('MAIL Port value not defined!');
+					if(empty($_POST['mailfrom'])) throw new Exception('MAIL From value not defined!');
+					if(empty($_POST['mailfromname'])) throw new Exception('MAIL From Name value not defined!');
+					if(empty($_POST['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
+					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
+
+					require_once 'libs/PHPMailer/PHPMailerAutoload.php';
+
+					$mail = new PHPMailer;
+
+					$mail->isSMTP();
+					$mail->Host = @$_POST['mailhost'];
+					$mail->SMTPAuth = !empty($_POST['mailuser']);
+					if($mail->SMTPAuth)
+					{
+						$mail->Username = @$_POST['mailuser'];
+						$mail->Password = @$_POST['mailpwd'];
+					}
+
+					$mail->SMTPSecure = @$_POST['mailsecure'];
+					$mail->Port = @$_POST['mailport'];
+
+					$mail->setFrom(@$_POST['mailfrom'], @$_POST['mailfromname']);
+					$mail->addAddress(@$_POST['mailadmin'], @$_POST['mailadminname']);
+					
+					$mail->isHTML(true);
+
+					$mail->Subject = 'Test message';
+					$mail->Body    = 'This is a test message';
+					$mail->AltBody = 'This is a test message';
+
+					if($mail->send())
+					{
+						echo '{"result": 0, "status": "OK"}';
+					}
+					
+					throw new Exception("FAILED");
+				}
+				exit;
+				case 'add_user':
+				{
+					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
+					if(empty($_POST['dbuser'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
+					if(empty($_POST['adminuser'])) throw new Exception('Login value not defined!');
+					if(empty($_POST['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
+
+					$db = new MySQLDB();
+					$db->connect(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db']);
+					$db->put("INSERT INTO pb_users (login, passwd, mail, deleted) VALUES ('".sql_escape(@$_POST['adminuser'])."', PASSWORD('".sql_escape(@$_POST['adminpwd'])."'), '".sql_escape(@$_POST['mailadmin'])."', 0)");
+
+					echo '{"result": 0, "status": "OK"}';
+				}
+				exit;
 				case 'save_config':
 				{
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
@@ -308,13 +365,22 @@ EOT;
 					if(empty($_POST['ldappwd'])) throw new Exception('LDAP Password value not defined!');
 					if(empty($_POST['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
 
+					if(empty($_POST['mailhost'])) throw new Exception('MAIL Host value not defined!');
+					if(empty($_POST['mailport'])) throw new Exception('MAIL Port value not defined!');
+					if(empty($_POST['mailfrom'])) throw new Exception('MAIL From value not defined!');
+					if(empty($_POST['mailfromname'])) throw new Exception('MAIL From Name value not defined!');
+					if(empty($_POST['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
+					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
+
+					if(empty($_POST['allowmails'])) throw new Exception('MAIL Admin Name value not defined!');
+
 					$config = str_replace(
-						array('#host#', '#login#', '#password#', '#db#', '#ldap_host#', '#ldap_port#', '#ldap_user#', '#ldap_password#', '#ldap_base#', '#ldap_filter#'), 
-						array(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db'], @$_POST['ldaphost'], @$_POST['ldapport'], @$_POST['ldapuser'], @$_POST['ldappwd'], @$_POST['ldapbase'], @$_POST['ldapfilter']), 
+						array('#host#', '#login#', '#password#', '#db#', '#ldap_host#', '#ldap_port#', '#ldap_user#', '#ldap_password#', '#ldap_base#', '#ldap_filter#', '#mail_host#', '#mail_port#', '#mail_user#', '#mail_password#', '#mail_secure#', '#mail_admin#', '#mail_admin_name#', '#mail_from#', '#mail_from_name#', '#allow_mails#', '#mail_auth#'), 
+						array(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db'], @$_POST['ldaphost'], @$_POST['ldapport'], @$_POST['ldapuser'], @$_POST['ldappwd'], @$_POST['ldapbase'], @$_POST['ldapfilter'], sql_escape(@$_POST['mailhost']), sql_escape(@$_POST['mailport']), sql_escape(@$_POST['mailuser']), sql_escape(@$_POST['mailpwd']), sql_escape(@$_POST['mailsecure']), sql_escape(@$_POST['mailadmin']), sql_escape(@$_POST['mailadminname']), sql_escape(@$_POST['mailfrom']), sql_escape(@$_POST['mailfromname']), sql_escape(@$_POST['uploaddir']), empty(@$_POST['mailuser'])?'false':'true'), 
 						$config
 					);
 					
-					if(file_put_contents('inc.config.php', $config) === FALSE)
+					if(@file_put_contents('inc.config.php', $config) === FALSE)
 					{
 						throw new Exception("Save config error");
 					}
@@ -693,7 +759,15 @@ EOT;
 						if(this.readyState == 4) {
 							if(this.status == 200)
 							{
-								var result = JSON.parse(this.responseText);
+								var result;
+								try
+								{
+									result = JSON.parse(this.responseText);
+								}
+								catch(e)
+								{
+									result = {result: 1, status: this.responseText};
+								}
 								if(result.result)
 								{
 									gi("result_"+id).classList.remove('alert-success');
@@ -775,10 +849,21 @@ EOT;
 				);
 			}
 
+			function f_create_admin_account(id)
+			{
+				gi("result_"+id).textContent = 'Loading...';
+				gi("result_"+id).style.display = 'block';
+				f_post(id, "add_user", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+					+'&adminuser='+encodeURIComponent(gi('admin_user').value)+'&adminpwd='+encodeURIComponent(gi('admin_pwd').value)
+					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)
+				);
+			}
+
 			function f_save_config(id)
 			{
 				gi("result_"+id).textContent = 'Loading...';
 				gi("result_"+id).style.display = 'block';
+				var ms = gi("mail_secure");
 				f_post(id, "save_config", 'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
 					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
@@ -987,7 +1072,40 @@ EOT;
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_save_config(8);'>8. Save config</button><div id="result_8" class="alert alert-danger" style="display: none"></div>
+					<h3>Admin account</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="admin_user" class="control-label col-sm-2">Login:</label>
+				<div class="col-sm-5">
+					<input id="admin_user" class="form-control" type="text" value="admin" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="admin_pwd" class="control-label col-sm-2">Password:</label>
+				<div class="col-sm-5">
+					<input id="admin_pwd" class="form-control" type="password" value="" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_create_admin_account(8);'>8. Create admin account</button><div id="result_8" class="alert alert-danger" style="display: none"></div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>Misc settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="allow_mails" class="control-label col-sm-2">Allowed mails (regex match):</label>
+				<div class="col-sm-5">
+					<input id="allow_mails" class="form-control" type="text" value="^.+@.+$" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<button type="button" class="btn btn-primary" onclick='f_save_config(9);'>9. Save config</button><div id="result_9" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>
