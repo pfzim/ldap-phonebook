@@ -489,7 +489,7 @@ function sortTable(n) {
 				<th width="10%" onclick="sortTable(4)">Position</th>
 				<th width="10%" onclick="sortTable(5)">Department</th>
 				<?php if($uid) { ?>
-				<th width="5%">Operations</th>
+				<th width="15%">Operations</th>
 				<?php } ?>
 			</tr>
 			</thead>
