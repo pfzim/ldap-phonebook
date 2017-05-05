@@ -382,13 +382,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 
-			echo '{"result": 0, "message": "Successful hide (ID '.$id.')"}';
+			echo '{"code": 0, "message": "Successful hide (ID '.$id.')"}';
 		}
 		exit;
 		case 'show':
@@ -396,13 +396,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
 
-			echo '{"result": 0, "message": "Successful show (ID '.$id.')"}';
+			echo '{"code": 0, "message": "Successful show (ID '.$id.')"}';
 		}
 		exit;
 		case 'setlocation':
@@ -410,18 +410,18 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(@$_POST['map'] > PB_MAPS_COUNT)
 			{
-				echo '{"result": 1, "message": "Invalid map identifier"}';
+				echo '{"code": 1, "message": "Invalid map identifier"}';
 				exit;
 			}
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
 
-			echo '{"result": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
+			echo '{"code": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
 		case 'setphoto':
@@ -429,17 +429,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(!$id)
 			{
-				echo '{"result": 1, "message": "Invalid identifier"}';
+				echo '{"code": 1, "message": "Invalid identifier"}';
 				exit;
 			}
 			if(!file_exists(@$_FILES['photo']['tmp_name']))
 			{
-				echo '{"result": 1, "message": "Invalid photo"}';
+				echo '{"code": 1, "message": "Invalid photo"}';
 				exit;
 			}
 
@@ -467,7 +467,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 1 WHERE `id` = # LIMIT 1", $id));
 
-			echo '{"result": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
+			echo '{"code": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
 		}
 		exit;
 		case 'deletephoto':
@@ -475,18 +475,18 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(!$id)
 			{
-				echo '{"result": 1, "message": "Invalid identifier"}';
+				echo '{"code": 1, "message": "Invalid identifier"}';
 				exit;
 			}
 
 			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 0 WHERE `id` = # LIMIT 1", $id));
 
-			echo '{"result": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
+			echo '{"code": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
 		}
 		exit;
 		case 'save':
@@ -494,7 +494,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 
@@ -512,12 +512,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			{
 				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
 				$id = $db->last_id(); 
-				echo '{"result": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
+				echo '{"code": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
 			}
 			else
 			{
 				$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $id));
-				echo '{"result": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
+				echo '{"code": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
 			}
 		}
 		exit;
@@ -526,12 +526,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$uid)
 			{
-				echo '{"result": 1, "message": "Please, log in"}';
+				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
 			}
 			if(!$id)
 			{
-				echo '{"result": 1, "message": "Invalid identifier"}';
+				echo '{"code": 1, "message": "Invalid identifier"}';
 				exit;
 			}
 
@@ -543,7 +543,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				unlink($filename);
 			}
 
-			echo '{"result": 0, "message": "Deleted (ID '.$id.')"}';
+			echo '{"code": 0, "message": "Deleted (ID '.$id.')"}';
 		}
 		exit;
 		case 'get':
@@ -551,17 +551,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$id)
 			{
-				echo '{"result": 1, "message": "Invalid identifier"}';
+				echo '{"code": 1, "message": "Invalid identifier"}';
 				exit;
 			}
 
 			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # ORDER BY m.`lname`, m.`fname`", $id)))
 			{
-				echo '{"result": 1, "message": "DB error"}';
+				echo '{"code": 1, "message": "DB error"}';
 				exit;
 			}
 
-			echo '{"result": 0, "id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).'}';
+			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).'}';
 		}
 		exit;
 		case 'map':

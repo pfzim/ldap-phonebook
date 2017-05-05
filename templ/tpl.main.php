@@ -75,7 +75,7 @@ function f_set_location(id, map, x, y)
 	$.post("pb.php?action=setlocation&id="+id, {'map': map, 'x': x, 'y': y },
 		function(data)
 		{
-			$.notify(data.message, data.result?"error":"success");
+			$.notify(data.message, data.code?"error":"success");
 			var row = gi('row'+data.id);
 			if(row)
 			{
@@ -125,7 +125,7 @@ function f_hide(ev)
 		{
 			return function(data)
 			{ 
-				$.notify(data.message, data.result?"error":"success");
+				$.notify(data.message, data.code?"error":"success");
 				el.textContent = 'Show';
 				el.onclick = function(event) { f_show(event); };
 			}
@@ -148,7 +148,7 @@ function f_show(ev)
 		{
 			return function(data)
 			{
-				$.notify(data.message, data.result?"error":"success");
+				$.notify(data.message, data.code?"error":"success");
 				el.textContent = 'Hide';
 				el.onclick = function(event) { f_hide(event); };
 			}
@@ -171,8 +171,8 @@ function f_delete(ev)
 		{
 			return function(data)
 			{
-				$.notify(data.message, data.result?"error":"success");
-				if(!data.result)
+				$.notify(data.message, data.code?"error":"success");
+				if(!data.code)
 				{
 					var row = el.parentNode.parentNode;
 					row.parentNode.removeChild(row);
@@ -205,8 +205,8 @@ function f_save()
 		},
 		function(data)
 		{
-			$.notify(data.message, data.result?"error":"success");
-			if(!data.result)
+			$.notify(data.message, data.code?"error":"success");
+			if(!data.code)
 			{
 				gi('edit-container').style.display='none';
 				f_update_row(data.id);
@@ -229,7 +229,7 @@ function f_update_row(id)
 		{
 			return function(data)
 			{
-				if(data.result)
+				if(data.code)
 				{
 					$.notify(data.message, "error");
 				}
@@ -319,7 +319,7 @@ function f_edit(ev)
 			{
 				return function(data)
 				{
-					if(data.result)
+					if(data.code)
 					{
 						$.notify(data.message, "error");
 					}
@@ -362,8 +362,8 @@ function f_upload(id)
 		}
 	).done(function(data)
 	{
-		$.notify(data.message, data.result?"error":"success");
-		if(!data.result)
+		$.notify(data.message, data.code?"error":"success");
+		if(!data.code)
 		{
 			f_update_row(data.id);
 		}

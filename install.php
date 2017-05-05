@@ -213,7 +213,7 @@ EOT;
 					
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'create_db':
@@ -232,7 +232,7 @@ EOT;
 					//$db->select_db(@$_POST['db']);
 					//$db->put($db_table);
 
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'create_tables':
@@ -251,7 +251,7 @@ EOT;
 					//$db->select_db(@$_POST['db']);
 					//$db->put($db_table);
 
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'create_db_user':
@@ -264,7 +264,7 @@ EOT;
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					$db->put("CREATE USER '".sql_escape(@$_POST['dbuser'])."'@'%' IDENTIFIED BY '".sql_escape(@$_POST['dbpwd'])."'");
 
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'grant_access':
@@ -279,7 +279,7 @@ EOT;
 					$db->put("GRANT ALL PRIVILEGES ON ".sql_escape(@$_POST['db']).".* TO '".sql_escape(@$_POST['dbuser'])."'@'%'");
 					$db->put("FLUSH PRIVILEGES");
 				
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'check_ldap':
@@ -303,7 +303,7 @@ EOT;
 							$sr = ldap_search($ldap, @$_POST['ldapbase'], @$_POST['ldapfilter'], explode(',', 'samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto'));
 							if($sr)
 							{
-								echo '{"result": 0, "status": "OK (Entries founded: '.ldap_count_entries($ldap, $sr).')"}';
+								echo '{"code": 0, "status": "OK (Entries founded: '.ldap_count_entries($ldap, $sr).')"}';
 								ldap_free_result($sr);
 								exit;
 							}
@@ -348,7 +348,7 @@ EOT;
 
 					if($mail->send())
 					{
-						echo '{"result": 0, "status": "OK"}';
+						echo '{"code": 0, "status": "OK"}';
 					}
 					
 					throw new Exception("FAILED");
@@ -366,7 +366,7 @@ EOT;
 					$db->connect(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db']);
 					$db->put("INSERT INTO pb_users (login, passwd, mail, deleted) VALUES ('".sql_escape(@$_POST['adminuser'])."', PASSWORD('".sql_escape(@$_POST['adminpwd'])."'), '".sql_escape(@$_POST['mailadmin'])."', 0)");
 
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'save_config':
@@ -401,7 +401,7 @@ EOT;
 						throw new Exception("Save config error");
 					}
 					
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'remove_self':
@@ -410,14 +410,14 @@ EOT;
 					{
 						throw new Exception("FAILED");
 					}
-					echo '{"result": 0, "status": "OK"}';
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 			}
 		}
 		catch(Exception $e)
 		{
-			echo '{"result": 1, "status": "'.json_escape($e->getMessage()).'"}';
+			echo '{"code": 1, "status": "'.json_escape($e->getMessage()).'"}';
 			exit;
 		}
 	}
@@ -782,15 +782,15 @@ EOT;
 								}
 								catch(e)
 								{
-									result = {result: 1, status: "Response: "+this.responseText};
+									result = {code: 1, status: "Response: "+this.responseText};
 								}
 							}
 							else
 							{
-								result = {result: 1, status: "AJAX error code: "+this.status};
+								result = {code: 1, status: "AJAX error code: "+this.status};
 							}
 
-							if(result.result)
+							if(result.code)
 							{
 								gi("result_"+id).classList.remove('alert-success');
 								gi("result_"+id).classList.add('alert-danger');

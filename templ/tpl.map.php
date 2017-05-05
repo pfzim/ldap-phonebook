@@ -34,7 +34,7 @@ function f_set_location(id, map, x, y)
 	$.post("pb.php?action=setlocation&id="+id, {'map': map, 'x': x, 'y': y },
 		function(data)
 		{
-			$.notify(data.message, data.result?"error":"success");
+			$.notify(data.message, data.code?"error":"success");
 		},
 		'json'
 	)
