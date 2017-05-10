@@ -177,7 +177,7 @@ $config = <<<'EOT'
 	define("LDAP_PASSWD", "#ldap_password#");
 	define("LDAP_BASE_DN", "#ldap_base#");
 	define("LDAP_FILTER", "#ldap_filter#");
-	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto");
+	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol");
 
 	define("MAIL_HOST", "#mail_host#");
 	define("MAIL_FROM", "#mail_from#");

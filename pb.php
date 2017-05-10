@@ -282,7 +282,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 							$records = ldap_get_entries($ldap, $sr);
 							foreach($records as $account)
 							{
-								if(!empty($account['givenname'][0]) && !empty($account['sn'][0]))
+								if(!empty($account['samaccountname'][0]) && !empty($account['givenname'][0]) && !empty($account['sn'][0]))
 								{
 									/*
 									echo @$account['samaccountname'][0];
@@ -315,6 +315,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									$s_phone_mobile = @$account['mobile'][0];
 									$s_mail = @$account['mail'][0];
 									$s_photo = @$account['thumbnailphoto'][0];
+									$s_visible = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?0:1;
 									
 									// *********************************************************
 
@@ -367,6 +368,63 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					while($cookie !== null && $cookie != '');
 
 					ldap_unbind($ldap);
+				}
+			}
+		}
+		exit;
+		case 'hide_disabled':
+		{
+			if(!$uid) break;
+			header("Content-Type: text/plain; charset=utf-8");
+			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
+			if($ldap)
+			{
+				ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
+				{
+					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
+
+					$i = 0;
+					$cookie = '';
+					do
+					{
+						ldap_control_paged_result($ldap, 200, true, $cookie);
+						
+						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368))", array('samaccountname', 'useraccountcontrol'));
+						if($sr)
+						{
+							$records = ldap_get_entries($ldap, $sr);
+							foreach($records as $account)
+							{
+								if(!empty($account['samaccountname'][0]))
+								{
+									print_r($account);
+
+									// *********************************************************
+
+									$s_login = @$account['samaccountname'][0];
+									$s_disabled = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?1:0;
+									
+									// *********************************************************
+
+									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
+									{
+										$id = $db->data[0][0];
+										$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `samname` = ! LIMIT 1", $s_login));
+										$i++;
+									}
+								}
+							}
+							ldap_control_paged_result_response($ldap, $sr, $cookie);
+							ldap_free_result($sr);
+						}
+
+					}
+					while($cookie !== null && $cookie != '');
+
+					ldap_unbind($ldap);
+					echo 'Updated contacts: '.$i;
 				}
 			}
 		}
