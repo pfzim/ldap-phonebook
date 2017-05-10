@@ -335,20 +335,24 @@ function php_mailer($to, $name, $subject, $html, $plain)
 										$w = 64;
 										$h = 64;
 										list($width, $height) = getimagesizefromstring($s_photo);
-										$r = $width / $height;
-										if($w/$h > $r)
+										$r = $w / $h;
+										if($width/$height > $r)
 										{
-											$newwidth = $h*$r;
-											$newheight = $h;
+											$src_width = ceil($height*$r);
+											$src_x = ceil(($width - $src_width)/2);
+											$src_y = 0;
+											$src_height = $height;
 										}
 										else
 										{
-											$newheight = $w/$r;
-											$newwidth = $w;
+											$src_height = ceil($width/$r);
+											$src_y = ceil(($height - $src_height)/2);
+											$src_x = 0;
+											$src_width = $width;
 										}
 										$src = imagecreatefromstring($s_photo);
-										$dst = imagecreatetruecolor($newwidth, $newheight);
-										imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+										$dst = imagecreatetruecolor($w, $h);
+										imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
 										imagejpeg($dst, $upload_dir.'/t'.$id.'.jpg', 100);
 										imagedestroy($dst);
 										imagedestroy($src);
@@ -447,20 +451,24 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$w = 64;
 			$h = 64;
 			list($width, $height) = getimagesizefromstring($s_photo);
-			$r = $width / $height;
-			if($w/$h > $r)
+			$r = $w / $h;
+			if($width/$height > $r)
 			{
-				$newwidth = $h*$r;
-				$newheight = $h;
+				$src_width = ceil($height*$r);
+				$src_x = ceil(($width - $src_width)/2);
+				$src_y = 0;
+				$src_height = $height;
 			}
 			else
 			{
-				$newheight = $w/$r;
-				$newwidth = $w;
+				$src_height = ceil($width/$r);
+				$src_y = ceil(($height - $src_height)/2);
+				$src_x = 0;
+				$src_width = $width;
 			}
 			$src = imagecreatefromstring($s_photo);
-			$dst = imagecreatetruecolor($newwidth, $newheight);
-			imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+			$dst = imagecreatetruecolor($w, $h);
+			imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
 			imagejpeg($dst, dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg', 100);
 			imagedestroy($dst);
 			imagedestroy($src);
