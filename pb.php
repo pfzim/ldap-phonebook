@@ -271,6 +271,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				{
 					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
 
+					$i = 0;
+					$j = 0;
 					$cookie = '';
 					do
 					{
@@ -323,11 +325,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									{
 										$id = $db->data[0][0];
 										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
+										$i++;
 									}
 									else
 									{
-										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
+										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
 										$id = $db->last_id();
+										$j++;
 									}
 									//echo "\r\n".$db->get_last_error()."\r\n";
 
@@ -368,6 +372,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					while($cookie !== null && $cookie != '');
 
 					ldap_unbind($ldap);
+					echo 'Updated: '.$i.', added: '.$j.' contacts';
 				}
 			}
 		}
@@ -391,7 +396,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					{
 						ldap_control_paged_result($ldap, 200, true, $cookie);
 						
-						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368))", array('samaccountname', 'useraccountcontrol'));
+						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=2))", array('samaccountname', 'useraccountcontrol'));
 						if($sr)
 						{
 							$records = ldap_get_entries($ldap, $sr);

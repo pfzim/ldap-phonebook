@@ -11,7 +11,7 @@
 	define("LDAP_PASSWD", "password");
 	define("LDAP_BASE_DN", "DC=domain,DC=local");
 	define("LDAP_FILTER", "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))");
-	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto");
+	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol");
 
 	define("MAIL_HOST", "smtp.example.com");
 	define("MAIL_FROM", "admin@example.com");
