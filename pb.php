@@ -91,7 +91,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	{
 		$id = $_GET['id'];
 	}
-	
+
 	if($action == "message")
 	{
 		switch($id)
@@ -103,14 +103,14 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				$error_msg = "Unknown error";
 				break;
 		}
-		
+
 		include('templ/tpl.message.php');
 		exit;
 	}
 
 	$db = new MySQLDB();
 	$db->connect();
-		
+
 	$uid = 0;
 	if(isset($_SESSION['uid']))
 	{
@@ -277,7 +277,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					do
 					{
 						ldap_control_paged_result($ldap, 200, true, $cookie);
-						
+
 						$sr = ldap_search($ldap, LDAP_BASE_DN, LDAP_FILTER, explode(',', LDAP_ATTRS));
 						if($sr)
 						{
@@ -318,7 +318,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									$s_mail = @$account['mail'][0];
 									$s_photo = @$account['thumbnailphoto'][0];
 									$s_visible = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?0:1;
-									
+
 									// *********************************************************
 
 									if($db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
@@ -395,7 +395,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					do
 					{
 						ldap_control_paged_result($ldap, 200, true, $cookie);
-						
+
 						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=2))", array('samaccountname', 'useraccountcontrol'));
 						if($sr)
 						{
@@ -410,7 +410,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 									$s_login = @$account['samaccountname'][0];
 									$s_disabled = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?1:0;
-									
+
 									// *********************************************************
 
 									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
@@ -440,7 +440,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
 
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
-			
+
 			include('templ/tpl.export.php');
 		}
 		exit;
@@ -582,7 +582,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			if(!$id)
 			{
 				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
-				$id = $db->last_id(); 
+				$id = $db->last_id();
 				echo '{"code": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
 			}
 			else
@@ -607,7 +607,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 
 			$db->put(rpv("DELETE FROM `pb_contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
-			
+
 			$filename = dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg';
 			if(file_exists($filename))
 			{
@@ -626,13 +626,33 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # ORDER BY m.`lname`, m.`fname`", $id)))
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
 			{
 				echo '{"code": 1, "message": "DB error"}';
 				exit;
 			}
 
 			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).'}';
+		}
+		exit;
+		case 'get_acs_location':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			if(!$id)
+			{
+				echo '{"code": 1, "message": "Invalid identifier"}';
+				exit;
+			}
+
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname` FROM `pb_contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
+			{
+				echo '{"code": 1, "message": "DB error"}';
+				exit;
+			}
+
+			require_once('inc.acs.php');
+
+			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "location": '.intval(get_acs_location($db->data[0][0], $db->data[0][1], $db->data[0][2], $db->data[0][3])).'}';
 		}
 		exit;
 		case 'map':
