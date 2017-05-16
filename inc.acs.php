@@ -1,6 +1,12 @@
 <?php
 // For Parsec 2.5
-function get_acs_location($user_id, $samname, $fname, $lname)
+function get_acs_location($user_id, $samname, $first_name, $last_name)
+/*
+	RETURN:
+		0 - unknown status
+		1 - in office
+		2 - out office
+*/
 {
 	$result = 0;
 	
@@ -15,6 +21,10 @@ function get_acs_location($user_id, $samname, $fname, $lname)
 			if(intval($row) == 72)
 			{
 				$result = 1;
+			}
+			else
+			{
+				$result = 2;
 			}
 
 			odbc_free_result($res);
