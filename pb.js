@@ -39,76 +39,74 @@ if(!XMLHttpRequest.prototype.sendAsBinary) {
 	};
 }
 
-function f_xhr() {
-  if(typeof XMLHttpRequest === 'undefined')
-  {
-  		XMLHttpRequest = function()
-  		{
-  				try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch(e) {}
-  				try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch(e) {}
-  				try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch(e) {}
-  				try { return new ActiveXObject("Microsoft.XMLHTTP"); } catch(e) {}
-  				return null;
-  		};
-  }
-  return new XMLHttpRequest();
+function f_xhr()
+{
+	try { return new XMLHttpRequest(); } catch(e) {}
+	try { return new ActiveXObject("Msxml3.XMLHTTP"); } catch(e) {}
+	try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch(e) {}
+	try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch(e) {}
+	try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch(e) {}
+	try { return new ActiveXObject("Microsoft.XMLHTTP"); } catch(e) {}
+	console.log("ERROR: XMLHttpRequest undefined");
+	return null;
 }
 
-function f_http(url, f_callback, callback_params, content_type, data)
+function f_http(url, _f_callback, _callback_params, content_type, data)
 {
-	if(typeof f_callback === 'undefined') f_callback = null;
-	if(typeof callback_params === 'undefined') callback_params = null;
+	var f_callback = null;
+	var callback_params = null;
+	
+	if(typeof _f_callback !== 'undefined') f_callback = _f_callback;
+	if(typeof _callback_params !== 'undefined') callback_params = _callback_params;
 	if(typeof contwnt_type === 'undefined') content_type = null;
 	if(typeof data === 'undefined') data = null;
-	
+
 	var xhr = f_xhr();
 	if(!xhr)
-	{	
-				if(f_callback)
-				{
-					f_callback({code: 1, status: "AJAX error: XMLHttpRequest unsupported"}, callback_params);
-				}
+	{
+		if(f_callback)
+		{
+			f_callback({code: 1, status: "AJAX error: XMLHttpRequest unsupported"}, callback_params);
+		}
 
 		return false;
 	}
-	
-		xhr.open(content_type?"post":"get", url, true);
-		xhr.onreadystatechange = function(e)
+
+	xhr.open(content_type?"post":"get", url, true);
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState == 4)
 		{
-			if(this.readyState == 4)
+			var result;
+			if(xhr.status == 200)
 			{
-				var result;
-				if(this.status == 200)
+				try
 				{
-					try
-					{
-						result = JSON.parse(this.responseText);
-					}
-					catch(e)
-					{
-						result = {code: 1, status: "Response: "+this.responseText};
-					}
+					result = JSON.parse(xhr.responseText);
 				}
-				else
+				catch(e)
 				{
-					result = {code: 1, status: "AJAX error code: "+this.status};
+					result = {code: 1, status: "Response: "+xhr.responseText};
 				}
-				
-				if(f_callback)
-				{
-					f_callback(result, callback_params);
-				}
-				}
-		};
-		
-		if(content_type)
-		{
-							xhr.setRequestHeader('Content-Type', content_type);
+			}
+			else
+			{
+				result = {code: 1, status: "AJAX error code: "+xhr.status};
+			}
+
+			if(f_callback)
+			{
+				f_callback(result, callback_params);
+			}
 		}
-		
-		xhr.send(data);
+	};
+
+	if(content_type)
+	{
+		xhr.setRequestHeader('Content-Type', content_type);
 	}
-	
+
+	xhr.send(data);
 
 	return true;
 }
