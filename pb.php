@@ -261,7 +261,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		case 'sync':
 		{
 			if(!$uid) break;
-			header("Content-Type: text/plain; charset=utf-8");
+			//header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Type: text/html; charset=utf-8");
+
 			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
 			if($ldap)
 			{
@@ -271,8 +273,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				{
 					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
 
-					$i = 0;
-					$j = 0;
+					$data = array();
+					$count_updated = 0;
+					$count_added = 0;
 					$cookie = '';
 					do
 					{
@@ -303,7 +306,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									echo "\n";
 									/**/
 
-									print_r($account);
+									//print_r($account);
 
 									// *********************************************************
 
@@ -325,13 +328,31 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									{
 										$id = $db->data[0][0];
 										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
-										$i++;
+										$count_updated++;
 									}
 									else
 									{
 										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
 										$id = $db->last_id();
-										$j++;
+										$count_added++;
+										
+										$data[] = array(
+											$id,
+											$s_login,
+											$s_first_name,
+											$s_last_name,
+											$s_department,
+											$s_organization,
+											$s_position,
+											$s_phone_internal,
+											$s_phone_mobile,
+											$s_mail,
+											isset($account['thumbnailphoto'][0])?1:0,
+											0,
+											0,
+											0,
+											1
+										);
 									}
 									//echo "\r\n".$db->get_last_error()."\r\n";
 
@@ -372,7 +393,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					while($cookie !== null && $cookie != '');
 
 					ldap_unbind($ldap);
-					echo 'Updated: '.$i.', added: '.$j.' contacts';
+					//echo 'Updated: '.$count_updated.', added: '.$count_added.' contacts';
+					include('templ/tpl.sync.php');
 				}
 			}
 		}
@@ -658,21 +680,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		case 'map':
 		{
 			header("Content-Type: text/html; charset=utf-8");
-			//$db->connect();
+
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
 
 			include('templ/tpl.map.php');
-
-			//$db->disconnect();
 		}
 		exit;
 	}
 
 	header("Content-Type: text/html; charset=utf-8");
 
-	//$db->connect();
 	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
-	//$db->disconnect();
 
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');
