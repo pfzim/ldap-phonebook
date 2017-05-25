@@ -7,6 +7,7 @@
 		<link type="text/css" href="templ/style.css" rel="stylesheet" />
 		<script src="templ/jquery-3.2.0.min.js"></script>
 		<script src="templ/notify.min.js"></script>
+		<script src="pb.js"></script>
 	</head>
 	<body>
 		<ul class="menu-bar">
