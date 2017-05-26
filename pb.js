@@ -110,11 +110,12 @@ function f_http(url, _f_callback, _callback_params, content_type, data)
 
 function f_sw_img(ev)
 {
-	var img = ev.target.parentNode.dataset.photo;
+	var el_src = ev.target || ev.srcElement;
+	var img = el_src.parentNode.getAttribute('data-photo');
 	if(parseInt(img, 10))
 	{
 		var el = gi('userphoto');
-		el.src = 'photos/t'+ev.target.parentNode.dataset.id+'.jpg';
+		el.src = 'photos/t'+el_src.parentNode.getAttribute('data-id')+'.jpg';
 		el = gi('imgblock');
 		imgblock.style.display = 'block';
 		imgblock.style.left = (ev.clientX+10)  + "px";
@@ -134,12 +135,13 @@ function f_mv_img(ev)
 
 function f_sw_map(ev)
 {
-	var id = parseInt(ev.target.parentNode.dataset.map, 10);
+	var el_src = ev.target || ev.srcElement;
+	var id = parseInt(el_src.parentNode.getAttribute('data-map'), 10);
 	if(id)
 	{
 		var el = gi('map-container');
-		var x = parseInt(ev.target.parentNode.dataset.x, 10);
-		var y = parseInt(ev.target.parentNode.dataset.y, 10);
+		var x = parseInt(el_src.parentNode.getAttribute('data-x'), 10);
+		var y = parseInt(el_src.parentNode.getAttribute('data-y'), 10);
 		el.style.display = 'block';
 		el.onclick = function() {gi('map-container').style.display = 'none';};
 		var map = gi('map-image');
@@ -147,14 +149,15 @@ function f_sw_map(ev)
 		{
 			return function(ev)
 			{
+				var el_src = ev.target || ev.srcElement;
 				var el = gi('map-marker');
 				if(el)
 				{
 					el.onclick = null;
 					el.style.display = 'block';
-					el.style.left = (ev.target.offsetLeft + x - el.width/2)  + "px";
-					el.style.top = (ev.target.offsetTop + y - el.height/2)  + "px";
-					//alert("    x: "+(ev.target.offsetLeft + x) +"    y: "+(ev.target.offsetTop + y));
+					el.style.left = (el_src.offsetLeft + x - el.width/2)  + "px";
+					el.style.top = (el_src.offsetTop + y - el.height/2)  + "px";
+					//alert("    x: "+(el_src.offsetLeft + x) +"    y: "+(el_src.offsetTop + y));
 				}
 			}
 		}(x, y);
@@ -188,8 +191,9 @@ function f_set_location(id, map, x, y)
 
 function f_map_set(ev)
 {
-	var id = ev.target.parentNode.parentNode.dataset.id;
-	var map = ev.target.dataset.map;
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	var map = el_src.getAttribute('data-map');
 	gi('map-container').onclick = null;
 	gi('map-image').onload = null;
 	gi('map-image').src = 'templ/map'+map+'.png';
@@ -211,7 +215,8 @@ function f_map_set(ev)
 
 function f_hide(ev)
 {
-	var id = ev.target.parentNode.parentNode.dataset.id;
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
 		function(data, el)
 		{ 
@@ -222,13 +227,14 @@ function f_hide(ev)
 				el.onclick = function(event) { f_show(event); };
 			}
 		},
-		ev.target
+		el_src
 	);
 };
 
 function f_show(ev)
 {
-	var id = ev.target.parentNode.parentNode.dataset.id;
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
 		function(data, el)
 		{
@@ -239,13 +245,14 @@ function f_show(ev)
 				el.onclick = function(event) { f_hide(event); };
 			}
 		},
-		ev.target,
+		el_src
 	);
 };
 
 function f_delete(ev)
 {
-	var id = ev.target.parentNode.parentNode.dataset.id;
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'delete', 'id': id }),
 		function(data, el)
 		{
@@ -257,7 +264,7 @@ function f_delete(ev)
 
 			}
 		},
-		ev.target
+		el_src
 	);
 };
 
@@ -361,7 +368,7 @@ function f_edit(ev)
 	var id = 0;
 	if(ev)
 	{
-		id = ev.target.parentNode.parentNode.dataset.id;
+		id = el_src.parentNode.parentNode.getAttribute('data-id');
 	}
 	gi('edit_id').value = id;
 	if(!id)
@@ -427,7 +434,7 @@ function f_photo(ev)
 	var id = 0;
 	if(ev)
 	{
-		id = ev.target.parentNode.parentNode.dataset.id;
+		id = el_src.parentNode.parentNode.getAttribute('data-id');
 	}
 	if(id)
 	{
@@ -442,20 +449,21 @@ function f_photo(ev)
 
 function si(ev)
 {
+	var el_src = ev.target || ev.srcElement;
 	document.getElementById('popup').style.display = 'block';
 	document.getElementById('popup').style.left = (ev.pageX+10)  + "px";
 	document.getElementById('popup').style.top = (ev.pageY+10)  + "px";
-	if(parseInt(ev.target.dataset.photo, 10))
+	if(parseInt(el_src.getAttribute('data-photo'), 10))
 	{
-		document.getElementById('u_photo').src = 'photos/t'+ev.target.dataset.id+'.jpg';
+		document.getElementById('u_photo').src = 'photos/t'+el_src.getAttribute('data-id')+'.jpg';
 	}
 	else
 	{
 		document.getElementById('u_photo').src = 'templ/nophoto.png';
 	}
-	document.getElementById('u_name').textContent = ev.target.dataset.name;
-	document.getElementById('u_position').textContent = ev.target.dataset.position;
-	document.getElementById('u_phone').textContent = ev.target.dataset.phone;
+	document.getElementById('u_name').textContent = el_src.getAttribute('data-name');
+	document.getElementById('u_position').textContent = el_src.getAttribute('data-position');
+	document.getElementById('u_phone').textContent = el_src.getAttribute('data-phone');
 }
 
 function mi(ev)
@@ -471,8 +479,8 @@ function mi(ev)
 /* old function click-click-move
 function f_click(ev)
 {
-	ev.target.style.border="1px dashed red";
-	ev.target.style.borderRadius = "5px";
+	el_src.style.border="1px dashed red";
+	el_src.style.borderRadius = "5px";
 	var el = document.getElementById('map-image');
 	el.onclick = function(id) {
 		return function(event)
@@ -485,20 +493,21 @@ function f_click(ev)
 			document.getElementById('u'+id).style.top = (event.pageY - box.top - window.scrollY - 22)+'px';
 			document.getElementById('map-image').onclick = null;
 		}
-	}(ev.target.dataset.id);
+	}(el_src.getAttribute('data-id'));
 }
 */
 
 function f_drag(ev)
 {
-	ev.target.style.border="1px dashed red";
-	ev.target.style.borderRadius = "5px";
+	var el_src = ev.target || ev.srcElement;
+	el_src.style.border="1px dashed red";
+	el_src.style.borderRadius = "5px";
 
 	var box = document.getElementById('map-image').getBoundingClientRect();
 	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
-	ev.target.style.left = Math.round(ev.pageX - box.left - sx - 17)+'px';
-	ev.target.style.top = Math.round(ev.pageY - box.top - sy - 23)+'px';
+	el_src.style.left = Math.round(ev.pageX - box.left - sx - 17)+'px';
+	el_src.style.top = Math.round(ev.pageY - box.top - sy - 23)+'px';
 
 	document.onmousemove = function(id)
 	{
@@ -517,13 +526,14 @@ function f_drag(ev)
 			document.getElementById('u'+id).style.left = (x - 17)+'px';
 			document.getElementById('u'+id).style.top = (y - 23)+'px';
 		}
-	}(ev.target.dataset.id);
+	}(el_src.getAttribute('data-id'));
 
-	ev.target.onmouseup = function(ev) { f_drop(ev) };
+	el_src.onmouseup = function(ev) { f_drop(ev) };
 }
 
 function f_drop(ev)
 {
+	var el_src = ev.target || ev.srcElement;
 	document.onmousemove = null;
 	var box = document.getElementById('map-image').getBoundingClientRect();
 	//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
@@ -535,11 +545,11 @@ function f_drop(ev)
 	if(y < 0) y = 0;
 	if(x > box.right - box.left) x = box.right - box.left;
 	if(y > box.bottom - box.top) y = box.bottom - box.top;
-	ev.target.style.left = (x - 16)+'px';
-	ev.target.style.top = (y - 22)+'px';
-	f_set_location(ev.target.dataset.id, map, x, y);
-	ev.target.style.border="0px dashed black";
-	ev.target.onmouseup = null;
+	el_src.style.left = (x - 16)+'px';
+	el_src.style.top = (y - 22)+'px';
+	f_set_location(el_src.getAttribute('data-id'), map, x, y);
+	el_src.style.border="0px dashed black";
+	el_src.onmouseup = null;
 }
 
 function filter_table() {
@@ -559,7 +569,8 @@ function filter_table() {
 	{
 		if(tds[j])
 		{
-		  if (tds[j].textContent.toLowerCase().indexOf(filter) > -1)
+		  var str = tds[j].textContent || tds[j].innerHTML;
+		  if(str.toLowerCase().indexOf(filter) > -1)
 		  {
 			sh = "";
 			break;
