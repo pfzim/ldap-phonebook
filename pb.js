@@ -149,8 +149,8 @@ function f_sw_map(ev)
 		{
 			return function(ev)
 			{
-				var el_src = ev.target || ev.srcElement;
 				var el = gi('map-marker');
+				var el_src = gi('map-image');
 				if(el)
 				{
 					el.onclick = null;
@@ -171,7 +171,7 @@ function f_set_location(id, map, x, y)
 	f_http("pb.php?action=setlocation&id="+id,
 		function(data, params)
 		{
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				var row = gi('row'+data.id);
@@ -206,7 +206,9 @@ function f_map_set(ev)
 		gi('map-marker').style.top = (event.clientY - gi('map-marker').height/2)  + "px";
 		gi('map-marker').onclick = function()
 		{
-			f_set_location(id, map, event.pageX - gi('map-image').offsetLeft, event.pageY - gi('map-image').offsetTop);
+			var pX = event.pageX || (event.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+			var pY = event.pageY || (event.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+			f_set_location(id, map, pX - gi('map-image').offsetLeft, pY - gi('map-image').offsetTop);
 			gi('map-container').style.display='none';
 			gi('map-image').onclick = null;
 		};
@@ -220,7 +222,7 @@ function f_hide(ev)
 	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
 		function(data, el)
 		{ 
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				el.textContent = 'Show';
@@ -238,7 +240,7 @@ function f_show(ev)
 	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
 		function(data, el)
 		{
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				el.textContent = 'Hide';
@@ -256,7 +258,7 @@ function f_delete(ev)
 	f_http("pb.php?"+json2url({'action': 'delete', 'id': id }),
 		function(data, el)
 		{
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				var row = el.parentNode.parentNode;
@@ -273,7 +275,7 @@ function f_save()
 	f_http("pb.php?action=save&id="+gi('edit_id').value, 
 		function(data, params)
 		{
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				gi('edit-container').style.display='none';
@@ -303,7 +305,7 @@ function f_update_row(id)
 		{
 			if(data.code)
 			{
-				$.notify(data.message, "error");
+				f_notify(data.message, "error");
 			}
 			else
 			{
@@ -390,7 +392,7 @@ function f_edit(ev)
 			{
 				if(data.code)
 				{
-					$.notify(data.message, "error");
+					f_notify(data.message, "error");
 				}
 				else
 				{
@@ -415,7 +417,7 @@ function f_upload(id)
 	f_http("pb.php?action=setphoto&id="+id,
 		function(data, params)
 		{
-			$.notify(data.message, data.code?"error":"success");
+			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				f_update_row(data.id);
@@ -450,9 +452,11 @@ function f_photo(ev)
 function si(ev)
 {
 	var el_src = ev.target || ev.srcElement;
+	var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+	var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
 	document.getElementById('popup').style.display = 'block';
-	document.getElementById('popup').style.left = (ev.pageX+10)  + "px";
-	document.getElementById('popup').style.top = (ev.pageY+10)  + "px";
+	document.getElementById('popup').style.left = (pX+10)  + "px";
+	document.getElementById('popup').style.top = (pY+10)  + "px";
 	if(parseInt(el_src.getAttribute('data-photo'), 10))
 	{
 		document.getElementById('u_photo').src = 'photos/t'+el_src.getAttribute('data-id')+'.jpg';
@@ -461,9 +465,9 @@ function si(ev)
 	{
 		document.getElementById('u_photo').src = 'templ/nophoto.png';
 	}
-	document.getElementById('u_name').textContent = el_src.getAttribute('data-name');
-	document.getElementById('u_position').textContent = el_src.getAttribute('data-position');
-	document.getElementById('u_phone').textContent = el_src.getAttribute('data-phone');
+	document.getElementById('u_name').innerHTML = escapeHtml(el_src.getAttribute('data-name'));
+	document.getElementById('u_position').innerHTML = escapeHtml(el_src.getAttribute('data-position'));
+	document.getElementById('u_phone').innerHTML = escapeHtml(el_src.getAttribute('data-phone'));
 }
 
 function mi(ev)
@@ -471,8 +475,10 @@ function mi(ev)
 	var el = document.getElementById('popup');
 	if(el)
 	{
-		el.style.left = (ev.pageX+10)  + "px";
-		el.style.top = (ev.pageY+10)  + "px";
+		var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+		var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+		el.style.left = (pX+10)  + "px";
+		el.style.top = (pY+10)  + "px";
 	}
 }
 
@@ -506,8 +512,10 @@ function f_drag(ev)
 	var box = document.getElementById('map-image').getBoundingClientRect();
 	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
-	el_src.style.left = Math.round(ev.pageX - box.left - sx - 17)+'px';
-	el_src.style.top = Math.round(ev.pageY - box.top - sy - 23)+'px';
+	var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+	var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+	el_src.style.left = Math.round(pX - box.left - sx - 17)+'px';
+	el_src.style.top = Math.round(pY - box.top - sy - 23)+'px';
 
 	document.onmousemove = function(id)
 	{
@@ -516,8 +524,10 @@ function f_drag(ev)
 			var box = document.getElementById('map-image').getBoundingClientRect();
 			var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 			var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
-			var x = Math.round(ev.pageX - box.left - sx);
-			var y = Math.round(ev.pageY - box.top - sy);
+			var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+			var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+			var x = Math.round(pX - box.left - sx);
+			var y = Math.round(pY - box.top - sy);
 			if(x < 0) x = 0;
 			if(y < 0) y = 0;
 			if(x > box.right - box.left) x = box.right - box.left;
@@ -539,8 +549,10 @@ function f_drop(ev)
 	//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
 	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
-	var x = Math.round(ev.pageX - box.left - sx);
-	var y = Math.round(ev.pageY - box.top - sy);
+	var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+	var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+	var x = Math.round(pX - box.left - sx);
+	var y = Math.round(pY - box.top - sy);
 	if(x < 0) x = 0;
 	if(y < 0) y = 0;
 	if(x > box.right - box.left) x = box.right - box.left;
@@ -550,6 +562,37 @@ function f_drop(ev)
 	f_set_location(el_src.getAttribute('data-id'), map, x, y);
 	el_src.style.border="0px dashed black";
 	el_src.onmouseup = null;
+}
+
+function f_notify(text, type)
+{
+	var el;
+	var temp;
+	el = gi('notify-block');
+	if(!el)
+	{
+		temp = document.getElementsByTagName('body')[0];
+		el = document.createElement('div');
+		el.id = 'notify-block';
+		el.style.top = '0px';
+		el.style.right = '0px';
+		el.className = 'notifyjs-corner';
+		temp.appendChild(el);
+	}
+
+	temp = document.createElement('div');
+	temp.innerHTML = '<div class="notifyjs-wrapper notifyjs-hidable"><div class="notifyjs-arrow"></div><div class="notifyjs-container" style=""><div class="notifyjs-bootstrap-base notifyjs-bootstrap-'+escapeHtml(type)+'"><span data-notify-text="">'+escapeHtml(text)+'</span></div>';
+	temp = el.appendChild(temp.firstChild);
+
+	setTimeout(
+		(function(el)
+		{
+			return function() {
+				el.parentNode.removeChild(el);
+			};
+		})(temp),
+		5000
+	);
 }
 
 function filter_table() {
