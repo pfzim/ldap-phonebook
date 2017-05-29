@@ -3,6 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<title>LDAP phonebook</title>
 		<link type="text/css" href="templ/style.css" rel="stylesheet" />
 		<script src="pb.js"></script>
