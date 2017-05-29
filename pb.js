@@ -251,6 +251,36 @@ function f_show(ev)
 	);
 };
 
+function f_get_acs_location(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.getAttribute('data-id');
+	f_http("pb.php?"+json2url({'action': 'get_acs_location', 'id': id }),
+		function(data, el)
+		{
+			if(!data.code)
+			{
+				var temp_str = 'unknown status';
+				switch(data.location)
+				{
+					case 1:
+						temp_str = 'In office';
+						break;
+					case 2:
+						temp_str = 'Out office';
+						break;
+				}
+				f_notify(temp_str, data.location?"success":"error");
+			}
+			else
+			{
+				f_notify(data.message, "error");
+			}
+		},
+		el_src
+	);
+};
+
 function f_delete(ev)
 {
 	var el_src = ev.target || ev.srcElement;

@@ -29,7 +29,7 @@ function get_acs_location($user_id, $samname, $first_name, $last_name)
 
 			odbc_free_result($res);
 		}
-		odbc_close($conn)
+		odbc_close($conn);
 	}
 
 	return $result;
