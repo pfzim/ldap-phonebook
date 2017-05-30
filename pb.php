@@ -271,7 +271,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
+					$upload_dir = dirname(__FILE__).DIRECTORY_SEPARATOR.'photos';
 
 					$data = array();
 					$count_updated = 0;
@@ -379,7 +379,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 										$src = imagecreatefromstring($s_photo);
 										$dst = imagecreatetruecolor($w, $h);
 										imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
-										imagejpeg($dst, $upload_dir.'/t'.$id.'.jpg', 100);
+										imagejpeg($dst, $upload_dir.DIRECTORY_SEPARATOR.'t'.$id.'.jpg', 100);
 										imagedestroy($dst);
 										imagedestroy($src);
 									}
@@ -410,8 +410,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					$upload_dir = dirname($_SERVER['SCRIPT_FILENAME']).'/photos';
-
 					$i = 0;
 					$cookie = '';
 					do
@@ -554,7 +552,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$src = imagecreatefromstring($s_photo);
 			$dst = imagecreatetruecolor($w, $h);
 			imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
-			imagejpeg($dst, dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg', 100);
+			imagejpeg($dst, dirname(__FILE__).DIRECTORY_SEPARATOR.'photos'.DIRECTORY_SEPARATOR.'t'.$id.'.jpg', 100);
 			imagedestroy($dst);
 			imagedestroy($src);
 
@@ -630,7 +628,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$db->put(rpv("DELETE FROM `pb_contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
 
-			$filename = dirname($_SERVER['SCRIPT_FILENAME']).'/photos/t'.$id.'.jpg';
+			$filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'photos'.DIRECTORY_SEPARATOR.'t'.$id.'.jpg';
 			if(file_exists($filename))
 			{
 				unlink($filename);
