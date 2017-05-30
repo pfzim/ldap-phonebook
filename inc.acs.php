@@ -22,7 +22,7 @@ function get_acs_location($user_id, $samname, $first_name, $last_name)
 		{
 			$row = odbc_fetch_row($res);
 			
-			if(intval($row) == 72)
+			if(intval($row[0]) == 72)
 			{
 				$result = 1;
 			}
