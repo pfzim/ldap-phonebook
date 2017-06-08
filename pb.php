@@ -335,7 +335,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
 										$id = $db->last_id();
 										$count_added++;
-										
+
 										$data[] = array(
 											$id,
 											$s_login,
@@ -460,6 +460,30 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
 
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
+
+			$result = $db->data;
+
+			include('templ/tpl.export.php');
+		}
+		exit;
+		case 'export_selected':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
+
+			$result = array();
+
+			if(isset($_POST['list']))
+			{
+				$list = explode(',', $_POST['list']);
+				foreach($list as $id)
+				{
+					if($db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`id` = #", $id)))
+					{
+						$result[] = $db->data[0];
+					}
+				}
+			}
 
 			include('templ/tpl.export.php');
 		}

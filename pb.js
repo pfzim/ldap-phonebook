@@ -52,7 +52,7 @@ function f_http(url, _f_callback, _callback_params, content_type, data)
 {
 	var f_callback = null;
 	var callback_params = null;
-	
+
 	if(typeof _f_callback !== 'undefined') f_callback = _f_callback;
 	if(typeof _callback_params !== 'undefined') callback_params = _callback_params;
 	if(typeof content_type === 'undefined') content_type = null;
@@ -221,7 +221,7 @@ function f_hide(ev)
 	var id = el_src.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
 		function(data, el)
-		{ 
+		{
 			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
@@ -302,7 +302,7 @@ function f_delete(ev)
 
 function f_save()
 {
-	f_http("pb.php?action=save&id="+gi('edit_id').value, 
+	f_http("pb.php?action=save&id="+gi('edit_id').value,
 		function(data, params)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -351,7 +351,7 @@ function f_update_row(id)
 					row.insertCell(5);
 					row.insertCell(6);
 				}
-				
+
 				row.id = 'row'+data.id;
 				row.setAttribute("data-id", data.id);
 				row.setAttribute("data-map", data.map);
@@ -368,19 +368,19 @@ function f_update_row(id)
 				row.cells[0].onmouseenter = function(event) { f_sw_img(event); };
 				row.cells[0].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
 				row.cells[0].onmousemove = function(event) { f_mv_img(event); };
-				
+
 				row.cells[1].textContent = data.phone;
 				row.cells[2].textContent = data.mobile;
 				row.cells[3].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
 				row.cells[4].textContent = data.position;
 				row.cells[5].textContent = data.department;
-				
+
 				var str = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>';
 				for(i = 2; i <= count_maps; i++)
 				{
 					str += ' <span class="command" data-map="'+i+'" onclick="f_map_set(event);">'+i+'</span>';
 				}
-				
+
 				if(data.visible)
 				{
 					row.cells[6].innerHTML = str+' <span class="command" onclick="f_hide(event);">Hide</span>';
@@ -477,6 +477,83 @@ function f_photo(ev)
 		}(id);
 		gi('upload').click();
 	}
+}
+
+function f_select_all(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	checkboxes = document.getElementsByName('check');
+	for(var i = 0, n = checkboxes.length; i < n; i++)
+	{
+		checkboxes[i].checked = el_src.checked;
+	}
+}
+
+function f_export_selected(ev)
+{
+	var el;
+	var postdata = "";
+	var j = 0;
+	var checkboxes = document.getElementsByName('check');
+	for(var i = 0, n = checkboxes.length; i < n;i++)
+	{
+		if(checkboxes[i].checked)
+		{
+			if(j > 0)
+			{
+				postdata += ",";
+			}
+			postdata += checkboxes[i].value;
+			j++;
+		}
+	}
+
+	if(j > 0)
+	{
+		el = gi('list');
+		el.value = postdata;
+		el = gi('contacts');
+		el.submit();
+	}
+
+	return false;
+}
+
+function f_hide_selected(ev)
+{
+	var postdata = "list=";
+	var j = 0;
+	var checkboxes = document.getElementsByName('check');
+	for(var i = 0, n = checkboxes.length; i < n;i++)
+	{
+		if(checkboxes[i].checked)
+		{
+			if(j > 0)
+			{
+				postdata += ",";
+			}
+			postdata += checkboxes[i].value;
+			j++;
+		}
+	}
+	if(j > 0)
+	{
+		f_http(
+			"/zxsa.php?action=hide_selected",
+			function(data, params)
+			{
+				f_notify(data.message, data.code?"error":"success");
+			},
+			null,
+			'application/x-www-form-urlencoded',
+			postdata
+		);
+	}
+	else
+	{
+		f_popup("Error", "No selection");
+	}
+	return false;
 }
 
 function si(ev)
@@ -626,7 +703,7 @@ function f_notify(text, type)
 }
 
 function filter_table() {
-  // Declare variables 
+  // Declare variables
   var input, filter, table, tr, td, i;
   input = gi("search");
   filter = input.value.toLowerCase();
@@ -659,7 +736,7 @@ function sortTable(n) {
   table = gi("table");
   switching = true;
   //Set the sorting direction to ascending:
-  dir = "asc"; 
+  dir = "asc";
   /*Make a loop that will continue until
   no switching has been done:*/
   while (switching) {
@@ -698,7 +775,7 @@ function sortTable(n) {
       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
       switching = true;
       //Each time a switch is done, increase this count by 1:
-      switchcount ++; 
+      switchcount ++;
     } else {
       /*If no switching has been done AND the direction is "asc",
       set the direction to "desc" and run the while loop again.*/
