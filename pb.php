@@ -475,12 +475,25 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			if(isset($_POST['list']))
 			{
+				$j = 0;
+				$list_safe = '';
 				$list = explode(',', $_POST['list']);
 				foreach($list as $id)
 				{
-					if($db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`id` = #", $id)))
+					if($j > 0)
 					{
-						$result[] = $db->data[0];
+						$list_safe .= ',';
+					}
+
+					$list_safe .= intval($id);
+					$j++;
+				}
+
+				if($j > 0)
+				{
+					if($db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`id` IN (?) ORDER BY m.`lname`, m.`fname`", $list_safe)))
+					{
+						$result = $db->data;
 					}
 				}
 			}
