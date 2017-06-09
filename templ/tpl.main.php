@@ -9,7 +9,7 @@
 			<thead>
 			<tr>
 				<?php if($uid) { ?>
-				<th width="3%"><input type="checkbox" onclick="f_select_all(event)"/></th>
+				<th width="1%"><input type="checkbox" onclick="f_select_all(event)"/></th>
 				<?php } ?>
 				<th width="20%" onclick="sortTable(0)">Name</th>
 				<th width="10%" onclick="sortTable(1)">Phone</th>
