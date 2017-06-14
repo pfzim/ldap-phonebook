@@ -1,5 +1,5 @@
 <?php include("tpl.header.php"); ?>
-		<h3 align="center">Added contacts</h3>
+		<h3 align="center">Synced contacts</h3>
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
 		<?php if($uid) { ?>
@@ -50,7 +50,7 @@
 		<?php } ?>
 			</tbody>
 		</table>
-		<p>Added contacts: <?php eh($count_added); ?>, updated contacts: <?php eh($count_updated); ?></p>
+		<p>Added <?php eh($count_added); ?> contacts, updated <?php eh($count_updated); ?> contacts</p>
 		<div id="edit-container" class="modal-container" style="display: none">
 			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 			<div class="modal-content">

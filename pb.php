@@ -402,7 +402,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		case 'hide_disabled':
 		{
 			if(!$uid) break;
-			header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Type: text/html; charset=utf-8");
 			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
 			if($ldap)
 			{
@@ -410,7 +410,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
 				{
-					$i = 0;
+					$data = array();
+					$count_updated = 0;
+					$count_added = 0;
 					$cookie = '';
 					do
 					{
@@ -424,8 +426,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 							{
 								if(!empty($account['samaccountname'][0]))
 								{
-									print_r($account);
-
 									// *********************************************************
 
 									$s_login = @$account['samaccountname'][0];
@@ -433,11 +433,12 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 									// *********************************************************
 
-									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
+									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
 									{
 										$id = $db->data[0][0];
-										$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `samname` = ! LIMIT 1", $s_login));
-										$i++;
+										$data[] = $db->data[0];
+										$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
+										$count_updated++;
 									}
 								}
 							}
@@ -449,7 +450,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					while($cookie !== null && $cookie != '');
 
 					ldap_unbind($ldap);
-					echo 'Updated contacts: '.$i;
+
+					include('templ/tpl.sync.php');
 				}
 			}
 		}
