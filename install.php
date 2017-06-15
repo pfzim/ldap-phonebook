@@ -170,6 +170,7 @@ $config = <<<'EOT'
 	define("DB_PASSWD", "#password#");
 	define("DB_NAME", "#db#");
 	define("DB_CPAGE", "utf8");
+	define("DB_PREFIX", "pb_");
 
 	define("LDAP_HOST", "#ldap_host#");
 	define("LDAP_PORT", #ldap_port#);

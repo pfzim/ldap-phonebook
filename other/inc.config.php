@@ -4,6 +4,7 @@
 	define("DB_PASSWD", "");
 	define("DB_NAME", "pb");
 	define("DB_CPAGE", "utf8");
+	define("DB_PREFIX", "pb_");
 
 	define("LDAP_HOST", "dc-01");
 	define("LDAP_PORT", 389);

@@ -121,7 +121,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	{
 		if(!empty($_COOKIE['zh']) && !empty($_COOKIE['zl']))
 		{
-			if($db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", $_COOKIE['zl'], $_COOKIE['zh'])))
+			if($db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1", $_COOKIE['zl'], $_COOKIE['zh'])))
 			{
 				$_SESSION['uid'] = $db->data[0][0];
 				$uid = $_SESSION['uid'];
@@ -144,7 +144,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					exit;
 				}
 
-				if(!$db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
+				if(!$db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
 				{
 					//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_FAILED, 0, $ip));
 					$error_msg = "Неверное имя пользователя или пароль!";
@@ -159,7 +159,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				setcookie("zh", $sid, time()+2592000, '/');
 				setcookie("zl", @$_POST['login'], time()+2592000, '/');
 
-				$db->put(rpv("UPDATE pb_users SET `sid` = ! WHERE `id` = # LIMIT 1", $sid, $uid));
+				$db->put(rpv("UPDATE @users SET `sid` = ! WHERE `id` = # LIMIT 1", $sid, $uid));
 				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", $uid, LOG_LOGIN, 0, $ip));
 
 				header('Location: '.$self);
@@ -179,14 +179,14 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					exit;
 				}
 
-				if($db->select(rpv("SELECT m.`id` FROM pb_users AS m WHERE m.`login`= ! OR m.`mail` = ! LIMIT 1", @$_POST['login'], @$_POST['mail'])))
+				if($db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login`= ! OR m.`mail` = ! LIMIT 1", @$_POST['login'], @$_POST['mail'])))
 				{
 					$res = $db->data;
 					$error_msg = "Пользователь существует!";
 					include('templ/tpl.register.php');
 					exit;
 				}
-				$db->put(rpv("INSERT INTO pb_users (login, passwd, mail, deleted) VALUES (!, PASSWORD(!), !, 1)", @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
+				$db->put(rpv("INSERT INTO @users (login, passwd, mail, deleted) VALUES (!, PASSWORD(!), !, 1)", @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
 				$uid = $db->last_id();
 
 				// send mail to admin for accept registration
@@ -217,7 +217,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	{
 		case 'logoff':
 		{
-			$db->put(rpv("UPDATE pb_users SET `sid` = NULL WHERE `id` = # LIMIT 1", $uid));
+			$db->put(rpv("UPDATE @users SET `sid` = NULL WHERE `id` = # LIMIT 1", $uid));
 			$_SESSION['uid'] = 0;
 			$uid = $_SESSION['uid'];
 			setcookie("zh", NULL, time()-60, '/');
@@ -234,10 +234,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE pb_users SET `deleted` = 0 WHERE `login` = ! AND `id` = #", @$_GET['login'], $id));
+			$db->put(rpv("UPDATE @users SET `deleted` = 0 WHERE `login` = ! AND `id` = #", @$_GET['login'], $id));
 			//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_ACTIVATE, $id, $ip));
 
-			if($db->select(rpv("SELECT m.`id`, m.`mail` FROM pb_users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1", @$_GET['login'], $id)))
+			if($db->select(rpv("SELECT m.`id`, m.`mail` FROM @users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1", @$_GET['login'], $id)))
 			{
 				if(!php_mailer(
 					$db->data[0][1], @$_GET['login'],
@@ -324,15 +324,15 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 									// *********************************************************
 
-									if($db->select(rpv("SELECT m.`id`, m.`samname` FROM `pb_contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
+									if($db->select(rpv("SELECT m.`id`, m.`samname` FROM `@contacts` AS m WHERE m.`samname` = ! LIMIT 1", $s_login)))
 									{
 										$id = $db->data[0][0];
-										$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
+										$db->put(rpv("UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
 										$count_updated++;
 									}
 									else
 									{
-										$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
+										$db->put(rpv("INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)", $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
 										$id = $db->last_id();
 										$count_added++;
 
@@ -433,11 +433,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 									// *********************************************************
 
-									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
+									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
 									{
 										$id = $db->data[0][0];
 										$data[] = $db->data[0];
-										$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
+										$db->put(rpv("UPDATE `@contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 										$count_updated++;
 									}
 								}
@@ -461,7 +461,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/plain; charset=utf-8");
 			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
 
-			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `@contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
 
 			$result = $db->data;
 
@@ -493,7 +493,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 				if($j > 0)
 				{
-					if($db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `pb_contacts` AS m WHERE m.`id` IN (?) ORDER BY m.`lname`, m.`fname`", $list_safe)))
+					if($db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `@contacts` AS m WHERE m.`id` IN (?) ORDER BY m.`lname`, m.`fname`", $list_safe)))
 					{
 						$result = $db->data;
 					}
@@ -512,7 +512,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
+			$db->put(rpv("UPDATE `@contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"code": 0, "message": "Successful hide (ID '.$id.')"}';
 		}
@@ -526,7 +526,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
+			$db->put(rpv("UPDATE `@contacts` SET `visible` = 1 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"code": 0, "message": "Successful show (ID '.$id.')"}';
 		}
@@ -545,7 +545,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
+			$db->put(rpv("UPDATE `@contacts` SET `map` = #, `x` = #, `y` = # WHERE `id` = # LIMIT 1", @$_POST['map'], @$_POST['x'], @$_POST['y'], $id));
 
 			echo '{"code": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
 		}
@@ -595,7 +595,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			imagedestroy($dst);
 			imagedestroy($src);
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 1 WHERE `id` = # LIMIT 1", $id));
+			$db->put(rpv("UPDATE `@contacts` SET `photo` = 1 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"code": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
 		}
@@ -614,7 +614,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("UPDATE `pb_contacts` SET `photo` = 0 WHERE `id` = # LIMIT 1", $id));
+			$db->put(rpv("UPDATE `@contacts` SET `photo` = 0 WHERE `id` = # LIMIT 1", $id));
 
 			echo '{"code": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
 		}
@@ -640,13 +640,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			if(!$id)
 			{
-				$db->put(rpv("INSERT INTO `pb_contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
+				$db->put(rpv("INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
 				$id = $db->last_id();
 				echo '{"code": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
 			}
 			else
 			{
-				$db->put(rpv("UPDATE `pb_contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $id));
+				$db->put(rpv("UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $id));
 				echo '{"code": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
 			}
 		}
@@ -665,7 +665,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$db->put(rpv("DELETE FROM `pb_contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
+			$db->put(rpv("DELETE FROM `@contacts` WHERE `id` = # AND `samname` = '' LIMIT 1", $id));
 
 			$filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'photos'.DIRECTORY_SEPARATOR.'t'.$id.'.jpg';
 			if(file_exists($filename))
@@ -685,7 +685,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
 			{
 				echo '{"code": 1, "message": "DB error"}';
 				exit;
@@ -703,7 +703,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname` FROM `pb_contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
+			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname` FROM `@contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
 			{
 				echo '{"code": 1, "message": "DB error"}';
 				exit;
@@ -718,7 +718,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/html; charset=utf-8");
 
-			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
 
 			include('templ/tpl.map.php');
 		}
@@ -727,7 +727,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 	header("Content-Type: text/html; charset=utf-8");
 
-	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `pb_contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
+	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m ? ORDER BY m.`lname`, m.`fname`", $uid?'':'WHERE m.`visible` = 1'));
 
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');
