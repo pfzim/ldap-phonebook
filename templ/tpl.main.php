@@ -60,7 +60,7 @@
 		<form id="contacts" method="post" action="?action=export_selected">
 			<input id="list" type="hidden" name="list" value="" />
 		</form>
-		<a href="#" onclick="f_export_selected(event); return false;">Export selected<a/>
+		<a href="#" onclick="f_export_selected(event); return false;">Export selected</a>
 		<?php } ?>
 		<br />
 		<br />
