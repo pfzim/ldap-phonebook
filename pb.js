@@ -145,6 +145,7 @@ function f_sw_map(ev)
 		el.style.display = 'block';
 		el.onclick = function() {gi('map-container').style.display = 'none';};
 		var map = gi('map-image');
+		map.src = '';
 		map.onload = function(x, y)
 		{
 			return function(ev)
