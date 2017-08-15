@@ -351,6 +351,7 @@ function f_update_row(id)
 					row.insertCell(4);
 					row.insertCell(5);
 					row.insertCell(6);
+					row.insertCell(7);
 				}
 
 				row.id = 'row'+data.id;
@@ -359,38 +360,39 @@ function f_update_row(id)
 				row.setAttribute("data-x", data.x);
 				row.setAttribute("data-y", data.y);
 				row.setAttribute("data-photo", data.photo);
-				row.cells[0].textContent = data.firstname + ' ' + data.lastname;
+				row.cells[0].textContent = '';
+				row.cells[1].textContent = data.firstname + ' ' + data.lastname;
 				if(data.photo)
 				{
-					row.cells[0].className = 'userwithphoto';
+					row.cells[1].className = 'userwithphoto';
 				}
-				row.cells[0].style.cursor = 'pointer';
-				row.cells[0].onclick = function(event) { f_sw_map(event); };
-				row.cells[0].onmouseenter = function(event) { f_sw_img(event); };
-				row.cells[0].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
-				row.cells[0].onmousemove = function(event) { f_mv_img(event); };
+				row.cells[1].style.cursor = 'pointer';
+				row.cells[1].onclick = function(event) { f_sw_map(event); };
+				row.cells[1].onmouseenter = function(event) { f_sw_img(event); };
+				row.cells[1].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
+				row.cells[1].onmousemove = function(event) { f_mv_img(event); };
 
-				row.cells[1].textContent = data.phone;
-				row.cells[2].textContent = data.mobile;
-				row.cells[3].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
-				row.cells[4].textContent = data.position;
-				row.cells[5].textContent = data.department;
+				row.cells[2].textContent = data.phone;
+				row.cells[3].textContent = data.mobile;
+				row.cells[4].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
+				row.cells[5].textContent = data.position;
+				row.cells[6].textContent = data.department;
 
 				var str = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>';
-				for(i = 2; i <= count_maps; i++)
+				for(i = 2; i <= map_count; i++)
 				{
 					str += ' <span class="command" data-map="'+i+'" onclick="f_map_set(event);">'+i+'</span>';
 				}
 
 				if(data.visible)
 				{
-					row.cells[6].innerHTML = str+' <span class="command" onclick="f_hide(event);">Hide</span>';
+					row.cells[7].innerHTML = str+' <span class="command" onclick="f_hide(event);">Hide</span>';
 				}
 				else
 				{
-					row.cells[6].innerHTML = str+' <span class="command" onclick="f_show(event);">Show</span>';
+					row.cells[7].innerHTML = str+' <span class="command" onclick="f_show(event);">Show</span>';
 				}
-				//row.cells[6].onclick = function(event) { h(event); };
+				//row.cells[7].onclick = function(event) { h(event); };
 			}
 		}
 	);
@@ -401,6 +403,7 @@ function f_edit(ev)
 	var id = 0;
 	if(ev)
 	{
+		var el_src = ev.target || ev.srcElement;
 		id = el_src.parentNode.parentNode.getAttribute('data-id');
 	}
 	gi('edit_id').value = id;
@@ -467,6 +470,7 @@ function f_photo(ev)
 	var id = 0;
 	if(ev)
 	{
+		var el_src = ev.target || ev.srcElement;
 		id = el_src.parentNode.parentNode.getAttribute('data-id');
 	}
 	if(id)
