@@ -8,15 +8,16 @@
 		<table id="table" class="main-table">
 			<thead>
 			<tr>
+				<?php $i = 0; ?>
 				<?php if($uid) { ?>
 				<th width="1%"><input type="checkbox" onclick="f_select_all(event)"/></th>
-				<?php } ?>
-				<th width="20%" onclick="sortTable(0)">Name</th>
-				<th width="10%" onclick="sortTable(1)">Phone</th>
-				<th width="10%" onclick="sortTable(2)">Mobile</th>
-				<th width="25%" onclick="sortTable(3)">E-Mail</th>
-				<th width="10%" onclick="sortTable(4)">Position</th>
-				<th width="10%" onclick="sortTable(5)">Department</th>
+				<?php $i++; } ?>
+				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)">Name</th>
+				<th width="10%" onclick="sortTable(<?php eh($i++); ?>)">Phone</th>
+				<th width="10%" onclick="sortTable(<?php eh($i++); ?>)">Mobile</th>
+				<th width="25%" onclick="sortTable(<?php eh($i++); ?>)">E-Mail</th>
+				<th width="10%" onclick="sortTable(<?php eh($i++); ?>)">Position</th>
+				<th width="10%" onclick="sortTable(<?php eh($i++); ?>)">Department</th>
 				<?php if($uid) { ?>
 				<th width="15%">Operations</th>
 				<?php } ?>
