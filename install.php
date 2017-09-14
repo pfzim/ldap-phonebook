@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(0);
+
 if(file_exists('inc.config.php'))
 {
 	header("Content-Type: text/plain; charset=utf-8");
@@ -310,7 +312,7 @@ EOT;
 							}
 						}
 					}
-					throw new Exception("FAILED");
+					throw new Exception(ldap_error($ldap));
 				}
 				exit;
 				case 'check_mail':
@@ -352,7 +354,7 @@ EOT;
 						echo '{"code": 0, "status": "OK"}';
 					}
 					
-					throw new Exception("FAILED");
+					throw new Exception($mail->ErrorInfo);
 				}
 				exit;
 				case 'add_user':
