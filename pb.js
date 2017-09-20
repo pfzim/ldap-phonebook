@@ -207,9 +207,7 @@ function f_map_set(ev)
 		gi('map-marker').style.top = (event.clientY - gi('map-marker').height/2)  + "px";
 		gi('map-marker').onclick = function()
 		{
-			var pX = event.pageX || (event.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
-			var pY = event.pageY || (event.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
-			f_set_location(id, map, pX - gi('map-image').offsetLeft, pY - gi('map-image').offsetTop);
+			f_set_location(id, map, (gi('map-marker').offsetLeft + gi('map-marker').width/2) - gi('map-image').offsetLeft, (gi('map-marker').offsetTop + gi('map-marker').height/2) - gi('map-image').offsetTop);
 			gi('map-container').style.display='none';
 			gi('map-image').onclick = null;
 		};
