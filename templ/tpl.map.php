@@ -1,9 +1,9 @@
 <?php include("tpl.header.php"); ?>
 		<script>
-			map = <?php eh($id);?>;
-			map_count = <?php eh(PB_MAPS_COUNT);?>;
+			map = <?php intval($id);?>;
+			map_count = <?php intval(PB_MAPS_COUNT);?>;
 		</script>
-		<h3 align="center">Map<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>&nbsp;<a href="?action=map&amp;id=<?php eh($i);?>"><?php eh($i);?></a><?php } ?></h3>
+		<h3 align="center">Map<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>&nbsp;<a href="?action=map&amp;id=<?php eh($i);?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?></h3>
 		<div style="position: relative;">
 				<img id="map-image" src="templ/map<?php eh($id);?>.png" style="left: 0px; top: 0px;"/>
 		<?php $i = 0; foreach($db->data as $row) { $i++; ?>
