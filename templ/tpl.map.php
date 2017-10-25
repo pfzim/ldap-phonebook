@@ -1,7 +1,7 @@
 <?php include("tpl.header.php"); ?>
 		<script>
-			map = <?php intval($id);?>;
-			map_count = <?php intval(PB_MAPS_COUNT);?>;
+			map = <?php eh(intval($id));?>;
+			map_count = <?php eh(intval(PB_MAPS_COUNT));?>;
 		</script>
 		<h3 align="center">Map<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>&nbsp;<a href="?action=map&amp;id=<?php eh($i);?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?></h3>
 		<div style="position: relative;">
