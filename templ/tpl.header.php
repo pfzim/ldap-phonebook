@@ -12,7 +12,7 @@
 		<ul class="menu-bar">
 			<li><a href="<?php eh("$self"); ?>">Home</a></li>
 			<li><a href="?action=map&amp;id=1">Map</a></li>
-			<?php if($uid == 1) { ?>
+			<?php if($uid) { ?>
 			<li><a href="?action=all">Show all</a></li>
 			<li><a href="?action=sync">Sync</a></li>
 			<li><a href="?action=export">Export</a></li>
