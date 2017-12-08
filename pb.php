@@ -144,16 +144,92 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					exit;
 				}
 
-				if(!$db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
+				if(defined('PB_USE_LDAP_AUTH') && (PB_USE_LDAP_AUTH == 1))
 				{
-					//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_FAILED, 0, $ip));
-					$error_msg = "Неверное имя пользователя или пароль!";
-					include('templ/tpl.login.php');
-					exit;
-				}
+					if(strpos($_POST['login'], '\\'))
+					{
+						list($domain, $login) = explode('\\', $_POST['login'], 2);
+					}
+					else if(strpos($_POST['login'], '@'))
+					{
+						list($login, $domain) = explode('@', $_POST['login'], 2);
+					}
+					else
+					{
+						$error_msg = "Неверный формат логина (user@domain, domain\\user)!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+					
+					// escape login here: addslashes($login)
 
-				$_SESSION['uid'] = $db->data[0][0];
-				$uid = $_SESSION['uid'];
+					$ldap = @ldap_connect(LDAP_HOST, LDAP_PORT);
+					if(!$ldap)
+					{
+						$error_msg = "LDAP connection error!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+					
+					ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+					ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+					if(!@ldap_bind($ldap, $login.'@'.$domain, @$_POST['passwd']))
+					{
+						$error_msg = "Неверное имя пользователя или пароль!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+					$cookie = '';
+					ldap_control_paged_result($ldap, 200, true, $cookie);
+
+					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.$login.')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
+					if(!$sr)
+					{
+						ldap_unbind($ldap);
+						$error_msg = "LDAP error!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+
+					$records = ldap_get_entries($ldap, $sr);
+					if(($records['count'] != 1) || empty($records[0]['samaccountname'][0]) || (strcasecmp($records[0]['samaccountname'][0], $login) != 0))
+					{
+						ldap_free_result($sr);
+						ldap_unbind($ldap);
+						print_r($records);
+						$error_msg = "Access denied!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+
+					if($db->select(rpv("SELECT m.`id` FROM `@users` AS m WHERE m.`login` = ! AND m.`deleted` = 0 LIMIT 1", $login)))
+					{
+						$_SESSION['uid'] = $db->data[0][0];
+					}
+					else // add new LDAP user
+					{
+						$db->put(rpv("INSERT INTO @users (login, passwd, mail, deleted) VALUES (!, '', !, 1)", @$login, @$records[0]['mail'][0]));
+						$_SESSION['uid'] = $db->last_id();
+					}
+
+					$uid = $_SESSION['uid'];
+
+					ldap_free_result($sr);
+					ldap_unbind($ldap);
+				}
+				else
+				{
+					if(!$db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
+					{
+						//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_FAILED, 0, $ip));
+						$error_msg = "Неверное имя пользователя или пароль!";
+						include('templ/tpl.login.php');
+						exit;
+					}
+
+					$_SESSION['uid'] = $db->data[0][0];
+					$uid = $_SESSION['uid'];
+				}
 
 				$sid = uniqid();
 				setcookie("zh", $sid, time()+2592000, '/');

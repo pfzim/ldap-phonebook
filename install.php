@@ -174,6 +174,8 @@ $config = <<<'EOT'
 	define("DB_CPAGE", "utf8");
 	define("DB_PREFIX", "pb_");
 
+	define("PB_USE_LDAP_AUTH", 0);
+
 	define("LDAP_HOST", "#ldap_host#");
 	define("LDAP_PORT", #ldap_port#);
 	define("LDAP_USER", "#ldap_user#");
@@ -181,6 +183,7 @@ $config = <<<'EOT'
 	define("LDAP_BASE_DN", "#ldap_base#");
 	define("LDAP_FILTER", "#ldap_filter#");
 	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol");
+	define("LDAP_ADMIN_GROUP_DN", "CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local");
 
 	define("MAIL_HOST", "#mail_host#");
 	define("MAIL_FROM", "#mail_from#");
