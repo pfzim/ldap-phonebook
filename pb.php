@@ -196,14 +196,22 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					{
 						ldap_free_result($sr);
 						ldap_unbind($ldap);
-						print_r($records);
+						// print_r($records);
 						$error_msg = "Access denied!";
 						include('templ/tpl.login.php');
 						exit;
 					}
 
-					if($db->select(rpv("SELECT m.`id` FROM `@users` AS m WHERE m.`login` = ! AND m.`deleted` = 0 LIMIT 1", $login)))
+					if($db->select(rpv("SELECT m.`id`, m.`passwd` FROM `@users` AS m WHERE m.`login` = ! AND m.`deleted` = 0 LIMIT 1", $login)))
 					{
+						if(!empty($db->data[0][1]))
+						{
+							ldap_free_result($sr);
+							ldap_unbind($ldap);
+							$error_msg = "Access denied!";
+							include('templ/tpl.login.php');
+							exit;
+						}
 						$_SESSION['uid'] = $db->data[0][0];
 					}
 					else // add new LDAP user
