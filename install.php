@@ -397,7 +397,7 @@ EOT;
 					if(empty($_POST['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
 					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
 
-					if(empty($_POST['allowmails'])) throw new Exception('MAIL Admin Name value not defined!');
+					if(empty($_POST['allowmails'])) throw new Exception('MAIL RegExp value not defined!');
 
 					$config = str_replace(
 						array(
