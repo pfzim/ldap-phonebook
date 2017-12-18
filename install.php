@@ -357,6 +357,7 @@ EOT;
 					if($mail->send())
 					{
 						echo '{"code": 0, "status": "OK"}';
+						exit;
 					}
 					
 					throw new Exception($mail->ErrorInfo);
