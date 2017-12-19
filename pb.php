@@ -111,6 +111,22 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	$db = new MySQLDB();
 	$db->connect();
 
+	$config = array();
+
+	if($db->select(rpv("SELECT m.`name`, m.`value` FROM @config AS m")))
+	{
+		foreach($db->data as $row)
+		{
+			$config[$row[0]] = $row[1];
+		}
+	}
+	
+	if(!isset($config['db_version']) || (intval($config['db_version']) != 1))
+	{
+		header('Location: upgrade.php');
+		exit;
+	}
+	
 	$uid = 0;
 	if(isset($_SESSION['uid']))
 	{
@@ -144,15 +160,17 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					exit;
 				}
 
+				$login = @$_POST['login'];
+
 				if(defined('PB_USE_LDAP_AUTH') && (PB_USE_LDAP_AUTH == 1))
 				{
-					if(strpos($_POST['login'], '\\'))
+					if(strpos($login, '\\'))
 					{
-						list($domain, $login) = explode('\\', $_POST['login'], 2);
+						list($domain, $login) = explode('\\', $login, 2);
 					}
-					else if(strpos($_POST['login'], '@'))
+					else if(strpos($login, '@'))
 					{
-						list($login, $domain) = explode('@', $_POST['login'], 2);
+						list($login, $domain) = explode('@', $login, 2);
 					}
 					else
 					{
@@ -161,8 +179,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 						exit;
 					}
 					
-					// escape login here: addslashes($login)
-
 					$ldap = @ldap_connect(LDAP_HOST, LDAP_PORT);
 					if(!$ldap)
 					{
@@ -182,7 +198,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					$cookie = '';
 					ldap_control_paged_result($ldap, 200, true, $cookie);
 
-					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.$login.')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
+					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.ldap_escape($login, null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
 					if(!$sr)
 					{
 						ldap_unbind($ldap);
@@ -202,7 +218,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 						exit;
 					}
 
-					if($db->select(rpv("SELECT m.`id`, m.`passwd` FROM `@users` AS m WHERE m.`login` = ! AND m.`deleted` = 0 LIMIT 1", $login)))
+					$login = $records[0]['samaccountname'][0];
+					
+					if($db->select(rpv("SELECT m.`id`, m.`passwd` FROM `@users` AS m WHERE m.`login` = ! AND m.`ldap` = 1 AND m.`deleted` = 0 LIMIT 1", $login)))
 					{
 						if(!empty($db->data[0][1]))
 						{
@@ -216,7 +234,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					}
 					else // add new LDAP user
 					{
-						$db->put(rpv("INSERT INTO @users (login, passwd, mail, deleted) VALUES (!, '', !, 1)", @$login, @$records[0]['mail'][0]));
+						$db->put(rpv("INSERT INTO @users (login, passwd, mail, ldap, deleted) VALUES (!, '', !, 1, 0)", $login, @$records[0]['mail'][0]));
 						$_SESSION['uid'] = $db->last_id();
 					}
 
@@ -225,9 +243,9 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					ldap_free_result($sr);
 					ldap_unbind($ldap);
 				}
-				else
+				else // internal authorization method
 				{
-					if(!$db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`deleted` = 0 LIMIT 1", @$_POST['login'], @$_POST['passwd'])))
+					if(!$db->select(rpv("SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`ldap` = 0 AND m.`deleted` = 0 LIMIT 1", $login, @$_POST['passwd'])))
 					{
 						//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", 0, LOG_LOGIN_FAILED, 0, $ip));
 						$error_msg = "Неверное имя пользователя или пароль!";
@@ -241,7 +259,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 				$sid = uniqid();
 				setcookie("zh", $sid, time()+2592000, '/');
-				setcookie("zl", @$_POST['login'], time()+2592000, '/');
+				setcookie("zl", $login, time()+2592000, '/');
 
 				$db->put(rpv("UPDATE @users SET `sid` = ! WHERE `id` = # LIMIT 1", $sid, $uid));
 				//$db->put(rpv("INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)", $uid, LOG_LOGIN, 0, $ip));
@@ -270,7 +288,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					include('templ/tpl.register.php');
 					exit;
 				}
-				$db->put(rpv("INSERT INTO @users (login, passwd, mail, deleted) VALUES (!, PASSWORD(!), !, 1)", @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
+				$db->put(rpv("INSERT INTO @users (login, passwd, mail, ldap, deleted) VALUES (!, PASSWORD(!), !, 0, 1)", @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
 				$uid = $db->last_id();
 
 				// send mail to admin for accept registration
