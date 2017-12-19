@@ -354,13 +354,12 @@ EOT;
 					$mail->Body    = 'This is a test message';
 					$mail->AltBody = 'This is a test message';
 
-					if($mail->send())
+					if(!$mail->send())
 					{
-						echo '{"code": 0, "status": "OK"}';
-						exit;
+						throw new Exception($mail->ErrorInfo);
 					}
 					
-					throw new Exception($mail->ErrorInfo);
+					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
 				case 'add_user':
@@ -397,7 +396,7 @@ EOT;
 					if(empty($_POST['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
 					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
 
-					if(empty($_POST['allowmails'])) throw new Exception('MAIL RegExp value not defined!');
+					if(empty($_POST['allowmails'])) throw new Exception('MAIL RegExp filter not defined!');
 
 					$config = str_replace(
 						array(
