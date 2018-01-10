@@ -109,7 +109,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	}
 
 	$db = new MySQLDB();
-	$db->connect();
+	//$db->connect();
 
 	$config = array();
 
