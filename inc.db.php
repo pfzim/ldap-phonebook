@@ -1,6 +1,4 @@
 <?php
-require_once("inc.config.php");
-
 class MySQLDB
 {
 	private $link_ro = NULL;
@@ -17,7 +15,7 @@ class MySQLDB
 	private $db_ro_same_rw = FALSE;
 	public $data = array();
 
-	function __construct($db_rw_host = DB_RW_HOST, $db_ro_host = DB_RO_HOST, $db_user = DB_USER, $db_passwd = DB_PASSWD, $db_name = DB_NAME, $db_cpage = DB_CPAGE, $rise_exception = FALSE)
+	function __construct($db_rw_host, $db_ro_host, $db_user, $db_passwd, $db_name, $db_cpage, $rise_exception = FALSE)
 	{
 		$this->db_ro_host = $db_ro_host;
 		$this->db_rw_host = $db_rw_host;

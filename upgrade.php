@@ -23,6 +23,8 @@ if(!file_exists('inc.config.php'))
 	exit;
 }
 
+require_once("inc.config.php");
+
 	if(!isset($_GET['action']) || ($_GET['action'] != 'upgrade'))
 	{
 		header("Content-Type: text/html; charset=utf-8");
@@ -47,8 +49,8 @@ if(!file_exists('inc.config.php'))
 	//require_once('inc.dbfunc.php');
 	require_once('inc.utils.php');
 
-	$db = new MySQLDB();
-	$db->connect();
+	$db = new MySQLDB(DB_RW_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
+	//$db->connect();
 	
 	$config = array('db_version' => 0);
 

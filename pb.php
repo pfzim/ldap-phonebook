@@ -23,6 +23,8 @@ if(!file_exists('inc.config.php'))
 	exit;
 }
 
+require_once("inc.config.php");
+
 function php_mailer($to, $name, $subject, $html, $plain)
 {
 	require_once 'libs/PHPMailer/PHPMailerAutoload.php';
@@ -108,7 +110,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 	}
 
-	$db = new MySQLDB();
+	$db = new MySQLDB(DB_RW_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
 	//$db->connect();
 
 	$config = array();
