@@ -13,6 +13,7 @@ class MySQLDB
 	private $db_ro_selected = FALSE;
 	private $db_rw_selected = FALSE;
 	private $db_ro_same_rw = FALSE;
+	private $rise_exception = FALSE;
 	public $data = array();
 
 	function __construct($db_rw_host, $db_ro_host, $db_user, $db_passwd, $db_name, $db_cpage, $rise_exception = FALSE)
@@ -30,6 +31,7 @@ class MySQLDB
 		$this->db_ro_same_rw = empty($db_ro_host);
 		$this->data = array();
 		$this->error_msg = "";
+		$this->rise_exception = $rise_exception;
 	}
 
 	private function connect($read_only)
