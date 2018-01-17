@@ -1,5 +1,22 @@
 <?php
-// connect LDAP on demand
+/*
+    LDAP class - connect LDAP on demand
+    Copyright (C) 2018 Dmitry V. Zimin
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 class LDAP
 {
 	private $link = NULL;
@@ -23,21 +40,26 @@ class LDAP
 
 	private function connect()
 	{
-		$this->link = ldap_connect(LDAP_HOST, LDAP_PORT);
+		$this->link = @ldap_connect($this->ldap_host, $this->ldap_port);
 		if(!$this->link)
 		{
 			$this->error(ldap_error($this->link));
 			$this->link = NULL;
+			return FALSE;
 		}
 
 		ldap_set_option($this->link, LDAP_OPT_PROTOCOL_VERSION, 3);
 		ldap_set_option($this->link, LDAP_OPT_REFERRALS, 0);
 		
-		if(!ldap_bind($this->link, LDAP_USER, LDAP_PASSWD))
+		if(!@ldap_bind($this->link, $this->ldap_user, $this->ldap_passwd))
 		{
 			$this->error(ldap_error($this->link));
+			ldap_unbind($this->link);
 			$this->link = NULL;
+			return FALSE;
 		}
+		
+		return TRUE;
 	}
 
 	public function disconnect()
@@ -46,7 +68,7 @@ class LDAP
 
 		if($this->link)
 		{
-			ldap_unbind($ldap);
+			ldap_unbind($this->link);
 			$this->link = NULL;
 		}
 	}
@@ -57,6 +79,29 @@ class LDAP
 		$this->disconnect();
 	}
 
+	// needed for check user password
+	public function switch_user($ldap_user, $ldap_passwd, $force_connect = FALSE)
+	{
+		$this->ldap_user = $ldap_user;
+		$this->ldap_passwd = $ldap_passwd;
+		
+		if($this->link)
+		{
+			if(!@ldap_bind($this->link, $this->ldap_user, $this->ldap_passwd))
+			{
+				$this->error(ldap_error($this->link));
+				$this->link = NULL;
+				return FALSE;
+			}
+		}
+		else if($force_connect)
+		{
+			return $this->connect();
+		}
+		
+		return TRUE;
+	}
+	
 	public function get_link($db_name)
 	{
 		if(!$this->link)
