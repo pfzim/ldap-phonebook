@@ -1,4 +1,23 @@
 <?php
+/*
+    MySQLDB class - connect on demand and allow read from one server
+                    and write to another server
+    Copyright (C) 2017-2018 Dmitry V. Zimin
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 class MySQLDB
 {
 	private $link_ro = NULL;
@@ -78,7 +97,7 @@ class MySQLDB
 				}
 
 				$this->db_ro_selected = TRUE;
-				
+
 				if(!mysqli_set_charset($this->link_ro, $this->db_cpage))
 				{
 					$this->error(mysqli_error($this->link_ro));
@@ -135,7 +154,12 @@ class MySQLDB
 
 	public function select($query)
 	{
-		$this->data = array();
+		return $this->select_ex($this->data, $query);
+	}
+
+	public function select_ex(&$data, $query)
+	{
+		$data = array();
 
 		if(!$this->connect(TRUE))
 		{
@@ -156,7 +180,7 @@ class MySQLDB
 
 		while($row = mysqli_fetch_row($res))
 		{
-			$this->data[] = $row;
+			$data[] = $row;
 		}
 
 		mysqli_free_result($res);
@@ -166,7 +190,12 @@ class MySQLDB
 
 	public function select_assoc($query)
 	{
-		$this->data = array();
+		return $this->select_assoc_ex($this->data, $query);
+	}
+
+	public function select_assoc_ex(&$data, $query)
+	{
+		$data = array();
 
 		if(!$this->connect(TRUE))
 		{
@@ -187,7 +216,7 @@ class MySQLDB
 
 		while($row = mysqli_fetch_assoc($res))
 		{
-			$this->data[] = $row;
+			$data[] = $row;
 		}
 
 		mysqli_free_result($res);

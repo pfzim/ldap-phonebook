@@ -185,7 +185,7 @@ function dpm($m, $y)
 		case 12:
 			return 31;
 		case 2:
-			if(((y%4 == 0) && (y%100 != 0)) || (y%400 == 0)) return 29;
+			if((($y%4 == 0) && ($y%100 != 0)) || ($y%400 == 0)) return 29;
 			return 28;
 		case 4:
 		case 6:
