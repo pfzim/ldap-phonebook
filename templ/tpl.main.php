@@ -24,7 +24,7 @@
 			</tr>
 			</thead>
 			<tbody id="table-data">
-		<?php $i = 0; foreach($db->data as $row) { $i++; ?>
+		<?php $i = 0; foreach($db->data as &$row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id=<?php eh($row[0]);?> data-map=<?php eh($row[11]); ?> data-x=<?php eh($row[12]); ?> data-y=<?php eh($row[13]); ?> data-photo=<?php eh($row[10]); ?>>
 				<?php if($uid) { ?>
 				<td><input type="checkbox" name="check" value="<?php eh($row[0]); ?>"/></td>

@@ -1,6 +1,6 @@
 <?php if(!defined("Z_PROTECTED")) exit; ?><?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <phonebook>
-<?php $i = 0; foreach($result as $row) { $i++; ?>
+<?php $i = 0; foreach($result as &$row) { $i++; ?>
 	<contact>
 		<name><?php eh($row[3].' '.$row[2]); ?></name>
 		<phone1><?php eh($row[7]); ?></phone1>

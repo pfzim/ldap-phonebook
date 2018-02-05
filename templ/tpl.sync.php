@@ -20,7 +20,7 @@
 			</tr>
 			</thead>
 			<tbody id="table-data">
-		<?php $i = 0; foreach($data as $row) { $i++; ?>
+		<?php $i = 0; foreach($data as &$row) { $i++; ?>
 			<tr id="<?php eh("row".$row[0]);?>" data-id=<?php eh($row[0]);?> data-map=<?php eh($row[11]); ?> data-x=<?php eh($row[12]); ?> data-y=<?php eh($row[13]); ?> data-photo=<?php eh($row[10]); ?>>
 				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(intval($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
 				<td><?php eh($row[7]); ?></td>

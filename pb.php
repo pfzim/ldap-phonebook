@@ -117,7 +117,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 	if($db->select(rpv("SELECT m.`name`, m.`value` FROM @config AS m")))
 	{
-		foreach($db->data as $row)
+		foreach($db->data as &$row)
 		{
 			$config[$row[0]] = $row[1];
 		}
@@ -526,7 +526,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 						if($sr)
 						{
 							$records = ldap_get_entries($ldap, $sr);
-							foreach($records as $account)
+							foreach($records as &$account)
 							{
 								if(!empty($account['samaccountname'][0]))
 								{
@@ -584,7 +584,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				$j = 0;
 				$list_safe = '';
 				$list = explode(',', $_POST['list']);
-				foreach($list as $id)
+				foreach($list as &$id)
 				{
 					if($j > 0)
 					{
