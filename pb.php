@@ -123,7 +123,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		}
 	}
 	
-	if(!isset($config['db_version']) || (intval($config['db_version']) != 1))
+	if(!isset($config['db_version']) || (intval($config['db_version']) != 2))
 	{
 		header('Location: upgrade.php');
 		exit;
@@ -732,26 +732,55 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			$s_first_name = @$_POST['firstname'];
-			$s_last_name = @$_POST['lastname'];
-			$s_department = @$_POST['department'];
-			$s_organization = @$_POST['company'];
-			$s_position = @$_POST['position'];
-			$s_phone_internal = @$_POST['phone'];
-			$s_phone_mobile = @$_POST['mobile'];
-			$s_mail = @$_POST['mail'];
+			$result_json = array(
+				'code' => 0,
+				'message' => '',
+				'errors' => array()
+			);
+
+			$s_id = intval(@$_POST['id']);
+			$s_first_name = trim(@$_POST['firstname']);
+			$s_last_name = trim(@$_POST['lastname']);
+			$s_department = trim(@$_POST['department']);
+			$s_organization = trim(@$_POST['company']);
+			$s_position = trim(@$_POST['position']);
+			$s_phone_internal = trim(@$_POST['phone']);
+			$s_phone_mobile = trim(@$_POST['mobile']);
+			$s_mail = trim(@$_POST['mail']);
+			$s_bday = trim(@$_POST['bday']);
+			$s_type = trim(@$_POST['type']);
 			$s_photo = 0;
 
-			if(!$id)
+			$d = explode('.', $s_bday, 3);
+			$nd = intval(@$d[0]);
+			$nm = intval(@$d[1]);
+			$ny = intval(@$d[2]);
+			$s_bday = sprintf("%04d-%02d-%02d", $ny, $nm, $nd);
+			$s_bday_human = sprintf("%02d.%02d.%04d", $nd, $nm, $ny);
+
+			if(!datecheck($nd, $nm, $ny))
 			{
-				$db->put(rpv("INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo));
-				$id = $db->last_id();
-				echo '{"code": 0, "id": '.$id.', "message": "Added (ID '.$id.')"}';
+				$result_json['code'] = 1;
+				$result_json['errors'][] = array('name' => 'bday', 'msg' => 'Date format must be DD.MM.YYYY!');
+			}
+
+			if($result_json['code'])
+			{
+				$result_json['message'] = 'Fill the form!';
+				echo json_encode($result_json);
+				exit;
+			}
+
+			if(!$s_id)
+			{
+				$db->put(rpv("INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `bday`, `type`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $s_bday, $s_type));
+				$s_id = $db->last_id();
+				echo '{"code": 0, "id": '.$s_id.', "message": "Added (ID '.$s_id.')"}';
 			}
 			else
 			{
-				$db->put(rpv("UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $id));
-				echo '{"code": 0, "id": '.$id.',"message": "Updated (ID '.$id.')"}';
+				$db->put(rpv("UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = #, `bday` = !, `type` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $s_bday, $s_type, $s_id));
+				echo '{"code": 0, "id": '.$s_id.',"message": "Updated (ID '.$s_id.')"}';
 			}
 		}
 		exit;

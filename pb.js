@@ -299,7 +299,75 @@ function f_delete(ev)
 	);
 };
 
-function f_save()
+
+function f_save(form_id)
+{
+	var form_data = {};
+	var el = gi(form_id);
+	for(i = 0; i < el.elements.length; i++)
+	{
+		var err = gi(el.elements[i].name + '-error');
+		if(err)
+		{
+			err.style.display='none';
+		}
+		if(el.elements[i].name)
+		{
+			if(el.elements[i].type == 'checkbox')
+			{
+				if(el.elements[i].checked)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else if(el.elements[i].type == 'select-one')
+			{
+				if(el.elements[i].selectedIndex != -1)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else
+			{
+				form_data[el.elements[i].name] = el.elements[i].value;
+			}
+		}
+	}
+
+	//alert(json2url(form_data));
+	//return;
+
+	gi('loading').style.display = 'block';
+	f_http("lpd.php?action=save,
+		function(data, params)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				gi(params+'-container').style.display='none';
+				f_update_row(data.id);
+			}
+			else if(data.errors)
+			{
+				for(i = 0; i < data.errors.length; i++)
+				{
+					var el = gi(data.errors[i].name + "-error");
+					if(el)
+					{
+						el.textContent = data.errors[i].msg;
+						el.style.display='block';
+					}
+				}
+			}
+		},
+		form_id,
+		'application/x-www-form-urlencoded',
+		json2url(form_data)
+	);
+}
+
+function f_save_old()
 {
 	f_http("pb.php?action=save&id="+gi('edit_id').value,
 		function(data, params)
@@ -396,49 +464,83 @@ function f_update_row(id)
 	);
 }
 
-function f_edit(ev)
+function f_edit(ev, form_id)
 {
 	var id = 0;
 	if(ev)
 	{
 		var el_src = ev.target || ev.srcElement;
 		id = el_src.parentNode.parentNode.getAttribute('data-id');
+		//id = ev;
 	}
-	gi('edit_id').value = id;
 	if(!id)
 	{
-		gi('firstname').value = '';
-		gi('lastname').value = '';
-		gi('department').value = '';
-		gi('company').value = '';
-		gi('position').value = '';
-		gi('phone').value = '';
-		gi('mobile').value = '';
-		gi('mail').value = '';
-		gi('edit-container').style.display='block';
+		var form_data = {};
+		var el = gi(form_id);
+		for(i = 0; i < el.elements.length; i++)
+		{
+			var err = gi(el.elements[i].name + '-error');
+			if(err)
+			{
+				err.style.display='none';
+			}
+			if(el.elements[i].name == 'id')
+			{
+				el.elements[i].value = id;
+			}
+			else if(el.elements[i].name == 'pid')
+			{
+				el.elements[i].value = g_pid;
+			}
+			else
+			{
+				if(el.elements[i].type == 'checkbox')
+				{
+					el.elements[i].checked = false;
+				}
+				else
+				{
+					el.elements[i].value = '';
+				}
+			}
+		}
+		gi(form_id + '-container').style.display='block';
 	}
 	else
 	{
-		f_http("pb.php?"+json2url({'action': 'get', 'id': id }),
+		gi('loading').style.display = 'block';
+		f_http("lpd.php?"+json2url({'action': 'get_' + form_id, 'id': id }),
 			function(data, params)
 			{
+				gi('loading').style.display = 'none';
 				if(data.code)
 				{
 					f_notify(data.message, "error");
 				}
 				else
 				{
-					gi('firstname').value = data.firstname;
-					gi('lastname').value = data.lastname;
-					gi('department').value = data.department;
-					gi('company').value = data.company;
-					gi('position').value = data.position;
-					gi('phone').value = data.phone;
-					gi('mobile').value = data.mobile;
-					gi('mail').value = data.mail;
-					gi('edit-container').style.display='block';
+					var el = gi(params);
+					for(i = 0; i < el.elements.length; i++)
+					{
+						if(el.elements[i].name)
+						{
+							if(data.data[el.elements[i].name])
+							{
+								if(el.elements[i].type == 'checkbox')
+								{
+									el.elements[i].checked = (parseInt(data.data[el.elements[i].name], 10) != 0);
+								}
+								else
+								{
+									el.elements[i].value = data.data[el.elements[i].name];
+								}
+							}
+						}
+					}
+					gi(params+'-container').style.display='block';
 				}
-			}
+			},
+			form_id
 		);
 	}
 }

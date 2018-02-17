@@ -32,6 +32,7 @@ class MySQLDB
 	private $db_ro_selected = FALSE;
 	private $db_rw_selected = FALSE;
 	private $db_ro_same_rw = FALSE;
+	private $transaction_active = 0;
 	private $rise_exception = FALSE;
 	public $data = array();
 
@@ -48,6 +49,7 @@ class MySQLDB
 		$this->link_ro = NULL;
 		$this->link_rw = NULL;
 		$this->db_ro_same_rw = empty($db_ro_host);
+		$this->transaction_active = 0;
 		$this->data = array();
 		$this->error_msg = "";
 		$this->rise_exception = $rise_exception;
@@ -55,7 +57,7 @@ class MySQLDB
 
 	private function connect($read_only)
 	{
-		if(!$read_only || $this->db_ro_same_rw)
+		if(!$read_only || $this->db_ro_same_rw || $this->transaction_active)
 		{
 			if(!$this->link_rw)
 			{
@@ -133,6 +135,10 @@ class MySQLDB
 
 		if($this->link_rw)
 		{
+			if($this->transaction_active)
+			{
+				$this->rollback();
+			}
 			mysqli_close($this->link_rw);
 			$this->link_rw = NULL;
 		}
@@ -142,6 +148,24 @@ class MySQLDB
 	{
 		$this->data = array();
 		$this->disconnect();
+	}
+
+	public function start_transaction()
+	{
+		$this->put("START TRANSACTION");
+		$this->transaction_active = 1;
+	}
+	
+	public function commit()
+	{
+		$this->put("COMMIT");
+		$this->transaction_active = 0;
+	}
+
+	public function rollback()
+	{
+		$this->put("ROLLBACK");
+		$this->transaction_active = 0;
 	}
 
 	public function select_db($db_name)
@@ -166,10 +190,10 @@ class MySQLDB
 			return FALSE;
 		}
 
-		$res = mysqli_query($this->db_ro_same_rw ? $this->link_rw : $this->link_ro, $query);
+		$res = mysqli_query(($this->db_ro_same_rw || $this->transaction_active) ? $this->link_rw : $this->link_ro, $query);
 		if(!$res)
 		{
-			$this->error(mysqli_error($this->db_ro_same_rw ? $this->link_rw : $this->link_ro));
+			$this->error(mysqli_error(($this->db_ro_same_rw || $this->transaction_active) ? $this->link_rw : $this->link_ro));
 			return FALSE;
 		}
 
@@ -202,10 +226,10 @@ class MySQLDB
 			return FALSE;
 		}
 
-		$res = mysqli_query($this->db_ro_same_rw ? $this->link_rw : $this->link_ro, $query);
+		$res = mysqli_query(($this->db_ro_same_rw || $this->transaction_active) ? $this->link_rw : $this->link_ro, $query);
 		if(!$res)
 		{
-			$this->error(mysqli_error($this->db_ro_same_rw ? $this->link_rw : $this->link_ro));
+			$this->error(mysqli_error(($this->db_ro_same_rw || $this->transaction_active) ? $this->link_rw : $this->link_ro));
 			return FALSE;
 		}
 

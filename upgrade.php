@@ -81,16 +81,30 @@ require_once("inc.config.php");
 			{
 				echo 'Error: '.$db->get_last_error();
 			}
-			echo "Upgrade complete!\n";
+			echo "Upgrade to version 1 complete!\n";
+		}
+		case 1:
+		{
+			echo "Add column 'type' to 'contacts' table...\n";
+			if(!$db->put(rpv("ALTER TABLE @users ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
+			{
+				echo 'Error: '.$db->get_last_error();
+			}
+			echo "Set db_version = '2'...\n";
+			if(!$db->put(rpv("UPDATE @config SET `value` = 2 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'Error: '.$db->get_last_error();
+			}
+			echo "Upgrade to version 2 complete!\n";
 		}
 		break;
-		case 1:
+		case 2:
 		{
 			echo "Upgrade doesn't required\n";
 		}
 		break;
 		default:
 		{
-			echo "Unknown DB version\n";
+			echo "ERROR: Unknown DB version\n";
 		}
 	}
