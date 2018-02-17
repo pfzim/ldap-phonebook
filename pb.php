@@ -751,17 +751,20 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$s_type = trim(@$_POST['type']);
 			$s_photo = 0;
 
-			$d = explode('.', $s_bday, 3);
-			$nd = intval(@$d[0]);
-			$nm = intval(@$d[1]);
-			$ny = intval(@$d[2]);
-			$s_bday = sprintf("%04d-%02d-%02d", $ny, $nm, $nd);
-			$s_bday_human = sprintf("%02d.%02d.%04d", $nd, $nm, $ny);
-
-			if(!datecheck($nd, $nm, $ny))
+			if(!empty($s_bday))
 			{
-				$result_json['code'] = 1;
-				$result_json['errors'][] = array('name' => 'bday', 'msg' => 'Date format must be DD.MM.YYYY!');
+				$d = explode('.', $s_bday, 3);
+				$nd = intval(@$d[0]);
+				$nm = intval(@$d[1]);
+				$ny = intval(@$d[2]);
+				$s_bday = sprintf("%04d-%02d-%02d", $ny, $nm, $nd);
+				$s_bday_human = sprintf("%02d.%02d.%04d", $nd, $nm, $ny);
+
+				if(!datecheck($nd, $nm, $ny))
+				{
+					$result_json['code'] = 1;
+					$result_json['errors'][] = array('name' => 'bday', 'msg' => 'Date format must be DD.MM.YYYY!');
+				}
 			}
 
 			if($result_json['code'])
@@ -809,7 +812,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "message": "Deleted (ID '.$id.')"}';
 		}
 		exit;
-		case 'get':
+		case 'get_contact':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
 			if(!$id)
@@ -851,7 +854,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/html; charset=utf-8");
 
-			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
+			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`type`, m.`visible` FROM `@contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`", $id));
 
 			include('templ/tpl.map.php');
 		}

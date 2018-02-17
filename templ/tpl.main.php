@@ -70,7 +70,7 @@
 			<span class="close white" onclick="this.parentNode.style.display='none'">&times;</span>
 			<div class="modal-content">
 				<span class="close" onclick="this.parentNode.parentNode.style.display='none'">&times;</span>
-				<form id="document">
+				<form id="contact">
 				<h3>Contact</h3>
 				<input name="id" type="hidden" value=""/>
 				<div class="form-title"><label for="firstname">First name:</label></div>
@@ -112,7 +112,7 @@
 				<div class="form-title">Icon:</div>
 				<select class="form-field" name="type">
 				<?php for($i = 0; $i < count($g_icons); $i++) { ?>
-					<option value="<?php eh($i); ?>"><?php eh($g_icons[$i]); ?></option>
+					<option value="<?php eh($i); ?>" <?php if($i == 0) { echo ' selected="selected"'; } ?>><?php eh($g_icons[$i]); ?></option>
 				<?php } ?>
 				</select>
 				<div id="type-error" class="form-error"></div>

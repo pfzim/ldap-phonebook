@@ -338,7 +338,7 @@ function f_save(form_id)
 	//return;
 
 	gi('loading').style.display = 'block';
-	f_http("lpd.php?action=save",
+	f_http("pb.php?action=save",
 		function(data, params)
 		{
 			gi('loading').style.display = 'none';
@@ -364,34 +364,6 @@ function f_save(form_id)
 		form_id,
 		'application/x-www-form-urlencoded',
 		json2url(form_data)
-	);
-}
-
-function f_save_old()
-{
-	f_http("pb.php?action=save&id="+gi('edit_id').value,
-		function(data, params)
-		{
-			f_notify(data.message, data.code?"error":"success");
-			if(!data.code)
-			{
-				gi('edit-container').style.display='none';
-				f_update_row(data.id);
-			}
-		},
-		null,
-		'application/x-www-form-urlencoded',
-		json2url(
-		{
-			'firstname': gi('firstname').value,
-			'lastname': gi('lastname').value,
-			'department': gi('department').value,
-			'company': gi('company').value,
-			'position': gi('position').value,
-			'phone': gi('phone').value,
-			'mobile': gi('mobile').value,
-			'mail': gi('mail').value
-		})
 	);
 }
 
@@ -509,7 +481,7 @@ function f_edit(ev, form_id)
 	else
 	{
 		gi('loading').style.display = 'block';
-		f_http("lpd.php?"+json2url({'action': 'get_' + form_id, 'id': id }),
+		f_http("pb.php?"+json2url({'action': 'get_' + form_id, 'id': id }),
 			function(data, params)
 			{
 				gi('loading').style.display = 'none';
