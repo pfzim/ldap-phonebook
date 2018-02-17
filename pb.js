@@ -338,7 +338,7 @@ function f_save(form_id)
 	//return;
 
 	gi('loading').style.display = 'block';
-	f_http("lpd.php?action=save,
+	f_http("lpd.php?action=save",
 		function(data, params)
 		{
 			gi('loading').style.display = 'none';

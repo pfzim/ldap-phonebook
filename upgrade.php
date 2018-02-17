@@ -49,7 +49,7 @@ require_once("inc.config.php");
 	//require_once('inc.dbfunc.php');
 	require_once('inc.utils.php');
 
-	$db = new MySQLDB(DB_RW_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
+	$db = new MySQLDB(DB_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
 	//$db->connect();
 	
 	$config = array('db_version' => 0);
@@ -69,31 +69,31 @@ require_once("inc.config.php");
 			echo "Create 'config' table...\n";
 			if(!$db->put(rpv("CREATE TABLE @config (`name` VARCHAR(255) NOT NULL DEFAULT '', `value` VARCHAR(8192) NOT NULL DEFAULT '', PRIMARY KEY(`name`)) ENGINE = InnoDB")))
 			{
-				echo 'Error: '.$db->get_last_error();
+				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "Add column 'ldap' to 'users' table...\n";
 			if(!$db->put(rpv("ALTER TABLE @users ADD COLUMN `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `mail`")))
 			{
-				echo 'Error: '.$db->get_last_error();
+				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "Set db_version = '1'...\n";
 			if(!$db->put(rpv("INSERT INTO @config (`name`, `value`) VALUES('db_version', 1) ON DUPLICATE KEY UPDATE `value` = 1")))
 			{
-				echo 'Error: '.$db->get_last_error();
+				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "Upgrade to version 1 complete!\n";
 		}
 		case 1:
 		{
 			echo "Add column 'type' to 'contacts' table...\n";
-			if(!$db->put(rpv("ALTER TABLE @users ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
+			if(!$db->put(rpv("ALTER TABLE @contacts ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
 			{
-				echo 'Error: '.$db->get_last_error();
+				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "Set db_version = '2'...\n";
 			if(!$db->put(rpv("UPDATE @config SET `value` = 2 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$db->get_last_error();
+				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "Upgrade to version 2 complete!\n";
 		}

@@ -110,7 +110,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		exit;
 	}
 
-	$db = new MySQLDB(DB_RW_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
+	$db = new MySQLDB(DB_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
 	//$db->connect();
 
 	$config = array();
