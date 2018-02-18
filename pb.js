@@ -369,7 +369,7 @@ function f_save(form_id)
 
 function f_update_row(id)
 {
-	f_http("pb.php?"+json2url({'action': 'get', 'id': id }),
+	f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),
 		function(data, params)
 		{
 			if(data.code)

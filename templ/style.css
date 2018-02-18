@@ -81,9 +81,6 @@ body {
 .menu-bar .active {
     background-color: #4CAF50;
 }
-th {
-    text-align: left;
-}
 /*form { display: block; margin: 20px auto; background: #ddd; border-radius: 10px; padding: 5px }*/
 
 .progress {
@@ -114,13 +111,18 @@ th {
     width: 100%;
     color: darkgrey;
 }
-table {
-    width: 100%;
+.main-table th {
+    text-align: left;
+	border-bottom: 1px solid #DDDDDD;
+}
+.main-table th a {
+    text-decoration: none;
+	color: black;
 }
 .main-table td {
     vertical-align: top;
 }
-.main-table tr:hover {
+.main-table tr:hover td {
     background-color: #E0E0E0;
 }
 .expand-list {
@@ -213,8 +215,10 @@ table {
     right: 10px;
     font-weight: bold;
     font-size: 24pt;
-    color: white;
     cursor: pointer;
+}
+.white {
+    color: white;
 }
 #status {
     text-align: center;
@@ -319,16 +323,36 @@ table {
 .server-info {
     font-size: 8pt;
 }
+.page-number {
+	margin-top: 10px;
+	margin-bottom: 10px;
+    padding: 10px;
+    display: inline-block;
+    background-color: #DDDDDD;
+	border-radius: 3px;
+}
+.command {
+    padding: 1px;
+    background-color: #DDDDDD;
+	border-radius: 3px;
+}
 .command:hover {
     cursor: pointer;
     text-decoration: underline;
     text-decoration-style: dashed;
+    background-color: #FAFAFA;
+}
+.mono {
+    font-family: Courier, monospace, fixed;
 }
 .boldtext {
     font-weight: bold;
 }
 .userwithphoto {
     color: blue;
+}
+.content-box {
+	overflow: hidden;
 }
 .modal-container {
     position: fixed;
@@ -362,7 +386,9 @@ table {
     position: fixed;
     left: 50%;
     top: 50%;
+    border-radius: 4px;
     transform: translate(-50%, -50%);
+	overflow-y: auto;
 }
 .form-title {
     margin-bottom: 3px;
@@ -370,7 +396,7 @@ table {
 .form-field {
     border: 1px solid #ccc;
     border-radius: 3px;
-    padding: 8px;
+    padding: 6px;
     margin-bottom: 5px;
     width: 280px;
 }
@@ -381,7 +407,34 @@ table {
     border-radius: 3px;
     padding: 5px;
     margin-bottom: 5px;
-    width: 280px;
+    width: 130px;
+}
+.button-accept {
+    background-color: #d6f5d6;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+    margin-bottom: 5px;
+    width: 130px;
+}
+.button-decline {
+    background-color: #ffe6e6;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+    margin-bottom: 5px;
+    width: 130px;
+}
+.form-error {
+	padding: 5px;
+	margin-bottom: 5px;
+	border: 1px solid #ebccd1;
+	border-radius: 4px;
+	color: #a94442;
+	background-color: #f2dede;
+	display: none;
 }
 .tooltip-user {
     position: absolute;
@@ -491,4 +544,35 @@ table {
 	z-index: 2;
 	width: 0;
 	height: 0;
+}
+.left-menu .active {
+    background-color: #DDDDDD;
+}
+.left-menu {
+	float: left;
+	width: 200px;
+    background-color: #FAFAFA;
+	border-radius: 4px;
+    margin-right: 10px;
+}
+.left-menu ul {
+	list-style-type: none;
+	margin: 5px;
+	overflow-wrap: break-word;
+	padding-left: 0px;
+}
+.left-menu li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+.left-menu li a:hover {
+    background-color: #555;
+    color: white;
+}
+.doc-info {
+    background-color: #FAFAFA;
+	border-radius: 4px;
+	padding: 10px;
 }
