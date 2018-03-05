@@ -95,7 +95,10 @@ require_once("inc.config.php");
 			{
 				echo 'Error: '.$db->get_last_error()."\n";
 			}
-			echo "Upgrade to version 2 complete!\n";
+			echo "\nNow you must add to inc.config.php something like\n\n";
+			echo '  $g_icons = array("Human", "Printer", "Fax");';
+			echo "\nAnd replace files templ/marker-static-[0-nn].png with you icons\n";
+			echo "\n\nUpgrade to version 2 complete!\n";
 		}
 		break;
 		case 2:

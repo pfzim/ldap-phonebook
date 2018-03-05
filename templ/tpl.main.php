@@ -1,7 +1,14 @@
 <?php include("tpl.header.php"); ?>
 		<h3 align="center">LDAP Phonebook</h3>
+		<div>
+			<span><b>Brithdays:</b></span>
+		<?php $i = 0; foreach($birthdays as &$row) { $i++; ?>
+			<span><b><?php eh($row[15]); ?></b></span> <span><?php eh($row[2].' '.$row[3]); ?></span>
+		<?php } ?>
+		</div>
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
+		<span class="command" onclick="gi('search').value = ''; filter_table();">Reset</span>
 		<?php if($uid) { ?>
 		<span class="command f-right" onclick="f_edit(null, 'contact');">Add contact</span>
 		<?php } ?>

@@ -378,7 +378,7 @@ function f_update_row(id)
 			}
 			else
 			{
-				var row = gi('row'+data.id);
+				var row = gi('row'+data.data.id);
 				if(!row)
 				{
 					row = gi("table-data").insertRow(0);
@@ -392,15 +392,14 @@ function f_update_row(id)
 					row.insertCell(7);
 				}
 
-				row.id = 'row'+data.id;
-				row.setAttribute("data-id", data.id);
-				row.setAttribute("data-map", data.map);
-				row.setAttribute("data-x", data.x);
-				row.setAttribute("data-y", data.y);
-				row.setAttribute("data-photo", data.photo);
-				row.cells[0].textContent = '';
-				row.cells[1].textContent = data.firstname + ' ' + data.lastname;
-				if(data.photo)
+				row.id = 'row'+data.data.id;
+				row.setAttribute("data-id", data.data.id);
+				row.setAttribute("data-map", data.data.map);
+				row.setAttribute("data-x", data.data.x);
+				row.setAttribute("data-y", data.data.y);
+				row.setAttribute("data-photo", data.data.photo);
+				row.cells[1].textContent = data.data.firstname + ' ' + data.data.lastname;
+				if(data.data.photo)
 				{
 					row.cells[1].className = 'userwithphoto';
 				}
@@ -410,19 +409,19 @@ function f_update_row(id)
 				row.cells[1].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
 				row.cells[1].onmousemove = function(event) { f_mv_img(event); };
 
-				row.cells[2].textContent = data.phone;
-				row.cells[3].textContent = data.mobile;
-				row.cells[4].innerHTML = '<a href="mailto:'+escapeHtml(data.mail)+'">'+escapeHtml(data.mail)+'</a>';
-				row.cells[5].textContent = data.position;
-				row.cells[6].textContent = data.department;
+				row.cells[2].textContent = data.data.phone;
+				row.cells[3].textContent = data.data.mobile;
+				row.cells[4].innerHTML = '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
+				row.cells[5].textContent = data.data.position;
+				row.cells[6].textContent = data.data.department;
 
-				var str = '<span class="command" onclick="f_edit(event);">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>';
+				var str = '<span class="command" onclick="f_edit(event, \'contact\');">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>';
 				for(i = 2; i <= map_count; i++)
 				{
 					str += ' <span class="command" data-map="'+i+'" onclick="f_map_set(event);">'+i+'</span>';
 				}
 
-				if(data.visible)
+				if(data.data.visible)
 				{
 					row.cells[7].innerHTML = str+' <span class="command" onclick="f_hide(event);">Hide</span>';
 				}
