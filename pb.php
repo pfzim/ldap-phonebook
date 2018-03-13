@@ -540,6 +540,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 									if($s_disabled && $db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1", $s_login)))
 									{
 										$id = $db->data[0][0];
+										$db->data[0][14] = 0;
 										$data[] = $db->data[0];
 										$db->put(rpv("UPDATE `@contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1", $id));
 										$count_updated++;
