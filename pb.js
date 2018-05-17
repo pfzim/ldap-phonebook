@@ -516,17 +516,37 @@ function f_edit(ev, form_id)
 	}
 }
 
-function f_upload(id)
+function f_upload_photo(id)
 {
-	var fd = new FormData(gi("photo-upload"));
+	gi('loading').style.display = 'block';
+	var fd = new FormData(gi("form-file-upload"));
 	f_http("pb.php?action=setphoto&id="+id,
 		function(data, params)
 		{
+			gi('loading').style.display = 'none';
 			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
 				f_update_row(data.id);
 			}
+		},
+		null,
+		null,
+		fd
+	);
+
+	return false;
+}
+
+function f_upload_file(action)
+{
+	gi('loading').style.display = 'block';
+	var fd = new FormData(gi("form-file-upload"));
+	f_http("pb.php?action="+action,
+		function(data, params)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
 		},
 		null,
 		null,
@@ -546,13 +566,23 @@ function f_photo(ev)
 	}
 	if(id)
 	{
-		gi('upload').onchange = function(id) {
+		gi('file-upload').onchange = function(id) {
 			return function() {
-				f_upload(id);
+				f_upload_photo(id);
 			}
 		}(id);
-		gi('upload').click();
+		gi('file-upload').click();
 	}
+}
+
+function f_import_xml()
+{
+	gi('file-upload').onchange = function() {
+		return function() {
+			f_upload_file('import_xml');
+		}
+	}();
+	gi('file-upload').click();
 }
 
 function f_select_all(ev)

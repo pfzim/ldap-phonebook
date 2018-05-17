@@ -16,6 +16,7 @@
 			<li><a href="?action=all">Show all</a></li>
 			<li><a href="?action=sync">Sync</a></li>
 			<li><a href="?action=export">Export</a></li>
+			<li><a href="?action=services">Tools</a></li>
 			<?php } ?>
 			<ul style="float:right;list-style-type:none;">
 				<?php if($uid) { ?>

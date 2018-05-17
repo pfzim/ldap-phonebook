@@ -132,13 +132,13 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<div id="map-container" class="modal-container" style="display:none">
 			<span class="close" onclick="this.parentNode.style.display='none'">&times;</span>
 			<img id="map-image" class="map-image" src="templ/map1.png"/>
 			<img id="map-marker" class="map-marker" src="templ/marker.gif"/>
 		</div>
-		<form method="post" id="photo-upload" name="photo-upload">		
-			<input id="upload" type="file" name="photo" style="display: none"/>
+		<form method="post" id="form-file-upload" name="form-file-upload">
+			<input id="file-upload" type="file" name="file" style="display: none"/>
 		</form>
 <?php include("tpl.footer.php"); ?>

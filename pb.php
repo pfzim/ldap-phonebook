@@ -573,6 +573,104 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			include('templ/tpl.export.php');
 		}
 		exit;
+		case 'export_xml':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Disposition: attachment; filename=\"base.xml\"; filename*=utf-8''base.xml");
+
+			$db->select_assoc_ex($result, rpv("SELECT * FROM `@contacts` AS m"));
+
+			include('templ/tpl.export-all.php');
+		}
+		exit;
+		case 'dump_db':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			header("Content-Disposition: attachment; filename=\"base.sql\"; filename*=utf-8''base.sql");
+
+			echo rpv('TRUNCATE TABLE @contacts;')."\r\n";
+			
+			$db->select_assoc_ex($result, rpv("SELECT * FROM `@contacts` AS m"));
+
+			foreach($result as &$row)
+			{
+				$keys = '';
+				$values = '';
+				foreach($row as $key => $value)
+				{
+					if($key != 'id')
+					{
+						if(!empty($keys))
+						{
+							$keys .= ', ';
+							$values .= ', ';
+						}
+						$keys .= '`'.sql_escape($key).'`';
+						$values .= '\''.sql_escape($value).'\'';
+					}
+				}
+
+				echo rpv('INSERT INTO @contacts (?) VALUES (?);', $keys, $values)."\r\n";
+			}
+		}
+		exit;
+		case 'import_xml':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+			
+			if(!file_exists(@$_FILES['file']['tmp_name']))
+			{
+				echo '{"code": 1, "message": "Invalid XML"}';
+				exit;
+			}
+			
+			$result_ok = 0;
+			$result_fail = 0;
+
+			$xml = simplexml_load_file(@$_FILES['file']['tmp_name']);
+			if($xml === FALSE)
+			{
+				echo '{"code": 1, "message": "XML load and parse failed"}';
+				exit;
+			}
+
+			if(!$db->put(rpv('TRUNCATE TABLE @contacts')))
+			{
+				echo '{"code": 1, "message": "Truncate table failed"}';
+				exit;
+			}
+
+			foreach($xml->children() as $contact)
+			{
+				$keys = '';
+				$values = '';
+				foreach($contact->children() as $key => $value)
+				{
+					if($key != 'id')
+					{
+						if(!empty($keys))
+						{
+							$keys .= ', ';
+							$values .= ', ';
+						}
+						$keys .= '`'.sql_escape($key).'`';
+						$values .= '\''.sql_escape($value).'\'';
+					}
+				}
+
+				if($db->put(rpv('INSERT INTO @contacts (?) VALUES (?)', $keys, $values)))
+				{
+					$result_ok++;
+				}
+				else
+				{
+					$result_fail++;
+				}
+			}
+			
+			echo '{"code": 0, "ok": '.$result_ok.', "fail": '.$result_fail.', "message": "XML imported (OK: '.$result_ok.', FAIL: '.$result_fail.')"}';
+		}
+		exit;
 		case 'export_selected':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
@@ -849,6 +947,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			require_once('inc.acs.php');
 
 			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "location": '.intval(get_acs_location($db->data[0][0], $db->data[0][1], $db->data[0][2], $db->data[0][3])).'}';
+		}
+		exit;
+		case 'services':
+		{
+			header("Content-Type: text/html; charset=utf-8");
+
+			include('templ/tpl.services.php');
 		}
 		exit;
 		case 'map':
