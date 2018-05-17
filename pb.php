@@ -969,6 +969,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/html; charset=utf-8");
 
+			$db->select_ex($birthdays, rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible`, DATE_FORMAT(m.`bday`, '%d.%m') FROM `@contacts` AS m WHERE m.`visible` = 1 AND ((DAY(m.`bday`) = DAY(NOW()) AND MONTH(m.`bday`) = MONTH(NOW())) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 1 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 1 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 2 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 2 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 3 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 3 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 4 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 4 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 5 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 5 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 6 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 6 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 7 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 7 DAY))) ORDER BY MONTH(m.`bday`), DAY(m.`bday`), m.`lname`, m.`fname`"));
 			$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m ORDER BY m.`lname`, m.`fname`"));
 
 			include('templ/tpl.main.php');
