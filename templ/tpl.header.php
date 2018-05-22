@@ -5,8 +5,9 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<title>LDAP phonebook</title>
-		<link rel="icon" type="image/png" href="templ/favicon.png" />
 		<link type="text/css" href="templ/style.css" rel="stylesheet" />
+		<link rel="icon" type="image/png" sizes="32x32" href="templ/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="templ/favicon-16x16.png">
 		<script src="pb.js"></script>
 	</head>
 	<body>
