@@ -591,13 +591,18 @@ function f_menu(ev)
 	{
 		el_src = ev.target || ev.srcElement;
 		id = el_src.parentNode.parentNode.getAttribute('data-id');
+		f_menu_id(el_src, id);
 	}
+}
+
+function f_menu_id(ev, el_src, id)
+{
 	if(id)
 	{
 		var el = gi('contact-menu');
 		var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
 		var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
-		el.style.left = Math.round(pX)  + "px";
+		el.style.left = Math.round(pX-190)  + "px";
 		el.style.top = Math.round(pY)  + "px";
 		el.setAttribute('data-id', id);
 		gi('menu-cmd-edit').style.display = 'none';
@@ -800,10 +805,15 @@ function f_click(ev)
 function f_drag(ev)
 {
 	var el_src = ev.target || ev.srcElement;
+	if(ev.button > 1)
+	{
+		f_menu_id(ev, el_src, el_src.getAttribute('data-id'));
+		return false;
+	}
 	el_src.style.border="1px dashed red";
 	el_src.style.borderRadius = "5px";
 
-	var box = document.getElementById('map-image').getBoundingClientRect();
+	var box = document.getElementById('map-image-drag').getBoundingClientRect();
 	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
 	var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
@@ -815,7 +825,7 @@ function f_drag(ev)
 	{
 		return function(ev)
 		{
-			var box = document.getElementById('map-image').getBoundingClientRect();
+			var box = document.getElementById('map-image-drag').getBoundingClientRect();
 			var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 			var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
 			var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
@@ -839,7 +849,7 @@ function f_drop(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	document.onmousemove = null;
-	var box = document.getElementById('map-image').getBoundingClientRect();
+	var box = document.getElementById('map-image-drag').getBoundingClientRect();
 	//alert('px: '+ev.pageX+'  py: '+ev.pageY+'   cx: '+(box.left)+'  py: '+(box.top));
 	var sx = (window.pageXOffset !== undefined)? window.pageXOffset: (document.documentElement || document.body.parentNode || document.body).scrollLeft;
 	var sy = (window.pageYOffset !== undefined)? window.pageYOffset: (document.documentElement || document.body.parentNode || document.body).scrollTop;
