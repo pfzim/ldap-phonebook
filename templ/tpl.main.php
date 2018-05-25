@@ -37,27 +37,14 @@
 				<td><input type="checkbox" name="check" value="<?php eh($row[0]); ?>"/></td>
 				<?php } ?>
 				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(intval($row[10])) { eh('userwithphoto'); } ?>"><?php eh($row[2].' '.$row[3]); ?></td>
-				<td class="command" onclick="f_get_acs_location(event);"><?php eh($row[7]); ?></td>
+				<td><?php eh($row[7]); ?></td>
 				<td><?php eh($row[8]); ?></td>
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
 				<td>
-					<?php if(empty($row[1])) { ?>
-						<span class="command" onclick="f_edit(event, 'contact');">Edit</span>
-						<span class="command" onclick="f_delete(event);">Delete</span>
-						<span class="command" onclick="f_photo(event);">Photo</span>
-					<?php } ?>
-					<span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>
-					<?php for($i = 2; $i <= PB_MAPS_COUNT; $i++) { ?>
-						<span class="command" data-map="<?php eh($i); ?>" onclick="f_map_set(event);"><?php eh($i); ?></span>
-					<?php } ?>
-					<?php if($row[14]) { ?>
-						<span class="command" onclick="f_hide(event);">Hide</span>
-					<?php } else { ?>
-						<span class="command" onclick="f_show(event);">Show</span>
-					<?php } ?>
+					<span class="command" onclick="f_menu(event);">Menu</span>
 				</td>
 				<?php } ?>
 			</tr>
@@ -141,4 +128,21 @@
 		<form method="post" id="form-file-upload" name="form-file-upload">
 			<input id="file-upload" type="file" name="file" style="display: none"/>
 		</form>
+
+		<div id="contact-menu" class="contact-menu" data-id="0">
+			<ul>
+				<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>
+					<li><a href="#" data-map="<?php eh($i); ?>" onclick="f_map_set(event); return false;">Locate map&nbsp;<?php eh($i); ?></a></li>
+				<?php } ?>
+				<li><a href="#" onclick="f_get_acs_location(event);">Query ACS</a></li>
+				<li><a id="menu-cmd-edit" href="#" onclick="f_edit(event, 'contact'); return false;">Edit</a></li>
+				<li><a id="menu-cmd-delete" href="#" onclick="f_delete(event); return false;">Delete</a></li>
+				<li><a id="menu-cmd-photo" href="#" onclick="f_photo(event); return false;">Upload photo</a></li>
+				<li><a id="menu-cmd-show" href="#" onclick="f_show(event); return false;">Show</a></li>
+				<li><a id="menu-cmd-hide" href="#" onclick="f_hide(event); return false;">Hide</a></li>
+				<li><a id="menu-cmd-connect-0" href="#">Connect to &lt;comp_name&gt;</a></li>
+				<li><a id="menu-cmd-connect-1" href="#">Connect to &lt;comp_name&gt;</a></li>
+				<li><a id="menu-cmd-connect-2" href="#">Connect to &lt;comp_name&gt;</a></li>
+			</ul>
+		</div>
 <?php include("tpl.footer.php"); ?>

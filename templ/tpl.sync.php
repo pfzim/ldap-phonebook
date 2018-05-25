@@ -30,6 +30,7 @@
 				<td><?php eh($row[4]); ?></td>
 				<?php if($uid) { ?>
 				<td>
+<div id="temporary-fix">
 					<?php if(empty($row[1])) { ?>
 						<span class="command" onclick="f_edit(event);">Edit</span>
 						<span class="command" onclick="f_delete(event);">Delete</span>
@@ -44,6 +45,7 @@
 					<?php } else { ?>
 						<span class="command" onclick="f_show(event);">Show</span>
 					<?php } ?>
+</div>
 				</td>
 				<?php } ?>
 			</tr>

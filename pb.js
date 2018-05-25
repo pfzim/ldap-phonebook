@@ -117,9 +117,9 @@ function f_sw_img(ev)
 		var el = gi('userphoto');
 		el.src = 'photos/t'+el_src.parentNode.getAttribute('data-id')+'.jpg';
 		el = gi('imgblock');
-		imgblock.style.display = 'block';
-		imgblock.style.left = (ev.clientX+10)  + "px";
-		imgblock.style.top = (ev.clientY+10)  + "px";
+		el.style.display = 'block';
+		el.style.left = (ev.clientX+10)  + "px";
+		el.style.top = (ev.clientY+10)  + "px";
 	}
 }
 
@@ -193,7 +193,7 @@ function f_set_location(id, map, x, y)
 function f_map_set(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	var map = el_src.getAttribute('data-map');
 	gi('map-container').onclick = null;
 	gi('map-image').onload = null;
@@ -217,7 +217,7 @@ function f_map_set(ev)
 function f_hide(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
 		function(data, el)
 		{
@@ -235,7 +235,7 @@ function f_hide(ev)
 function f_show(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
 		function(data, el)
 		{
@@ -253,7 +253,7 @@ function f_show(ev)
 function f_get_acs_location(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var id = el_src.parentNode.getAttribute('data-id');
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'get_acs_location', 'id': id }),
 		function(data, el)
 		{
@@ -283,7 +283,7 @@ function f_get_acs_location(ev)
 function f_delete(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	f_http("pb.php?"+json2url({'action': 'delete', 'id': id }),
 		function(data, el)
 		{
@@ -415,20 +415,7 @@ function f_update_row(id)
 				row.cells[5].textContent = data.data.position;
 				row.cells[6].textContent = data.data.department;
 
-				var str = '<span class="command" onclick="f_edit(event, \'contact\');">Edit</span> <span class="command" onclick="f_delete(event);">Delete</span> <span class="command" onclick="f_photo(event);">Photo</span> <span class="command" data-map="1" onclick="f_map_set(event);">Map&nbsp;1</span>';
-				for(i = 2; i <= map_count; i++)
-				{
-					str += ' <span class="command" data-map="'+i+'" onclick="f_map_set(event);">'+i+'</span>';
-				}
-
-				if(data.data.visible)
-				{
-					row.cells[7].innerHTML = str+' <span class="command" onclick="f_hide(event);">Hide</span>';
-				}
-				else
-				{
-					row.cells[7].innerHTML = str+' <span class="command" onclick="f_show(event);">Show</span>';
-				}
+				row.cells[7].innerHTML = '<span class="command" onclick="f_menu(event);">Menu</span>';
 				//row.cells[7].onclick = function(event) { h(event); };
 			}
 		}
@@ -438,10 +425,11 @@ function f_update_row(id)
 function f_edit(ev, form_id)
 {
 	var id = 0;
+	var el_src;
 	if(ev)
 	{
-		var el_src = ev.target || ev.srcElement;
-		id = el_src.parentNode.parentNode.getAttribute('data-id');
+		el_src = ev.target || ev.srcElement;
+		id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 		//id = ev;
 	}
 	if(!id)
@@ -562,7 +550,7 @@ function f_photo(ev)
 	if(ev)
 	{
 		var el_src = ev.target || ev.srcElement;
-		id = el_src.parentNode.parentNode.getAttribute('data-id');
+		id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	}
 	if(id)
 	{
@@ -572,6 +560,99 @@ function f_photo(ev)
 			}
 		}(id);
 		gi('file-upload').click();
+	}
+}
+
+var parentElement;
+
+documentClick = function (event) {
+	var parent;
+	var wrapperElement = gi('contact-menu');
+	if (event.target !== parentElement && event.target !== wrapperElement) {
+		parent = event.target.parentNode;
+		  while (parent !== wrapperElement && parent !== parentElement) {
+			  parent = parent.parentNode;
+			  if (parent === null) {
+				wrapperElement.style.display = 'none';
+				//wrapperElement.parentNode.removeChild(wrapperElement);
+				document.removeEventListener('click', documentClick, false);
+				wrapperElement = null;
+				  break;
+			  }
+		}
+	}
+};
+
+function f_menu(ev)
+{
+	var id = 0;
+	var el_src;
+	if(ev)
+	{
+		el_src = ev.target || ev.srcElement;
+		id = el_src.parentNode.parentNode.getAttribute('data-id');
+	}
+	if(id)
+	{
+		var el = gi('contact-menu');
+		var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
+		var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
+		el.style.left = Math.round(pX)  + "px";
+		el.style.top = Math.round(pY)  + "px";
+		el.setAttribute('data-id', id);
+		gi('menu-cmd-edit').style.display = 'none';
+		gi('menu-cmd-photo').style.display = 'none';
+		gi('menu-cmd-delete').style.display = 'none';
+		gi('menu-cmd-show').style.display = 'none';
+		gi('menu-cmd-hide').style.display = 'none';
+		gi('menu-cmd-connect-0').style.display = 'none';
+		gi('menu-cmd-connect-1').style.display = 'none';
+		gi('menu-cmd-connect-2').style.display = 'none';
+		el.style.display = 'block';
+		parentElement = el_src;
+		document.addEventListener('click', documentClick, false);
+		
+		f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),
+			function(data, el)
+			{
+				if(!data.code)
+				{
+					// add pc to list
+					if(data.code)
+					{
+						f_notify(data.message, "error");
+					}
+					else
+					{
+						if(data.data.samname == '')
+						{
+							gi('menu-cmd-edit').style.display = 'block';
+							gi('menu-cmd-photo').style.display = 'block';
+							gi('menu-cmd-delete').style.display = 'block';
+						}
+						if(data.data.visible)
+						{
+							gi('menu-cmd-hide').style.display = 'block';
+						}
+						else
+						{
+							gi('menu-cmd-show').style.display = 'block';
+						}
+						var i;
+						for(i = 0; i < 3; i++)
+						{
+							if(data.data.pc[i] != '')
+							{
+								gi('menu-cmd-connect-'+i).href = 'msraurl:' + data.data.pc[i];
+								gi('menu-cmd-connect-'+i).style.display = 'block';
+								gi('menu-cmd-connect-'+i).textContent = 'Connect to ' + data.data.pc[i];
+							}
+						}
+					}
+				}
+			},
+			el_src
+		);
 	}
 }
 
