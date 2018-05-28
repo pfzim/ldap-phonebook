@@ -610,7 +610,7 @@ function f_menu_id(ev, el_src, id)
 		var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
 		var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
 		el.style.left = Math.round(pX-190)  + "px";
-		el.style.top = Math.round(pY)  + "px";
+		el.style.top = Math.round(pY+5)  + "px";
 		el.setAttribute('data-id', id);
 		gi('menu-cmd-edit').style.display = 'none';
 		gi('menu-cmd-photo').style.display = 'none';
