@@ -214,6 +214,13 @@ function f_map_set(ev)
 	};
 };
 
+function f_map_unset(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
+	f_set_location(id, 0, 0, 0);
+}
+
 function f_hide(ev)
 {
 	var el_src = ev.target || ev.srcElement;
@@ -591,7 +598,7 @@ function f_menu(ev)
 	{
 		el_src = ev.target || ev.srcElement;
 		id = el_src.parentNode.parentNode.getAttribute('data-id');
-		f_menu_id(el_src, id);
+		f_menu_id(ev, el_src, id);
 	}
 }
 
@@ -613,6 +620,7 @@ function f_menu_id(ev, el_src, id)
 		gi('menu-cmd-connect-0').style.display = 'none';
 		gi('menu-cmd-connect-1').style.display = 'none';
 		gi('menu-cmd-connect-2').style.display = 'none';
+		gi('menu-loading').style.display = 'block';
 		el.style.display = 'block';
 		parentElement = el_src;
 		document.addEventListener('click', documentClick, false);
@@ -620,6 +628,7 @@ function f_menu_id(ev, el_src, id)
 		f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),
 			function(data, el)
 			{
+				gi('menu-loading').style.display = 'none';
 				if(!data.code)
 				{
 					// add pc to list
