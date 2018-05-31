@@ -11,16 +11,22 @@
 Все изменения нужно производить в AD, после чего провести повторную синхронизацию, при которой будут добавлены новые и обновлены существующие контакты.
 
 Функциональные возможности:
-- Импорт контактов из AD
+- Импорт контактов и фото из AD
 - Показать/скрыть любой контакт
 - Добавлять, редактировать и удалять локальные контакты
 - Указать расположение контакта на плане офиса. Удобно для ориентирования в большой компании
 - Экспорт в .xml файл для использования в приложении [PhoneBook](https://github.com/pfzim/PhoneBook) для Windows
+- Бекап всех контактов с координатами в XML
+- Восстановление контактов из XML бекапа
+- Скрытие всех контактов, которые были отключены в AD
 
 Карты хранятся в файлах `templ/map[1-5].png`
 
 ## Системные требования
-Apache, MySQL, PHP.
+- Apache
+- MySQL
+- PHP
+- Active Directory (опционально)
 
 Подключить модули расширения в php.ini или скомпилировать PHP с поддержкой LDAP
 - `extension=php_ldap.dll`
@@ -80,16 +86,22 @@ Imported contacts can not be edited, you can only hide them from the list and sp
 All that needs to be done in AD, then re-synchronize, which will be added new and updated.
 
 Functionality:
-- Import contacts from AD
+- Import contacts and photos from AD
 - Show / hide any contact
 - Add, edit and delete local contacts
 - Indicate the location of the contact on the office plan. Convenient for orientation in a large company
 - Export to an .xml file for use in the [Phonebook] application (https://github.com/pfzim/PhoneBook) for Windows
+- Backup all contacts with coordinates to XML file
+- Restore all contacts from XML file
+- Hide all contacts that was disabled in AD
 
 Maps are stored in the files `templ / map [1-5] .png`
 
 ## System requirements
-Apache, MySQL, PHP.
+- Apache
+- MySQL
+- PHP
+- Active Directory (optional)
 
 Plug-ins in php.ini or compile PHP with LDAP support
 - `extension = php_ldap.dll`
