@@ -584,6 +584,7 @@ body {
     background-color: #FAFAFA;
 	border-radius: 4px;
     margin-right: 10px;
+    border: 1px solid #CCC;
 }
 .contact-menu ul {
 	list-style-type: none;
