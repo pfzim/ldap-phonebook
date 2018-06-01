@@ -200,6 +200,7 @@ $config = <<<'EOT'
 	define("PB_MAPS_COUNT", 5);
 
 	$map_names = array("Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25");
+
 EOT;
 
 
@@ -454,6 +455,81 @@ EOT;
 					}
 					
 					echo '{"code": 0, "status": "OK"}';
+				}
+				exit;
+				case 'download_config':
+				{
+					if(empty($_GET['host'])) throw new Exception('Host value not defined!');
+					if(empty($_GET['db'])) throw new Exception('DB value not defined!');
+					if(empty($_GET['dbuser'])) throw new Exception('Login value not defined!');
+
+					if(empty($_GET['ldaphost'])) throw new Exception('LDAP Host value not defined!');
+					if(empty($_GET['ldapport'])) throw new Exception('LDAP Port value not defined!');
+					if(empty($_GET['ldapuser'])) throw new Exception('LDAP User value not defined!');
+					if(empty($_GET['ldappwd'])) throw new Exception('LDAP Password value not defined!');
+					if(empty($_GET['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
+
+					if(empty($_GET['mailhost'])) throw new Exception('MAIL Host value not defined!');
+					if(empty($_GET['mailport'])) throw new Exception('MAIL Port value not defined!');
+					if(empty($_GET['mailfrom'])) throw new Exception('MAIL From value not defined!');
+					if(empty($_GET['mailfromname'])) throw new Exception('MAIL From Name value not defined!');
+					if(empty($_GET['mailadmin'])) throw new Exception('MAIL Admin value not defined!');
+					if(empty($_GET['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
+
+					if(empty($_GET['allowmails'])) throw new Exception('MAIL RegExp filter not defined!');
+
+					$config = str_replace(
+						array(
+							'#host#',
+							'#login#',
+							'#password#',
+							'#db#',
+							'#ldap_host#',
+							'#ldap_port#',
+							'#ldap_user#',
+							'#ldap_password#',
+							'#ldap_base#',
+							'#ldap_filter#',
+							'#mail_host#',
+							'#mail_port#',
+							'#mail_user#',
+							'#mail_password#',
+							'#mail_secure#',
+							'#mail_admin#',
+							'#mail_admin_name#',
+							'#mail_from#',
+							'#mail_from_name#',
+							'#allow_mails#',
+							'#mail_auth#'
+						),
+						array(
+							sql_escape(@$_GET['host']),
+							sql_escape(@$_GET['dbuser']),
+							sql_escape(@$_GET['dbpwd']),
+							sql_escape(@$_GET['db']),
+							sql_escape(@$_GET['ldaphost']),
+							sql_escape(@$_GET['ldapport']),
+							sql_escape(@$_GET['ldapuser']),
+							sql_escape(@$_GET['ldappwd']),
+							sql_escape(@$_GET['ldapbase']),
+							sql_escape(@$_GET['ldapfilter']),
+							sql_escape(@$_GET['mailhost']),
+							sql_escape(@$_GET['mailport']),
+							sql_escape(@$_GET['mailuser']),
+							sql_escape(@$_GET['mailpwd']),
+							sql_escape(@$_GET['mailsecure']),
+							sql_escape(@$_GET['mailadmin']),
+							sql_escape(@$_GET['mailadminname']),
+							sql_escape(@$_GET['mailfrom']),
+							sql_escape(@$_GET['mailfromname']),
+							sql_escape(@$_GET['allowmails']),
+							empty($_GET['mailuser'])?'false':'true'
+						),
+						$config
+					);
+					
+					header("Content-Disposition: attachment; filename=\"inc.config.php\"; filename*=utf-8''inc.config.php");
+					echo $config;
 				}
 				exit;
 				case 'remove_self':
@@ -948,6 +1024,20 @@ EOT;
 				);
 			}
 
+			function f_download_config(id)
+			{
+				var ms = gi("mail_secure");
+				window.location = "install.php?action=download_config&" +
+					'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
+					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
+					+'&mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
+					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
+					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
+					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+				;
+			}
+
 			function f_remove_self(id)
 			{
 				f_post(id, "remove_self", 'goodbay=script');
@@ -1177,7 +1267,7 @@ EOT;
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
-					<button type="button" class="btn btn-primary" onclick='f_save_config(9);'>9. Save config</button><div id="result_9" class="alert alert-danger" style="display: none"></div>
+					<button type="button" class="btn btn-primary" onclick='f_save_config(9);'>9. Save config</button> or <button type="button" class="btn btn-primary" onclick='f_download_config(9);'>Download config</button><div id="result_9" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 		</div>
