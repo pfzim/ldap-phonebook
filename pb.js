@@ -609,8 +609,12 @@ function f_menu_id(ev, el_src, id)
 		var el = gi('contact-menu');
 		var pX = ev.pageX || (ev.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement.clientLeft || 0));
 		var pY = ev.pageY || (ev.clientY + (document.documentElement && document.documentElement.scrollTop || document.body && document.body.scrollTop || 0) - (document.documentElement.clientTop || 0));
-		el.style.left = Math.round(pX-190)  + "px";
-		el.style.top = Math.round(pY+5)  + "px";
+		pX = Math.round(pX-190);
+		pY = Math.round(pY+5);
+		if(pX < 0) pX = 0;
+		if(pY < 0) pY = 0;
+		el.style.left = pX  + "px";
+		el.style.top = pY + "px";
 		el.setAttribute('data-id', id);
 		gi('menu-cmd-edit').style.display = 'none';
 		gi('menu-cmd-photo').style.display = 'none';
