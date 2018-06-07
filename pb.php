@@ -122,13 +122,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$config[$row[0]] = $row[1];
 		}
 	}
-	
-	if(!isset($config['db_version']) || (intval($config['db_version']) != 2))
+
+	if(!isset($config['db_version']) || (intval($config['db_version']) != 3))
 	{
 		header('Location: upgrade.php');
 		exit;
 	}
-	
+
 	$uid = 0;
 	if(isset($_SESSION['uid']))
 	{
@@ -180,7 +180,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 						include('templ/tpl.login.php');
 						exit;
 					}
-					
+
 					$ldap = @ldap_connect(LDAP_HOST, LDAP_PORT);
 					if(!$ldap)
 					{
@@ -188,7 +188,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 						include('templ/tpl.login.php');
 						exit;
 					}
-					
+
 					ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
 					ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 					if(!@ldap_bind($ldap, $login.'@'.$domain, @$_POST['passwd']))
@@ -221,7 +221,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					}
 
 					$login = $records[0]['samaccountname'][0];
-					
+
 					if($db->select(rpv("SELECT m.`id`, m.`passwd` FROM `@users` AS m WHERE m.`login` = ! AND m.`ldap` = 1 AND m.`deleted` = 0 LIMIT 1", $login)))
 					{
 						if(!empty($db->data[0][1]))
@@ -589,7 +589,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Disposition: attachment; filename=\"base.sql\"; filename*=utf-8''base.sql");
 
 			echo rpv('TRUNCATE TABLE @contacts;')."\r\n";
-			
+
 			$db->select_assoc_ex($result, rpv("SELECT * FROM `@contacts` AS m"));
 
 			foreach($result as &$row)
@@ -617,13 +617,13 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		case 'import_xml':
 		{
 			header("Content-Type: text/plain; charset=utf-8");
-			
+
 			if(!file_exists(@$_FILES['file']['tmp_name']))
 			{
 				echo '{"code": 1, "message": "Invalid XML"}';
 				exit;
 			}
-			
+
 			$result_ok = 0;
 			$result_fail = 0;
 
@@ -667,7 +667,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					$result_fail++;
 				}
 			}
-			
+
 			echo '{"code": 0, "ok": '.$result_ok.', "fail": '.$result_fail.', "message": "XML imported (OK: '.$result_ok.', FAIL: '.$result_fail.')"}';
 		}
 		exit;
@@ -927,6 +927,16 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 
 			$compname = array('', '', '');
+			
+			if($db->select_ex($comps, rpv("SELECT m.`computer` FROM `@handshake` AS m WHERE m.`user` = ! ORDER BY m.`date` DESC LIMIT 3", $db->data[0][1])))
+			{
+				$i = 0;
+				foreach($comps as &$comp)
+				{
+					$compname[$i++] = &$comp[0];
+				}
+			}
+			
 
 			echo '{"code": 0, "data": {"id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).', "bday": "'.json_escape($db->data[0][15]).'", "type": '.intval($db->data[0][16]).', "pc": ["'.json_escape($compname[0]).'", "'.json_escape($compname[1]).'", "'.json_escape($compname[2]).'"]}}';
 		}
@@ -949,6 +959,24 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			require_once('inc.acs.php');
 
 			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "location": '.intval(get_acs_location($db->data[0][0], $db->data[0][1], $db->data[0][2], $db->data[0][3])).'}';
+		}
+		exit;
+		case 'hello':
+		{
+			header("Content-Type: text/plain; charset=utf-8");
+
+			$s_user_name = trim(@$_POST['user']);
+			$s_comp_name = trim(@$_POST['comp']);
+
+			if(empty($s_user_name))
+			{
+				echo '{"code": 1, "message": "Undefined user name"}';
+				exit;
+			}
+
+			$db->put(rpv("INSERT INTO `@handshake` (`user`, `date`, `computer`, `ip`) VALUES (!, NOW(), !, !)", $s_user_name, $s_comp_name, $ip));
+
+			echo '{"code": 0, "message": "HI"}';
 		}
 		exit;
 		case 'services':

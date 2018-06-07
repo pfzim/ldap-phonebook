@@ -62,11 +62,13 @@ require_once("inc.config.php");
 		}
 	}
 
+	echo "Upgrading...\n";
+
 	switch(intval($config['db_version']))
 	{
 		case 0:
 		{
-			echo "Create 'config' table...\n";
+			echo "\nCreate 'config' table...\n";
 			if(!$db->put(rpv("CREATE TABLE @config (`name` VARCHAR(255) NOT NULL DEFAULT '', `value` VARCHAR(8192) NOT NULL DEFAULT '', PRIMARY KEY(`name`)) ENGINE = InnoDB")))
 			{
 				echo 'Error: '.$db->get_last_error()."\n";
@@ -85,7 +87,7 @@ require_once("inc.config.php");
 		}
 		case 1:
 		{
-			echo "Add column 'type' to 'contacts' table...\n";
+			echo "\nAdd column 'type' to 'contacts' table...\n";
 			if(!$db->put(rpv("ALTER TABLE @contacts ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
 			{
 				echo 'Error: '.$db->get_last_error()."\n";
@@ -100,8 +102,22 @@ require_once("inc.config.php");
 			echo "\nAnd replace files templ/marker-static-[0-nn].png with you icons\n";
 			echo "\n\nUpgrade to version 2 complete!\n";
 		}
-		break;
 		case 2:
+		{
+			echo "\nCreate 'handshake' table...\n";
+			if(!$db->put(rpv("CREATE TABLE @handshake (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `user` VARCHAR(255) NOT NULL, `date` DATETIME NOT NULL, `computer` VARCHAR(255) NOT NULL DEFAULT '', `ip` VARCHAR(255) NOT NULL DEFAULT '', PRIMARY KEY(`id`)) ENGINE = InnoDB")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+			echo "Set db_version = '3'...\n";
+			if(!$db->put(rpv("UPDATE @config SET `value` = 3 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+			echo "\n\nUpgrade to version 3 complete!\n";
+		}
+		break;
+		case 3:
 		{
 			echo "Upgrade doesn't required\n";
 		}
