@@ -937,7 +937,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				}
 			}
 			
-
 			echo '{"code": 0, "data": {"id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).', "bday": "'.json_escape($db->data[0][15]).'", "type": '.intval($db->data[0][16]).', "pc": ["'.json_escape($compname[0]).'", "'.json_escape($compname[1]).'", "'.json_escape($compname[2]).'"]}}';
 		}
 		exit;
@@ -984,6 +983,15 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			header("Content-Type: text/html; charset=utf-8");
 
 			include('templ/tpl.services.php');
+		}
+		exit;
+		case 'handshakes':
+		{
+			header("Content-Type: text/html; charset=utf-8");
+
+			$db->select_ex($handshakes, rpv("SELECT m.`id`, m.`date`, m.`user`, m.`computer`, m.`ip` FROM `@handshake` AS m ORDER BY m.`date`, m.`user`"));
+
+			include('templ/tpl.handshakes.php');
 		}
 		exit;
 		case 'map':

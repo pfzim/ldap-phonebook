@@ -16,6 +16,7 @@
 			<li><a href="?action=map&amp;id=1">Map</a></li>
 			<?php if($uid) { ?>
 			<li><a href="?action=all">Show all</a></li>
+			<li><a href="?action=handshakes">Handshakes</a></li>
 			<li><a href="?action=sync">Sync</a></li>
 			<li><a href="?action=export">Export</a></li>
 			<li><a href="?action=services">Tools</a></li>
