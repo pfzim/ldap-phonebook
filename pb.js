@@ -239,6 +239,24 @@ function f_hide(ev)
 	);
 };
 
+function f_hide2(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
+	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
+		function(data, el)
+		{
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				gi('menu-cmd-hide').style.display = 'none';
+				gi('menu-cmd-show').style.display = 'block';
+			}
+		},
+		el_src
+	);
+};
+
 function f_show(ev)
 {
 	var el_src = ev.target || ev.srcElement;
@@ -251,6 +269,24 @@ function f_show(ev)
 			{
 				el.textContent = 'Hide';
 				el.onclick = function(event) { f_hide(event); };
+			}
+		},
+		el_src
+	);
+};
+
+function f_show2(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
+	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
+		function(data, el)
+		{
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				gi('menu-cmd-hide').style.display = 'block';
+				gi('menu-cmd-show').style.display = 'none';
 			}
 		},
 		el_src

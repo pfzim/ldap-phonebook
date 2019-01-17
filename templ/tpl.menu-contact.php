@@ -9,8 +9,8 @@
 				<li><a id="menu-cmd-edit" href="#" onclick="f_edit(event, 'contact'); return false;">Edit</a></li>
 				<li><a id="menu-cmd-delete" href="#" onclick="f_delete(event); return false;">Delete</a></li>
 				<li><a id="menu-cmd-photo" href="#" onclick="f_photo(event); return false;">Upload photo</a></li>
-				<li><a id="menu-cmd-show" href="#" onclick="f_show(event); return false;">Show</a></li>
-				<li><a id="menu-cmd-hide" href="#" onclick="f_hide(event); return false;">Hide</a></li>
+				<li><a id="menu-cmd-show" href="#" onclick="f_show2(event); return false;">Show</a></li>
+				<li><a id="menu-cmd-hide" href="#" onclick="f_hide2(event); return false;">Hide</a></li>
 				<li><a id="menu-cmd-connect-0" href="#">Connect to &lt;comp_name&gt;</a></li>
 				<li><a id="menu-cmd-connect-1" href="#">Connect to &lt;comp_name&gt;</a></li>
 				<li><a id="menu-cmd-connect-2" href="#">Connect to &lt;comp_name&gt;</a></li>

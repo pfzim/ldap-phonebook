@@ -989,7 +989,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		{
 			header("Content-Type: text/html; charset=utf-8");
 
-			$db->select_ex($handshakes, rpv("SELECT m.`id`, m.`date`, m.`user`, m.`computer`, m.`ip` FROM `@handshake` AS m ORDER BY m.`date`, m.`user`"));
+			$db->select_ex($handshakes, rpv("SELECT m.`id`, m.`date`, m.`user`, m.`computer`, m.`ip` FROM `@handshake` AS m ORDER BY m.`date` DESC, m.`user` LIMIT 1000"));
 
 			include('templ/tpl.handshakes.php');
 		}
