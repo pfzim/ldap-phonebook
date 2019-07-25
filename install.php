@@ -200,6 +200,7 @@ $config = <<<'EOT'
 	define("PB_MAPS_COUNT", 5);
 
 	$map_names = array("Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25");
+	$g_icons = array("Human", "Printer", "Fax");
 
 EOT;
 
