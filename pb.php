@@ -200,7 +200,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					$cookie = '';
 					ldap_control_paged_result($ldap, 200, true, $cookie);
 
-					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.ldap_escape($login, null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
+					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($login, null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
 					if(!$sr)
 					{
 						ldap_unbind($ldap);
@@ -522,7 +522,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					{
 						ldap_control_paged_result($ldap, 200, true, $cookie);
 
-						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=2))", array('samaccountname', 'useraccountcontrol'));
+						$sr = ldap_search($ldap, LDAP_BASE_DN, "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))", array('samaccountname', 'useraccountcontrol')); // OR (sAMAccountType=805306368)
 						if($sr)
 						{
 							$records = ldap_get_entries($ldap, $sr);
@@ -937,6 +937,41 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				}
 			}
 			
+			/* // *** start cut here ***
+			$line = '';
+
+			$f = @fopen('\\\\server.with.logs\\logs$\\'.$db->data[0][1].'.txt', 'r');
+			if($f !== false)
+			{
+				$cursor = -1;
+
+				fseek($f, $cursor, SEEK_END);
+				$char = fgetc($f);
+
+				for($i = 0; $i < 3; $i++)
+				{
+					// Trim trailing newline chars of the file
+					while ($char === "\n" || $char === "\r") {
+						fseek($f, $cursor--, SEEK_END);
+						$char = fgetc($f);
+					}
+
+					// Read until the start of file or first newline char
+					while ($char !== false && $char !== "\n" && $char !== "\r") {
+						// Prepend the new char
+						$line = $char . $line;
+						fseek($f, $cursor--, SEEK_END);
+						$char = fgetc($f);
+					}
+
+					if(preg_match('/logged into ([^\s]+) ip \d+\.\d+\.\d+\.\d+ using/', $line, $match))
+					{
+						$compname[$i] = $match[1];
+					}
+				}
+			}
+			// *** end cut here *** */
+
 			echo '{"code": 0, "data": {"id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).', "bday": "'.json_escape($db->data[0][15]).'", "type": '.intval($db->data[0][16]).', "pc": ["'.json_escape($compname[0]).'", "'.json_escape($compname[1]).'", "'.json_escape($compname[2]).'"]}}';
 		}
 		exit;
