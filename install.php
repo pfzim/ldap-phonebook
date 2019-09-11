@@ -173,6 +173,8 @@ $config = <<<'EOT'
 	define("DB_NAME", "#db#");
 	define("DB_CPAGE", "utf8");
 	define("DB_PREFIX", "pb_");
+	
+	define("LANGUAGES", "#langFile#");
 
 	define("PB_USE_LDAP_AUTH", 0);
 
@@ -398,6 +400,7 @@ EOT;
 					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
 
 					if(empty($_POST['allowmails'])) throw new Exception('MAIL RegExp filter not defined!');
+					if(empty($_POST['language'])) throw new Exception('Language not select.');
 
 					$config = str_replace(
 						array(
@@ -421,7 +424,8 @@ EOT;
 							'#mail_from#',
 							'#mail_from_name#',
 							'#allow_mails#',
-							'#mail_auth#'
+							'#mail_auth#',
+							'#langFile#'
 						),
 						array(
 							sql_escape(@$_POST['host']),
@@ -444,7 +448,8 @@ EOT;
 							sql_escape(@$_POST['mailfrom']),
 							sql_escape(@$_POST['mailfromname']),
 							sql_escape(@$_POST['allowmails']),
-							empty($_POST['mailuser'])?'false':'true'
+							empty($_POST['mailuser'])?'false':'true',
+							sql_escape(@$_POST['language'])
 						),
 						$config
 					);
@@ -500,7 +505,8 @@ EOT;
 							'#mail_from#',
 							'#mail_from_name#',
 							'#allow_mails#',
-							'#mail_auth#'
+							'#mail_auth#',
+							'#langFile#'
 						),
 						array(
 							sql_escape(@$_GET['host']),
@@ -523,7 +529,8 @@ EOT;
 							sql_escape(@$_GET['mailfrom']),
 							sql_escape(@$_GET['mailfromname']),
 							sql_escape(@$_GET['allowmails']),
-							empty($_GET['mailuser'])?'false':'true'
+							empty($_GET['mailuser'])?'false':'true',
+							sql_escape(@$_POST['language'])
 						),
 						$config
 					);
@@ -1021,6 +1028,7 @@ EOT;
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
 					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
 					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+					+'&language='+encodeURIComponent(gi('lang').value)
 				);
 			}
 
@@ -1035,6 +1043,7 @@ EOT;
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
 					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
 					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+					+'&language='+encodeURIComponent(gi('lang').value)
 				;
 			}
 
@@ -1047,6 +1056,26 @@ EOT;
 	<body>
 		<div class="container">
 		<div class="form-horizontal">
+			<div class="form-group"> 
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>Language settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="lang" class="control-label col-sm-2">Language:</label>
+				<div class="col-sm-5"> 
+					<select id="lang" class="form-control">
+						<?php 
+							$fileList = glob("language/*.php");
+							foreach ($fileList as $lanFile) { 
+								$path_parts = pathinfo($lanFile);
+								echo "<option>".$path_parts['filename']."</option>";
+							}; 
+						?>
+					</select>
+				</div>
+			</div>
+			
 			<div class="form-group"> 
 				<div class="col-sm-offset-2 col-sm-5">
 					<h3>MySQL settings</h3>
