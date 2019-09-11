@@ -1,5 +1,3 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php include("tpl.header.php"); ?>
 		<h3 align="center"><?php eh($lang["mainLDAPPhonebook"]) ?></h3>
 		<div>

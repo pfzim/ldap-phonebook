@@ -119,6 +119,22 @@ require_once("inc.config.php");
 		break;
 		case 3:
 		{
+			echo "\nAdd column 'pcity' to 'contacts' table...\n";
+			if(!$db->put(rpv("ALTER TABLE @contacts ADD COLUMN `pcity` varchar(255) NOT NULL DEFAULT '' AFTER `pint`")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+			echo "Set db_version = '4'...\n";
+			if(!$db->put(rpv("UPDATE @config SET `value` = 4 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+			echo "\nNow you must add to inc.config.php something like\n\n";
+			echo '  define("LANGUAGES", "EN");';
+			echo "\n\nUpgrade to version 4 complete!\n";
+		}
+		case 4:
+		{
 			echo "Upgrade doesn't required\n";
 		}
 		break;

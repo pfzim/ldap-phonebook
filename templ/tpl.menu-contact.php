@@ -1,5 +1,3 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php if(!defined("Z_PROTECTED")) exit; ?>
 		<div id="contact-menu" class="contact-menu" data-id="0">
 			<ul>

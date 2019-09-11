@@ -19,7 +19,7 @@ $lang = array (
 	"mainExportSelected"		=>  	"Экспорт выделенных",
 //----tpl.handshakes.php
 	"handshakesLDAPPhonebook"	=>  	"Телефонный справочник",
-	"handshakesSearch"			=>  	"Поиск..",
+	"handshakesSearch"			=>  	"Поиск...",
 	"handshakesReset"			=>  	"Сбросить",
 	"handshakesDate"			=>  	"Дата",
 	"handshakesUser"			=>  	"Пользователь",

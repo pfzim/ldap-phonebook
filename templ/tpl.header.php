@@ -1,6 +1,5 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php if(!defined("Z_PROTECTED")) exit; ?>
+<?php require_once '/language/'.LANGUAGES.'.php'; ?>
 <!DOCTYPE html>
 <html>
 	<head>

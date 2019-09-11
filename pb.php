@@ -124,7 +124,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		}
 	}
 
-	if(!isset($config['db_version']) || (intval($config['db_version']) != 3))
+	if(!isset($config['db_version']) || (intval($config['db_version']) != 4))
 	{
 		header('Location: upgrade.php');
 		exit;
@@ -1180,7 +1180,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 							WHERE m.`visible` = 1 
 							ORDER BY m.`lname`, m.`fname`"));
 
-	require_once '/language/'.LANGUAGES.'.php';
+	//require_once '/language/'.LANGUAGES.'.php';
 	
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');

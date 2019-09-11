@@ -90,7 +90,7 @@ Functionality:
 - Show / hide any contact
 - Add, edit and delete local contacts
 - Indicate the location of the contact on the office plan. Convenient for orientation in a large company
-- Export to an .xml file for use in the [Phonebook] application (https://github.com/pfzim/PhoneBook) for Windows
+- Export to an .xml file for use in the [Phonebook](https://github.com/pfzim/PhoneBook) application for Windows
 - Backup all contacts with coordinates to XML file
 - Restore all contacts from XML file
 - Hide all contacts that was disabled in AD

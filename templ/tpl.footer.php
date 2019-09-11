@@ -1,5 +1,3 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php if(!defined("Z_PROTECTED")) exit; ?>
 		<div id="loading" class="modal-container" style="display: none">
 			<div class="modal-content">

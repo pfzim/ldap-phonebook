@@ -1,5 +1,3 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php include("tpl.header.php"); ?>
 			<div class="login-block">
 				<h1><?php eh($lang["loginLoginHead"]) ?></h1>

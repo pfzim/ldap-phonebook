@@ -1,5 +1,3 @@
-<?php require_once '/language/'.LANGUAGES.'.php'; ?>
-
 <?php include("tpl.header.php"); ?>
 		<h3 align="center"><?php eh($lang["handshakesLDAPPhonebook"]) ?></h3>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="<?php eh($lang["handshakesSearch"]) ?>">

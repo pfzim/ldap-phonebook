@@ -140,11 +140,12 @@ CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   `org` varchar(255) NOT NULL DEFAULT '',
   `pos` varchar(255) NOT NULL DEFAULT '',
   `pint` varchar(255) NOT NULL DEFAULT '',
-	`pcity` varchar(255) NOT NULL DEFAULT '',
+  `pcity` varchar(255) NOT NULL DEFAULT '',
   `pcell` varchar(255) NOT NULL DEFAULT '',
   `mail` varchar(255) NOT NULL DEFAULT '',
   `bday` date DEFAULT NULL,
   `photo` int(10) unsigned NOT NULL DEFAULT '0',
+  `type` INTEGER UNSIGNED NOT NULL DEFAULT 0,
   `map` int(10) unsigned NOT NULL DEFAULT '0',
   `x` int(10) unsigned NOT NULL DEFAULT '0',
   `y` int(10) unsigned NOT NULL DEFAULT '0',
@@ -159,10 +160,34 @@ CREATE TABLE  `#DB_NAME#`.`pb_users` (
   `login` varchar(255) NOT NULL,
   `passwd` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `mail` varchar(1024) CHARACTER SET latin1 NOT NULL,
+  `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0,
   `sid` varchar(15) DEFAULT NULL,
   `deleted` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+EOT
+,
+<<<'EOT'
+CREATE TABLE `#DB_NAME#`.`handshake` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user` VARCHAR(255) NOT NULL,
+  `date` DATETIME NOT NULL,
+  `computer` VARCHAR(255) NOT NULL DEFAULT '',
+  `ip` VARCHAR(255) NOT NULL DEFAULT '',
+  PRIMARY KEY(`id`)
+) ENGINE = InnoDB
+EOT
+,
+<<<'EOT'
+CREATE TABLE `#DB_NAME#`.`config` (
+  `name` VARCHAR(255) NOT NULL DEFAULT '',
+  `value` VARCHAR(8192) NOT NULL DEFAULT '',
+  PRIMARY KEY(`name`)
+) ENGINE = InnoDB
+EOT
+,
+<<<'EOT'
+INSERT INTO `#DB_NAME#`.`config` (`name`, `value`) VALUES('db_version', 4)
 EOT
 );
 
