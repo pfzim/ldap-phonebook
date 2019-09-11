@@ -1,14 +1,16 @@
+<?php require_once '/language/'.LANGUAGES.'.php'; ?>
+
 <?php include("tpl.header.php"); ?>
-		<h3 align="center">LDAP Phonebook</h3>
-		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
-		<span class="command" onclick="gi('search').value = ''; filter_table();">Reset</span>
+		<h3 align="center"><?php eh($lang["handshakesLDAPPhonebook"]) ?></h3>
+		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="<?php eh($lang["handshakesSearch"]) ?>">
+		<span class="command" onclick="gi('search').value = ''; filter_table();"><?php eh($lang["handshakesReset"]) ?></span>
 		<table id="table" class="main-table">
 			<thead>
 			<tr>
-				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)">Date</th>
-				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)">User</th>
-				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)">Computer</th>
-				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)">IP</th>
+				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)"><?php eh($lang["handshakesDate"]) ?></th>
+				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)"><?php eh($lang["handshakesUser"]) ?></th>
+				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)"><?php eh($lang["handshakesComputer"]) ?></th>
+				<th width="20%" onclick="sortTable(<?php eh($i++); ?>)"><?php eh($lang["handshakesIP"]) ?></th>
 			</tr>
 			</thead>
 			<tbody id="table-data">
