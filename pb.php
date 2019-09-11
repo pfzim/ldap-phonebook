@@ -25,6 +25,7 @@ if(!file_exists('inc.config.php'))
 
 require_once("inc.config.php");
 
+
 function php_mailer($to, $name, $subject, $html, $plain)
 {
 	require_once 'libs/PHPMailer/PHPMailerAutoload.php';
@@ -151,6 +152,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 	if(empty($uid))
 	{
+		header("Content-Type: text/html; charset=utf-8");
 		switch($action)
 		{
 			case 'logon':
@@ -317,6 +319,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		}
 	}
 
+
+	
 	switch($action)
 	{
 		case 'logoff':
@@ -837,18 +841,19 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				'errors' => array()
 			);
 
-			$s_id = intval(@$_POST['id']);
-			$s_first_name = trim(@$_POST['firstname']);
-			$s_last_name = trim(@$_POST['lastname']);
-			$s_department = trim(@$_POST['department']);
-			$s_organization = trim(@$_POST['company']);
-			$s_position = trim(@$_POST['position']);
-			$s_phone_internal = trim(@$_POST['phone']);
-			$s_phone_mobile = trim(@$_POST['mobile']);
-			$s_mail = trim(@$_POST['mail']);
-			$s_bday = trim(@$_POST['bday']);
-			$s_type = trim(@$_POST['type']);
-			$s_photo = 0;
+			$s_id 				= intval(@$_POST['id']);
+			$s_first_name 		= trim(@$_POST['firstname']);
+			$s_last_name 		= trim(@$_POST['lastname']);
+			$s_department 		= trim(@$_POST['department']);
+			$s_organization 	= trim(@$_POST['company']);
+			$s_position 		= trim(@$_POST['position']);
+			$s_phone_internal 	= trim(@$_POST['phone']);
+			$s_phone_city 		= trim(@$_POST['phonecity']);
+			$s_phone_mobile 	= trim(@$_POST['mobile']);
+			$s_mail 			= trim(@$_POST['mail']);
+			$s_bday 			= trim(@$_POST['bday']);
+			$s_type 			= trim(@$_POST['type']);
+			$s_photo 			= 0;
 
 			if(!empty($s_bday))
 			{
@@ -875,13 +880,64 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			if(!$s_id)
 			{
-				$db->put(rpv("INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `bday`, `type`, `visible`) VALUES ('', !, !, !, !, !, !, !, !, #, !, #, 1)", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $s_bday, $s_type));
+				$db->put(rpv("INSERT INTO `@contacts` 
+								(`samname`, 
+								`fname`, 
+								`lname`, 
+								`dep`, 
+								`org`, 
+								`pos`, 
+								`pint`, 
+								`pcity`, 
+								`pcell`, 
+								`mail`, 
+								`photo`, 
+								`bday`, 
+								`type`, 
+								`visible`) 
+							VALUES ('', !, !, !, !, !, !, !, !, !, #, !, #, 1)", 
+								$s_first_name, 
+								$s_last_name, 
+								$s_department, 
+								$s_organization, 
+								$s_position, 
+								$s_phone_internal, 
+								$s_phone_city, 
+								$s_phone_mobile, 
+								$s_mail, 
+								$s_photo, 
+								$s_bday, 
+								$s_type));
 				$s_id = $db->last_id();
 				echo '{"code": 0, "id": '.$s_id.', "message": "Added (ID '.$s_id.')"}';
-			}
-			else
-			{
-				$db->put(rpv("UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = #, `bday` = !, `type` = # WHERE `id` = # AND `samname` = '' LIMIT 1", $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, $s_photo, $s_bday, $s_type, $s_id));
+			} else {
+				$db->put(rpv("UPDATE `@contacts` 
+							SET `fname` = !, 
+								`lname` = !, 
+								`dep` = !, 
+								`org` = !, 
+								`pos` = !, 
+								`pint` = !, 
+								`pcity` = !, 
+								`pcell` = !, 
+								`mail` = !, 
+								`photo` = #, 
+								`bday` = !, 
+								`type` = # 
+							WHERE `id` = # AND `samname` = '' LIMIT 1", 
+							$s_first_name, 
+							$s_last_name, 
+							$s_department, 
+							$s_organization, 
+							$s_position, 
+							$s_phone_internal, 
+							$s_phone_city, 
+							$s_phone_mobile, 
+							$s_mail, 
+							$s_photo, 
+							$s_bday, 
+							$s_type, 
+							$s_id));
 				echo '{"code": 0, "id": '.$s_id.',"message": "Updated (ID '.$s_id.')"}';
 			}
 		}
@@ -920,15 +976,34 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible`, DATE_FORMAT(m.`bday`, '%d.%m.%Y') AS create_date, m.`type` FROM `@contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
+			if(!$db->select_assoc(rpv("SELECT 	m.`id`, 
+												m.`samname`, 
+												m.`fname`, 
+												m.`lname`, 
+												m.`dep`, 
+												m.`org`, 
+												m.`pos`, 
+												m.`pint`, 
+												m.`pcell`, 
+												m.`mail`, 
+												m.`photo`, 
+												m.`map`, 
+												m.`x`, 
+												m.`y`, 
+												m.`visible`, 
+												DATE_FORMAT(m.`bday`, '%d.%m.%Y') AS create_date, 
+												m.`type`,
+												m.`pcity`
+								FROM `@contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
 			{
 				echo '{"code": 1, "message": "DB error"}';
 				exit;
 			}
 
+			$row = $db->data[0];
 			$compname = array('', '', '');
 			
-			if($db->select_ex($comps, rpv("SELECT m.`computer` FROM `@handshake` AS m WHERE m.`user` = ! ORDER BY m.`date` DESC LIMIT 3", $db->data[0][1])))
+			if($db->select_ex($comps, rpv("SELECT m.`computer` FROM `@handshake` AS m WHERE m.`user` = ! ORDER BY m.`date` DESC LIMIT 3", $row["samname"])))
 			{
 				$i = 0;
 				foreach($comps as &$comp)
@@ -937,7 +1012,28 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				}
 			}
 			
-			echo '{"code": 0, "data": {"id": '.intval($db->data[0][0]).', "samname": "'.json_escape($db->data[0][1]).'", "firstname": "'.json_escape($db->data[0][2]).'", "lastname": "'.json_escape($db->data[0][3]).'", "department": "'.json_escape($db->data[0][4]).'", "company": "'.json_escape($db->data[0][5]).'", "position": "'.json_escape($db->data[0][6]).'", "phone": "'.json_escape($db->data[0][7]).'", "mobile": "'.json_escape($db->data[0][8]).'", "mail": "'.json_escape($db->data[0][9]).'", "photo": '.intval($db->data[0][10]).', "map": '.intval($db->data[0][11]).', "x": '.intval($db->data[0][12]).', "y": '.intval($db->data[0][13]).', "visible": '.intval($db->data[0][14]).', "bday": "'.json_escape($db->data[0][15]).'", "type": '.intval($db->data[0][16]).', "pc": ["'.json_escape($compname[0]).'", "'.json_escape($compname[1]).'", "'.json_escape($compname[2]).'"]}}';
+			echo '{"code": 0, 
+					"data": {"id": '.intval($row["id"]).', 
+							"samname": "'.json_escape($row["samname"]).'",
+							"firstname": "'.json_escape($row["fname"]).'",
+							"lastname": "'.json_escape($row["lname"]).'", 
+							"department": "'.json_escape($row["dep"]).'", 
+							"company": "'.json_escape($row["org"]).'", 
+							"position": "'.json_escape($row["pos"]).'", 
+							"phone": "'.json_escape($row["pint"]).'", 
+							"phonecity": "'.json_escape($row["pcity"]).'", 
+							"mobile": "'.json_escape($row["pcell"]).'", 
+							"mail": "'.json_escape($row["mail"]).'", 
+							"photo": '.intval($row["photo"]).', 
+							"map": '.intval($row["map"]).', 
+							"x": '.intval($row["x"]).', 
+							"y": '.intval($row["y"]).', 
+							"visible": '.intval($row["visible"]).', 
+							"bday": "'.json_escape($row["create_date"]).'", 
+							"type": '.intval($row["type"]).', 
+							"pc": ["'.json_escape($compname[0]).'", 
+							"'.json_escape($compname[1]).'", 
+							"'.json_escape($compname[2]).'"]}}';
 		}
 		exit;
 		case 'get_acs_location':
@@ -1017,8 +1113,39 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 	header("Content-Type: text/html; charset=utf-8");
 
-	$db->select_ex($birthdays, rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible`, DATE_FORMAT(m.`bday`, '%d.%m') FROM `@contacts` AS m WHERE m.`visible` = 1 AND ((DAY(m.`bday`) = DAY(NOW()) AND MONTH(m.`bday`) = MONTH(NOW())) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 1 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 1 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 2 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 2 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 3 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 3 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 4 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 4 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 5 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 5 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 6 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 6 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 7 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 7 DAY))) ORDER BY MONTH(m.`bday`), DAY(m.`bday`), m.`lname`, m.`fname`"));
-	$db->select(rpv("SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`visible` = 1 ORDER BY m.`lname`, m.`fname`"));
+	$db->select_assoc_ex($birthdays, rpv("SELECT 	m.`id`, 
+													m.`samname`, 
+													m.`fname`, 
+													m.`lname`, 
+													DATE_FORMAT(m.`bday`, '%d.%m') AS DayMonth
+									FROM `@contacts` AS m 
+									WHERE 	m.`visible` = 1 AND 
+											MONTH(m.`bday`) = MONTH(NOW()) AND
+											DAY(m.`bday`) >= DAY(NOW()) AND
+											DAY(m.`bday`) <= DAY(NOW() + INTERVAL 7 DAY)					
+									ORDER BY MONTH(m.`bday`), DAY(m.`bday`), m.`lname`, m.`fname`"));
+	
+	$db->select_assoc(rpv("SELECT 	m.`id`, 
+									m.`samname`, 
+									m.`fname`, 
+									m.`lname`, 
+									m.`dep`, 
+									m.`org`, 
+									m.`pos`, 
+									m.`pint`, 
+									m.`pcell`, 
+									m.`mail`, 
+									m.`photo`, 
+									m.`map`, 
+									m.`x`, 
+									m.`y`, 
+									m.`visible`,
+									m.`pcity` 
+							FROM `@contacts` AS m 
+							WHERE m.`visible` = 1 
+							ORDER BY m.`lname`, m.`fname`"));
 
+	require_once '/language/'.LANGUAGES.'.php';
+	
 	include('templ/tpl.main.php');
 	//include('templ/tpl.debug.php');

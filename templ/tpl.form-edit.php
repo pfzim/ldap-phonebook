@@ -31,6 +31,10 @@
 				<div class="form-title"><label for="phone"><?php eh($lang["formEditPhone"]) ?></label></div>
 				<input class="form-field" id="phone" name="phone" type="edit" value=""/>
 				<div id="phone-error" class="form-error"></div>
+				
+				<div class="form-title"><label for="phonecity"><?php eh($lang["formEditPhoneCity"]) ?></label></div>
+				<input class="form-field" id="phonecity" name="phonecity" type="edit" value=""/>
+				<div id="phonecity-error" class="form-error"></div>
 
 				<div class="form-title"><label for="mobile"><?php eh($lang["formEditMobile"]) ?></label></div>
 				<input class="form-field" id="mobile" name="mobile" type="edit" value=""/>
