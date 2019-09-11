@@ -47,7 +47,7 @@ class MySQLDB
 	{
 		return mysqli_select_db($this->link, $db_name);
 	}
-	
+
 	public function select($query)
 	{
 		$this->data = FALSE;
@@ -140,6 +140,7 @@ CREATE TABLE `#DB_NAME#`.`pb_contacts` (
   `org` varchar(255) NOT NULL DEFAULT '',
   `pos` varchar(255) NOT NULL DEFAULT '',
   `pint` varchar(255) NOT NULL DEFAULT '',
+	`pcity` varchar(255) NOT NULL DEFAULT '',
   `pcell` varchar(255) NOT NULL DEFAULT '',
   `mail` varchar(255) NOT NULL DEFAULT '',
   `bday` date DEFAULT NULL,
@@ -174,6 +175,8 @@ $config = <<<'EOT'
 	define("DB_CPAGE", "utf8");
 	define("DB_PREFIX", "pb_");
 
+	define("LANGUAGES", "#langFile#");
+
 	define("PB_USE_LDAP_AUTH", 0);
 
 	define("LDAP_HOST", "#ldap_host#");
@@ -206,21 +209,21 @@ EOT;
 
 
 	//error_reporting(0);
-	
+
 	if(isset($_GET['action']))
 	{
 		$action = $_GET['action'];
 		try
 		{
 			header("Content-Type: text/plain; charset=utf-8");
-			
+
 			switch($action)
 			{
 				case 'check_db':
 				{
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
 					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
-					
+
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					echo '{"code": 0, "status": "OK"}';
@@ -231,7 +234,7 @@ EOT;
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
 					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
 					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
-					
+
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					//foreach($sql as $query)
@@ -250,7 +253,7 @@ EOT;
 					if(empty($_POST['host'])) throw new Exception('Host value not defined!');
 					if(empty($_POST['user'])) throw new Exception('Login value not defined!');
 					if(empty($_POST['db'])) throw new Exception('DB value not defined!');
-					
+
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					foreach($sql as $query)
@@ -288,7 +291,7 @@ EOT;
 					$db->connect(@$_POST['host'], @$_POST['user'], @$_POST['pwd']);
 					$db->put("GRANT ALL PRIVILEGES ON ".sql_escape(@$_POST['db']).".* TO '".sql_escape(@$_POST['dbuser'])."'@'%'");
 					$db->put("FLUSH PRIVILEGES");
-				
+
 					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
@@ -309,7 +312,7 @@ EOT;
 						{
 							$cookie = '';
 							ldap_control_paged_result($ldap, 200, true, $cookie);
-								
+
 							$sr = ldap_search($ldap, @$_POST['ldapbase'], @$_POST['ldapfilter'], explode(',', 'samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto'));
 							if($sr)
 							{
@@ -349,7 +352,7 @@ EOT;
 
 					$mail->setFrom(@$_POST['mailfrom'], @$_POST['mailfromname']);
 					$mail->addAddress(@$_POST['mailadmin'], @$_POST['mailadminname']);
-					
+
 					$mail->isHTML(true);
 
 					$mail->Subject = 'Test message';
@@ -360,7 +363,7 @@ EOT;
 					{
 						throw new Exception($mail->ErrorInfo);
 					}
-					
+
 					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
@@ -399,6 +402,7 @@ EOT;
 					if(empty($_POST['mailadminname'])) throw new Exception('MAIL Admin Name value not defined!');
 
 					if(empty($_POST['allowmails'])) throw new Exception('MAIL RegExp filter not defined!');
+					if(empty($_POST['language'])) throw new Exception('Language not select.');
 
 					$config = str_replace(
 						array(
@@ -422,7 +426,8 @@ EOT;
 							'#mail_from#',
 							'#mail_from_name#',
 							'#allow_mails#',
-							'#mail_auth#'
+							'#mail_auth#',
+							'#langFile#'
 						),
 						array(
 							sql_escape(@$_POST['host']),
@@ -445,16 +450,17 @@ EOT;
 							sql_escape(@$_POST['mailfrom']),
 							sql_escape(@$_POST['mailfromname']),
 							sql_escape(@$_POST['allowmails']),
-							empty($_POST['mailuser'])?'false':'true'
+							empty($_POST['mailuser'])?'false':'true',
+							sql_escape(@$_POST['language'])
 						),
 						$config
 					);
-					
+
 					if(@file_put_contents('inc.config.php', $config) === FALSE)
 					{
 						throw new Exception("Save config error");
 					}
-					
+
 					echo '{"code": 0, "status": "OK"}';
 				}
 				exit;
@@ -501,7 +507,8 @@ EOT;
 							'#mail_from#',
 							'#mail_from_name#',
 							'#allow_mails#',
-							'#mail_auth#'
+							'#mail_auth#',
+							'#langFile#'
 						),
 						array(
 							sql_escape(@$_GET['host']),
@@ -524,11 +531,12 @@ EOT;
 							sql_escape(@$_GET['mailfrom']),
 							sql_escape(@$_GET['mailfromname']),
 							sql_escape(@$_GET['allowmails']),
-							empty($_GET['mailuser'])?'false':'true'
+							empty($_GET['mailuser'])?'false':'true',
+							sql_escape(@$_POST['language'])
 						),
 						$config
 					);
-					
+
 					header("Content-Disposition: attachment; filename=\"inc.config.php\"; filename*=utf-8''inc.config.php");
 					echo $config;
 				}
@@ -550,14 +558,14 @@ EOT;
 			exit;
 		}
 	}
-	
+
 	header("Content-Type: text/html; charset=utf-8");
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Installation script</title>
-		<meta charset="utf-8"> 
+		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<style type="text/css">
@@ -902,7 +910,7 @@ EOT;
 				{
 					gi("result_"+id).textContent = 'Loading...';
 					gi("result_"+id).style.display = 'block';
-					
+
 					xhr.open("post", "install.php?action="+action, true);
 					xhr.onreadystatechange = function()
 					{
@@ -1022,6 +1030,7 @@ EOT;
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
 					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
 					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+					+'&language='+encodeURIComponent(gi('lang').value)
 				);
 			}
 
@@ -1036,6 +1045,7 @@ EOT;
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
 					+'&mailadmin='+encodeURIComponent(gi('mail_admin').value)+'&mailadminname='+encodeURIComponent(gi('mail_admin_name').value)
 					+'&allowmails='+encodeURIComponent(gi('allow_mails').value)
+					+'&language='+encodeURIComponent(gi('lang').value)
 				;
 			}
 
@@ -1048,119 +1058,139 @@ EOT;
 	<body>
 		<div class="container">
 		<div class="form-horizontal">
-			<div class="form-group"> 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-5">
+					<h3>Language settings</h3>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="lang" class="control-label col-sm-2">Language:</label>
+				<div class="col-sm-5">
+					<select id="lang" class="form-control">
+						<?php
+							$fileList = glob("language/*.php");
+							foreach ($fileList as $lanFile) {
+								$path_parts = pathinfo($lanFile);
+								echo "<option>".$path_parts['filename']."</option>";
+							};
+						?>
+					</select>
+				</div>
+			</div>
+
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<h3>MySQL settings</h3>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="host" class="control-label col-sm-2">Host:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="host" class="form-control" type="text" value="localhost" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="user_root" class="control-label col-sm-2">Login:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="user_root" class="form-control" type="text" value="root" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="pwd_root" class="control-label col-sm-2">Password:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="pwd_root" class="form-control" type="password" value="" />
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_check_db_conn(1);'>1. Check DB connection</button><div id="result_1" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="db_scheme" class="control-label col-sm-2">DB name:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="db_scheme" class="form-control" type="text" value="pb" />
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_create_db(2);'>2. Create database</button><div id="result_2" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_create_tables(3);'>3. Create tables</button><div id="result_3" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<h3>New MySQL DB user or enter existing</h3>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="db_user" class="control-label col-sm-2">Login:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="db_user" class="form-control" type="text" value="pbuser" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="db_pwd" class="control-label col-sm-2">Password:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="db_pwd" class="form-control" type="password" value="" />
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_create_db_user(4);'>4. Create DB user</button><div id="result_4" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_grant_access(5);'>5. Grant access to database</button><div id="result_5" class="alert alert-danger" style="display: none"></div>
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<h3>LDAP settings</h3>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_host" class="control-label col-sm-2">Host:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_host" class="form-control" type="text" value="dc" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_port" class="control-label col-sm-2">Port:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_port" class="form-control" type="text" value="389" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_user" class="control-label col-sm-2">User:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_user" class="form-control" type="text" value="domain\user" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_pwd" class="control-label col-sm-2">Password:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_pwd" class="form-control" type="password" value="" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_base" class="control-label col-sm-2">Base DN:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_base" class="form-control" type="text" value="DC=company,DC=local" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="ldap_filter" class="control-label col-sm-2">Filter:</label>
-				<div class="col-sm-5"> 
+				<div class="col-sm-5">
 					<input id="ldap_filter" class="form-control" type="text" value="(&amp;(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" />
 				</div>
 			</div>
-			<div class="form-group"> 
+			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-5">
 					<button type="button" class="btn btn-primary" onclick='f_check_ldap(6);'>6. Check LDAP connection</button><div id="result_6" class="alert alert-danger" style="display: none"></div>
 				</div>

@@ -1,4 +1,6 @@
-<?php if(!defined("Z_PROTECTED")) exit; ?><?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?php if(!defined("Z_PROTECTED")) exit; ?>
+<?php echo(htmlspecialchars_decode("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"))?>
+
 <phonebook>
 <?php $i = 0; foreach($result as &$row) { $i++; ?>
 	<contact>
@@ -13,4 +15,5 @@
 		<position><?php eh($row[6]); ?></position>
 	</contact>
 <?php } ?>
+
 </phonebook>
