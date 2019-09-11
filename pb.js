@@ -420,10 +420,13 @@ function f_update_row(id)
 				f_notify(data.message, "error");
 			}
 			else
-			{
+			{	
+				// Ищем строку по ID
 				var row = gi('row'+data.data.id);
+				// Если строка не найдена - считаем ее новой
 				if(!row)
-				{
+				{	
+					// Добавляем новую строку в таблицу
 					row = gi("table-data").insertRow(0);
 					row.insertCell(0);
 					row.insertCell(1);
@@ -433,33 +436,53 @@ function f_update_row(id)
 					row.insertCell(5);
 					row.insertCell(6);
 					row.insertCell(7);
+					row.insertCell(8);
+					// Заполняем атрибут id у ячеек строки
+					row.cells[1].setAttribute('id', "nameCell"+data.data.id);				// ФИО
+					row.cells[2].setAttribute('id', "pintCell"+data.data.id);				// Внутренний телефон
+					row.cells[3].setAttribute('id', "pcityCell"+data.data.id);				// Городской телефон
+					row.cells[4].setAttribute('id', "pcellCell"+data.data.id);				// Мобильный телефон
+					row.cells[5].setAttribute('id', "mailCell"+data.data.id);				// Электронная почта
+					row.cells[6].setAttribute('id', "posCell"+data.data.id);				// Должность
+					row.cells[7].setAttribute('id', "depCell"+data.data.id);				// Подразделение
+					row.cells[8].setAttribute('id', "mainMenuCell"+data.data.id);			// Меню
 				}
 
 				row.id = 'row'+data.data.id;
-				row.setAttribute("data-id", data.data.id);
-				row.setAttribute("data-map", data.data.map);
-				row.setAttribute("data-x", data.data.x);
-				row.setAttribute("data-y", data.data.y);
-				row.setAttribute("data-photo", data.data.photo);
-				row.cells[1].textContent = data.data.firstname + ' ' + data.data.lastname;
-				if(data.data.photo)
-				{
-					row.cells[1].className = 'userwithphoto';
+				row.setAttribute("data-id", 	data.data.id);
+				row.setAttribute("data-map", 	data.data.map);
+				row.setAttribute("data-x", 		data.data.x);
+				row.setAttribute("data-y", 		data.data.y);
+				row.setAttribute("data-photo", 	data.data.photo);
+				
+				// Получаем ячейки таблицы по ID
+				var nameCell 				= gi("nameCell"+data.data.id);					// ФИО
+				var phoneCell 				= gi("pintCell"+data.data.id);					// Внутренний телефон
+				var phoneCityCell 			= gi("pcityCell"+data.data.id);					// Городской телефон
+				var mobileCell 				= gi("pcellCell"+data.data.id);					// Мобильный телефон
+				var mailCell 				= gi("mailCell"+data.data.id);					// Электронная почта
+				var positionCell 			= gi("posCell"+data.data.id);					// Должность
+				var departmentCell 			= gi("depCell"+data.data.id);					// Подразделение
+				var menuCell 				= gi("mainMenuCell"+data.data.id);				// Меню
+				
+				// Заполняем найденные ячейки данными
+				nameCell.textContent 		= data.data.firstname + ' ' + data.data.lastname;
+				if(data.data.photo) {
+					nameCell.className = 'userwithphoto';
 				}
-				row.cells[1].style.cursor = 'pointer';
-				row.cells[1].onclick = function(event) { f_sw_map(event); };
-				row.cells[1].onmouseenter = function(event) { f_sw_img(event); };
-				row.cells[1].onmouseleave = function(event) { gi('imgblock').style.display = 'none'; };
-				row.cells[1].onmousemove = function(event) { f_mv_img(event); };
-
-				row.cells[2].textContent = data.data.phone;
-				row.cells[3].textContent = data.data.mobile;
-				row.cells[4].innerHTML = '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
-				row.cells[5].textContent = data.data.position;
-				row.cells[6].textContent = data.data.department;
-
-				row.cells[7].innerHTML = '<span class="command" onclick="f_menu(event);">Menu</span>';
-				//row.cells[7].onclick = function(event) { h(event); };
+				nameCell.style.cursor 		= 'pointer';
+				nameCell.onclick 			= function(event) { f_sw_map(event); };
+				nameCell.onmouseenter 		= function(event) { f_sw_img(event); };
+				nameCell.onmouseleave 		= function(event) { gi('imgblock').style.display = 'none'; };
+				nameCell.onmousemove 		= function(event) { f_mv_img(event); };
+				
+				phoneCell.textContent 		= data.data.phone;				
+				phoneCityCell.textContent 	= data.data.phonecity;
+				mobileCell.textContent 		= data.data.mobile;
+				mailCell.innerHTML 			= '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
+				positionCell.textContent 	= data.data.position;
+				departmentCell.textContent 	= data.data.department;
+				menuCell.innerHTML 			= '<span class="command" onclick="f_menu(event);">Menu</span>';
 			}
 		}
 	);

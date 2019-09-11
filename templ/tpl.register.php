@@ -1,15 +1,17 @@
+<?php require_once '/language/'.LANGUAGES.'.php'; ?>
+
 <?php include("tpl.header.php"); ?>
 		<div class="login-block">
-			<h1 align="center">Registration form</h1>
+			<h1 align="center"><?php eh($lang["registerRegistrationForm"]); ?></h1>
 			<form action="<?php eh("$self?action=reg"); ?>" method="post">
-				Login: <input name="login" type="text" /><br />
-				Password: <input name="passwd" type="password" /><br />
-				E-Mail: <input name="mail" type="text" /><br />
+				<?php eh($lang["registerLogin"]); ?> <input name="login" type="text" /><br />
+				<?php eh($lang["registerPassword"]); ?> <input name="passwd" type="password" /><br />
+				<?php eh($lang["registerEMail"]); ?> <input name="mail" type="text" /><br />
 				<?php if(!empty($error_msg)) { ?>
 				<p><?php eh($error_msg); ?></p>
 				<?php } ?>
-				<input type="submit" value="Register" /><br />
+				<input type="submit" value="<?php eh($lang["registerRegister"]); ?>" /><br />
 			</form>
-			<a href="<?php eh("$self?action=login"); ?>">Login</a>
+			<a href="<?php eh("$self?action=login"); ?>"><?php eh($lang["registerLoginHREF"]); ?></a>
 		</div>
 <?php include("tpl.footer.php"); ?>
