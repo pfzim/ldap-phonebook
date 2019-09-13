@@ -15,7 +15,7 @@ $lang = array (
 	"mainReset"					=>  	"Сбросить",
 	"mainBrithdays"				=>  	"Дни рождения:",
 	"mainNoBirthdays"			=>  	"Нет дней рождения",
-	"mainSearch"				=>  	"Поиск..",
+	"mainSearch"				=>  	"Поиск...",
 	"mainExportSelected"		=>  	"Экспорт выделенных",
 //----tpl.handshakes.php
 	"handshakesLDAPPhonebook"	=>  	"Телефонный справочник",

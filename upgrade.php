@@ -116,7 +116,6 @@ require_once("inc.config.php");
 			}
 			echo "\n\nUpgrade to version 3 complete!\n";
 		}
-		break;
 		case 3:
 		{
 			echo "\nAdd column 'pcity' to 'contacts' table...\n";
@@ -130,9 +129,10 @@ require_once("inc.config.php");
 				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
-			echo '  define("LANGUAGES", "EN");';
+			echo '  define("LANGUAGES", "en");';
 			echo "\n\nUpgrade to version 4 complete!\n";
 		}
+		break;
 		case 4:
 		{
 			echo "Upgrade doesn't required\n";
