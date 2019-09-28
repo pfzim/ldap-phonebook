@@ -39,15 +39,19 @@
 ## Дополнительные настройки в inc.config.php (опционально)
 Включить LDAP авторизацию:
 ```
-define("PB_USE_LDAP_AUTH", 1);
-define("LDAP_ADMIN_GROUP_DN", "CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local"); // Группа в AD с пользователями имеющими доступ на редактирование справочника
+define('PB_USE_LDAP_AUTH', 1);
+define('LDAP_ADMIN_GROUP_DN', 'CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local'); // Группа в AD с пользователями имеющими доступ на редактирование справочника
 ```
 Изменить количество и названия карт:
 ```
-define("PB_MAPS_COUNT", 5);
-$map_names = array("Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25");
+define('PB_MAPS_COUNT', 5);
+$map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
 ```
 
+Изменить язык (cпасибо @Impuls2003):
+```
+define('APP_LANGUAGE', 'ru');
+```
 
 
 This service import users info from LDAP/AD to MySQL DB
