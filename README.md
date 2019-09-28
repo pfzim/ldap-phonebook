@@ -48,7 +48,7 @@ define('PB_MAPS_COUNT', 5);
 $map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
 ```
 
-Изменить язык (cпасибо @Impuls2003):
+Изменить язык (cпасибо [@Impuls2003](https://github.com/Impuls2003)):
 ```
 define('APP_LANGUAGE', 'ru');
 ```
