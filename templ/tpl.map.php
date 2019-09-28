@@ -1,4 +1,4 @@
-<?php include("tpl.header.php"); ?>
+<?php include(ABSPATH.'tpl.header.php'); ?>
 		<script>
 			map = <?php eh(intval($id));?>;
 			map_count = <?php eh(intval(PB_MAPS_COUNT));?>;
@@ -17,10 +17,10 @@
 			tel.&nbsp;<span id="u_phone"></span>
 		</div>
 
-<?php include("tpl.form-edit.php"); ?>
-<?php include("tpl.form-upload.php"); ?>
-<?php include("tpl.map-container.php"); ?>
-<?php include("tpl.menu-contact.php"); ?>
+<?php include(ABSPATH.'tpl.form-edit.php'); ?>
+<?php include(ABSPATH.'tpl.form-upload.php'); ?>
+<?php include(ABSPATH.'tpl.map-container.php'); ?>
+<?php include(ABSPATH.'tpl.menu-contact.php'); ?>
 
 		<script>
 			document.addEventListener('contextmenu',function(ev) {
@@ -32,4 +32,4 @@
 				}
 			}, false);
 		</script>
-<?php include("tpl.footer.php"); ?>
+<?php include(ABSPATH.'tpl.footer.php'); ?>

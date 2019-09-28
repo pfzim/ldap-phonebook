@@ -1,10 +1,32 @@
 <?php
+/*
+    One file installer
+    Copyright (C) 2016 Dmitry V. Zimin
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 error_reporting(0);
 
-if(file_exists('inc.config.php'))
+if (!defined('ABSPATH'))
 {
-	header("Content-Type: text/plain; charset=utf-8");
+	define('ABSPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+}
+	
+if(file_exists(ABSPATH.'inc.config.php'))
+{
+	header('Content-Type: text/plain; charset=utf-8');
 	echo 'Configuration file already exist. Remove inc.config.php before running installation';
 	exit;
 }
@@ -13,14 +35,14 @@ class MySQLDB
 {
 	private $link = NULL;
 	public $data = NULL;
-	private $error_msg = "";
+	private $error_msg = '';
 	function __construct()
 	{
 		$link = NULL;
 		$data = FALSE;
-		$error_msg = "";
+		$error_msg = '';
 	}
-	function connect($db_host = "", $db_user = "", $db_passwd = "", $db_name = "", $db_cpage = "utf8")
+	function connect($db_host = '', $db_user = '', $db_passwd = '', $db_name = '', $db_cpage = 'utf8')
 	{
 		$this->link = mysqli_connect($db_host, $db_user, $db_passwd, $db_name);
 		if(!$this->link)
@@ -95,7 +117,7 @@ class MySQLDB
 	public function disconnect()
 	{
 		//$this->data = FALSE;
-		$this->error_msg = "";
+		$this->error_msg = '';
 		if($this->link)
 		{
 			mysqli_close($this->link);
@@ -193,42 +215,42 @@ EOT
 
 $config = <<<'EOT'
 <?php
-	define("DB_HOST", "#host#");
-	define("DB_USER", "#login#");
-	define("DB_PASSWD", "#password#");
-	define("DB_NAME", "#db#");
-	define("DB_CPAGE", "utf8");
-	define("DB_PREFIX", "pb_");
+	define('DB_HOST', '#host#');
+	define('DB_USER', '#login#');
+	define('DB_PASSWD', '#password#');
+	define('DB_NAME', '#db#');
+	define('DB_CPAGE', 'utf8');
+	define('DB_PREFIX', 'pb_');
 
-	define("LANGUAGES", "#langFile#");
+	define('APP_LANGUAGE', '#langFile#');
 
-	define("PB_USE_LDAP_AUTH", 0);
+	define('PB_USE_LDAP_AUTH', 0);
 
-	define("LDAP_HOST", "#ldap_host#");
-	define("LDAP_PORT", #ldap_port#);
-	define("LDAP_USER", "#ldap_user#");
-	define("LDAP_PASSWD", "#ldap_password#");
-	define("LDAP_BASE_DN", "#ldap_base#");
-	define("LDAP_FILTER", "#ldap_filter#");
-	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol");
-	define("LDAP_ADMIN_GROUP_DN", "CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local");
+	define('LDAP_HOST', '#ldap_host#');
+	define('LDAP_PORT', #ldap_port#);
+	define('LDAP_USER', '#ldap_user#');
+	define('LDAP_PASSWD', '#ldap_password#');
+	define('LDAP_BASE_DN', '#ldap_base#');
+	define('LDAP_FILTER', '#ldap_filter#');
+	define('LDAP_ATTRS', 'samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol');
+	define('LDAP_ADMIN_GROUP_DN', 'CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local');
 
-	define("MAIL_HOST", "#mail_host#");
-	define("MAIL_FROM", "#mail_from#");
-	define("MAIL_FROM_NAME", "#mail_from_name#");
-	define("MAIL_ADMIN", "#mail_admin#");
-	define("MAIL_ADMIN_NAME", "#mail_admin_name#");
-	define("MAIL_AUTH", #mail_auth#);
-	define("MAIL_LOGIN", "#mail_user#");
-	define("MAIL_PASSWD", "#mail_password#");
-	define("MAIL_SECURE", "#mail_secure#");
-	define("MAIL_PORT", #mail_port#);
+	define('MAIL_HOST', '#mail_host#');
+	define('MAIL_FROM', '#mail_from#');
+	define('MAIL_FROM_NAME', '#mail_from_name#');
+	define('MAIL_ADMIN', '#mail_admin#');
+	define('MAIL_ADMIN_NAME', '#mail_admin_name#');
+	define('MAIL_AUTH', #mail_auth#);
+	define('MAIL_LOGIN', '#mail_user#');
+	define('MAIL_PASSWD', '#mail_password#');
+	define('MAIL_SECURE', '#mail_secure#');
+	define('MAIL_PORT', #mail_port#);
 
-	define("ALLOW_MAILS", '#allow_mails#');
-	define("PB_MAPS_COUNT", 5);
+	define('ALLOW_MAILS', '#allow_mails#');
+	define('PB_MAPS_COUNT', 5);
 
-	$map_names = array("Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25");
-	$g_icons = array("Human", "Printer", "Fax");
+	$map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
+	$g_icons = array('Human', 'Printer', 'Fax');
 
 EOT;
 
@@ -481,7 +503,7 @@ EOT;
 						$config
 					);
 
-					if(@file_put_contents('inc.config.php', $config) === FALSE)
+					if(@file_put_contents(ABSPATH.'inc.config.php', $config) === FALSE)
 					{
 						throw new Exception("Save config error");
 					}

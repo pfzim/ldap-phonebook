@@ -22,7 +22,7 @@ class MySQLDB
 {
 	private $link_ro = NULL;
 	private $link_rw = NULL;
-	private $error_msg = "";
+	private $error_msg = '';
 	private $db_ro_host = NULL;
 	private $db_rw_host = NULL;
 	private $db_user = NULL;
@@ -51,7 +51,7 @@ class MySQLDB
 		$this->db_ro_same_rw = empty($db_ro_host);
 		$this->transaction_started = 0;
 		$this->data = array();
-		$this->error_msg = "";
+		$this->error_msg = '';
 		$this->rise_exception = $rise_exception;
 	}
 
@@ -125,7 +125,7 @@ class MySQLDB
 	public function disconnect()
 	{
 		//$this->data = FALSE;
-		$this->error_msg = "";
+		$this->error_msg = '';
 
 		if($this->link_ro)
 		{
@@ -152,19 +152,19 @@ class MySQLDB
 
 	public function start_transaction()
 	{
-		$this->put("START TRANSACTION");
+		$this->put('START TRANSACTION');
 		$this->transaction_started = 1;
 	}
 	
 	public function commit()
 	{
-		$this->put("COMMIT");
+		$this->put('COMMIT');
 		$this->transaction_started = 0;
 	}
 
 	public function rollback()
 	{
-		$this->put("ROLLBACK");
+		$this->put('ROLLBACK');
 		$this->transaction_started = 0;
 	}
 
@@ -280,7 +280,7 @@ class MySQLDB
 	{
 		if($this->rise_exception)
 		{
-			throw new Exception(__CLASS__.": ".$str);
+			throw new Exception(__CLASS__.': '.$str);
 		}
 		else
 		{

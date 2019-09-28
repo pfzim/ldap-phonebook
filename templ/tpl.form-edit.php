@@ -1,4 +1,4 @@
-<?php if(!defined("Z_PROTECTED")) exit; ?>
+<?php if(!defined('Z_PROTECTED')) exit; ?>
 		<div id="contact-container" class="modal-container" style="display: none">
 			<span class="close white" onclick="this.parentNode.style.display='none'">&times;</span>
 			<div class="modal-content">

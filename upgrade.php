@@ -17,13 +17,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if(!file_exists('inc.config.php'))
+if (!defined('ABSPATH'))
+{
+	define('ABSPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+}
+	
+if(!file_exists(ABSPATH.'inc.config.php'))
 {
 	header('Location: install.php');
 	exit;
 }
 
-require_once("inc.config.php");
+require_once(ABSPATH.'inc.config.php');
+
 
 	if(!isset($_GET['action']) || ($_GET['action'] != 'upgrade'))
 	{
@@ -129,7 +135,7 @@ require_once("inc.config.php");
 				echo 'Error: '.$db->get_last_error()."\n";
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
-			echo '  define("LANGUAGES", "en");';
+			echo '  define("APP_LANGUAGE", "en");';
 			echo "\n\nUpgrade to version 4 complete!\n";
 		}
 		break;

@@ -1,4 +1,4 @@
-<?php include("tpl.header.php"); ?>
+<?php include(ABSPATH.'tpl.header.php'); ?>
 		<h3 align="center"><?php eh($lang["handshakesLDAPPhonebook"]) ?></h3>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="<?php eh($lang["handshakesSearch"]) ?>">
 		<span class="command" onclick="gi('search').value = ''; filter_table();"><?php eh($lang["handshakesReset"]) ?></span>
@@ -25,5 +25,5 @@
 		<br />
 		<br />
 
-<?php include("tpl.menu-contact.php"); ?>
-<?php include("tpl.footer.php"); ?>
+<?php include(ABSPATH.'tpl.menu-contact.php'); ?>
+<?php include(ABSPATH.'tpl.footer.php'); ?>
