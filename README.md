@@ -1,5 +1,5 @@
 # LDAP phonebook
-[:ru:](#корпоративный-телефонный-справочник-с-отображением-контактов-на-карте-офиса) [:us:](#corporate-phone-directory-with-contacts-displayed-on-the-office-map)
+[:ru:](#корпоративный-телефонный-справочник-с-отображением-контактов-на-карте-офиса) [:us:](#corporate-phone-directory-with-contacts-displayed-on-the-office-map)  
 [Development ветка](https://github.com/pfzim/ldap-phonebook/tree/dev)
 
 # Корпоративный телефонный справочник с отображением контактов на карте офиса
