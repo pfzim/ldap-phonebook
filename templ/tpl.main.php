@@ -1,4 +1,4 @@
-<?php include(ABSPATH.'templ/tpl.header.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
 		<h3 align="center"><?php eh($lang["mainLDAPPhonebook"]) ?></h3>
 		<div>
 			<span><b><?php eh($lang["mainBrithdays"]) ?></b></span>
@@ -69,8 +69,8 @@
 		<br />
 		<br />
 
-<?php include(ABSPATH.'templ/tpl.form-edit.php'); ?>
-<?php include(ABSPATH.'templ/tpl.form-upload.php'); ?>
-<?php include(ABSPATH.'templ/tpl.map-container.php'); ?>
-<?php include(ABSPATH.'templ/tpl.menu-contact.php'); ?>
-<?php include(ABSPATH.'templ/tpl.footer.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.form-edit.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.form-upload.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.map-container.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.menu-contact.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.footer.php'); ?>

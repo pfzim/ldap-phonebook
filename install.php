@@ -190,7 +190,7 @@ CREATE TABLE  `#DB_NAME#`.`pb_users` (
 EOT
 ,
 <<<'EOT'
-CREATE TABLE `#DB_NAME#`.`handshake` (
+CREATE TABLE `#DB_NAME#`.`pb_handshake` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` VARCHAR(255) NOT NULL,
   `date` DATETIME NOT NULL,
@@ -201,7 +201,7 @@ CREATE TABLE `#DB_NAME#`.`handshake` (
 EOT
 ,
 <<<'EOT'
-CREATE TABLE `#DB_NAME#`.`config` (
+CREATE TABLE `#DB_NAME#`.`pb_config` (
   `name` VARCHAR(255) NOT NULL DEFAULT '',
   `value` VARCHAR(8192) NOT NULL DEFAULT '',
   PRIMARY KEY(`name`)
@@ -209,7 +209,7 @@ CREATE TABLE `#DB_NAME#`.`config` (
 EOT
 ,
 <<<'EOT'
-INSERT INTO `#DB_NAME#`.`config` (`name`, `value`) VALUES('db_version', 4)
+INSERT INTO `#DB_NAME#`.`pb_config` (`name`, `value`) VALUES('db_version', 4)
 EOT
 );
 
@@ -498,7 +498,7 @@ EOT;
 							sql_escape(@$_POST['mailfromname']),
 							sql_escape(@$_POST['allowmails']),
 							empty($_POST['mailuser'])?'false':'true',
-							sql_escape(@$_POST['language'])
+							sql_escape(@$_GET['language'])
 						),
 						$config
 					);
@@ -579,7 +579,7 @@ EOT;
 							sql_escape(@$_GET['mailfromname']),
 							sql_escape(@$_GET['allowmails']),
 							empty($_GET['mailuser'])?'false':'true',
-							sql_escape(@$_POST['language'])
+							sql_escape(@$_GET['language'])
 						),
 						$config
 					);

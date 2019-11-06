@@ -1,4 +1,4 @@
-<?php include(ABSPATH.'tpl.header.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
 			<div class="login-block">
 				<h1><?php eh($lang["loginLoginHead"]) ?></h1>
 				<form action="<?php eh("$self?action=logon"); ?>" method="post">
@@ -14,4 +14,4 @@
 				<a href="<?php eh("$self?action=register"); ?>"><?php eh($lang["loginRegister"]) ?></a>
 			</div>
 		</div>
-<?php include(ABSPATH.'tpl.footer.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.footer.php'); ?>

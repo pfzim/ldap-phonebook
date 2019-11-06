@@ -1,4 +1,4 @@
-<?php include(ABSPATH.'tpl.header.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
 		<h3 align="center">Synced contacts</h3>
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
@@ -85,4 +85,4 @@
 		<form method="post" id="photo-upload" name="photo-upload">		
 			<input id="upload" type="file" name="photo" style="display: none"/>
 		</form>
-<?php include(ABSPATH.'tpl.footer.php'); ?>
+<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.footer.php'); ?>
