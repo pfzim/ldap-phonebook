@@ -438,15 +438,76 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 									// *********************************************************
 
-									if($db->select(rpv('SELECT m.`id`, m.`samname` FROM `@contacts` AS m WHERE m.`samname` = ! LIMIT 1', $s_login)))
+									if($db->select(rpv("
+											SELECT
+												m.`id`,
+												m.`samname`
+											FROM `@contacts` AS m
+											WHERE m.`samname` = !
+											LIMIT 1
+										",
+										$s_login
+									)))
 									{
 										$id = $db->data[0][0];
-										$db->put(rpv('UPDATE `@contacts` SET `fname` = !, `lname` = !, `dep` = !, `org` = !, `pos` = !, `pint` = !, `pcell` = !, `mail` = !, `photo` = # WHERE `samname` = ! LIMIT 1', $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0, $s_login));
+										$db->put(rpv("
+												UPDATE `@contacts`
+												SET
+													`fname` = !,
+													`lname` = !,
+													`dep` = !,
+													`org` = !,
+													`pos` = !,
+													`pint` = !,
+													`pcell` = !,
+													`mail` = !,
+													`photo` = #
+												WHERE
+													`samname` = ! LIMIT 1
+											",
+											$s_first_name,
+											$s_last_name,
+											$s_department,
+											$s_organization,
+											$s_position,
+											$s_phone_internal,
+											$s_phone_mobile,
+											$s_mail,
+											isset($account['thumbnailphoto'][0])?1:0,
+											$s_login
+										));
+										
 										$count_updated++;
 									}
 									else
 									{
-										$db->put(rpv('INSERT INTO `@contacts` (`samname`, `fname`, `lname`, `dep`, `org`, `pos`, `pint`, `pcell`, `mail`, `photo`, `visible`) VALUES (!, !, !, !, !, !, !, !, !, #, 1)', $s_login, $s_first_name, $s_last_name, $s_department, $s_organization, $s_position, $s_phone_internal, $s_phone_mobile, $s_mail, isset($account['thumbnailphoto'][0])?1:0));
+										$db->put(rpv("
+												INSERT INTO `@contacts` (
+													`samname`,
+													`fname`,
+													`lname`,
+													`dep`,
+													`org`,
+													`pos`,
+													`pint`,
+													`pcell`,
+													`mail`,
+													`photo`,
+													`visible`
+												) VALUES (!, !, !, !, !, !, !, !, !, #, 1)
+											",
+											$s_login,
+											$s_first_name,
+											$s_last_name,
+											$s_department,
+											$s_organization,
+											$s_position,
+											$s_phone_internal,
+											$s_phone_mobile,
+											$s_mail,
+											isset($account['thumbnailphoto'][0])?1:0
+										));
+										
 										$id = $db->last_id();
 										$count_added++;
 
