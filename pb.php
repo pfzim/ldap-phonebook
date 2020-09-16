@@ -937,6 +937,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					$result_json['errors'][] = array('name' => 'bday', 'msg' => 'Date format must be DD.MM.YYYY!');
 				}
 			}
+			else
+			{
+				$s_bday = '0000-00-00';
+			}
 
 			if($result_json['code'])
 			{
