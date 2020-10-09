@@ -197,8 +197,8 @@ require_once(ROOTDIR.'inc.config.php');
 			}
 
 			echo "\nNow you must add to inc.config.php something like\n\n";
-			echo '  define("LDAP_URI", "ldap://dc-01.example.org");\n';
-			echo '  LDAP_HOST and LDAP_PORT deprecated and can be removed.\n';
+			echo "  define('LDAP_URI', 'ldap://dc-01.example.org');\n";
+			echo "  LDAP_HOST and LDAP_PORT deprecated and can be removed.\n";
 
 			echo "\n****************************************************";
 			echo "\n*  Admin password now set to 'admin'.              *";
