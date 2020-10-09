@@ -1,6 +1,7 @@
 # LDAP phonebook
 [:ru:](#корпоративный-телефонный-справочник-с-отображением-контактов-на-карте-офиса) [:us:](#corporate-phone-directory-with-contacts-displayed-on-the-office-map)  
 [Development ветка](https://github.com/pfzim/ldap-phonebook/tree/dev)
+[Вопросы предпочтительнее задавать здесь, а не по почте](https://github.com/pfzim/ldap-phonebook/issues?q=)
 
 # Корпоративный телефонный справочник с отображением контактов на карте офиса
 
@@ -25,7 +26,7 @@
 
 ## Системные требования
 - Apache
-- MySQL
+- MariaDB (MySQL)
 - PHP
 - Active Directory (опционально)
 
@@ -41,7 +42,9 @@
 Включить LDAP авторизацию:
 ```
 define('PB_USE_LDAP_AUTH', 1);
-define('LDAP_ADMIN_GROUP_DN', 'CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local'); // Группа в AD с пользователями имеющими доступ на редактирование справочника
+
+// Группа в AD с пользователями имеющими доступ на редактирование справочника
+define('LDAP_ADMIN_GROUP_DN', 'CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local');
 ```
 Изменить количество и названия карт:
 ```
@@ -104,7 +107,7 @@ Maps are stored in the files `templ / map [1-5] .png`
 
 ## System requirements
 - Apache
-- MySQL
+- MariaDB (MySQL)
 - PHP
 - Active Directory (optional)
 

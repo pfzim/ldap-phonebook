@@ -14,7 +14,7 @@
 		<ul class="menu-bar">
 			<li><a href="<?php eh("$self"); ?>"><?php eh($lang["headerHome"]) ?></a></li>
 			<li><a href="?action=map&amp;id=1"><?php eh($lang["headerMap"]) ?></a></li>
-			<?php if($uid) { ?>
+			<?php if($user->get_id()) { ?>
 			<li><a href="?action=all"><?php eh($lang["headerShowAll"]) ?></a></li>
 			<li><a href="?action=handshakes"><?php eh($lang["headerHandshakes"]) ?></a></li>
 			<li><a href="?action=sync"><?php eh($lang["headerSync"]) ?></a></li>
@@ -22,7 +22,7 @@
 			<li><a href="?action=services"><?php eh($lang["headerTools"]) ?></a></li>
 			<?php } ?>
 			<ul style="float:right;list-style-type:none;">
-				<?php if($uid) { ?>
+				<?php if($user->get_id()) { ?>
 				<li><a href="?action=logoff"><?php eh($lang["headerLogOut"]) ?></a></li>
 				<?php } else { ?>
 				<li><a href="?action=login"><?php eh($lang["headerLogIn"]) ?></a></li>

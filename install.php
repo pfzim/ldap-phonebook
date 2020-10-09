@@ -1,7 +1,7 @@
 <?php
 /*
     One file installer
-    Copyright (C) 2016 Dmitry V. Zimin
+    Copyright (C) 2016-2020 Dmitry V. Zimin
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 
 error_reporting(0);
 
-if (!defined('ABSPATH'))
+if (!defined('ROOTDIR'))
 {
-	define('ABSPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('ROOTDIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 }
 	
-if(file_exists(ABSPATH.'inc.config.php'))
+if(file_exists(ROOTDIR.'inc.config.php'))
 {
 	header('Content-Type: text/plain; charset=utf-8');
 	echo 'Configuration file already exist. Remove inc.config.php before running installation';
@@ -182,9 +182,8 @@ CREATE TABLE  `#DB_NAME#`.`pb_users` (
   `login` varchar(255) NOT NULL,
   `passwd` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `mail` varchar(1024) CHARACTER SET latin1 NOT NULL,
-  `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0,
   `sid` varchar(15) DEFAULT NULL,
-  `deleted` int(10) unsigned NOT NULL DEFAULT '0',
+  `flags` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOT
@@ -209,7 +208,7 @@ CREATE TABLE `#DB_NAME#`.`pb_config` (
 EOT
 ,
 <<<'EOT'
-INSERT INTO `#DB_NAME#`.`pb_config` (`name`, `value`) VALUES('db_version', 4)
+INSERT INTO `#DB_NAME#`.`pb_config` (`name`, `value`) VALUES('db_version', 5)
 EOT
 );
 
@@ -224,10 +223,9 @@ $config = <<<'EOT'
 
 	define('APP_LANGUAGE', '#langFile#');
 
-	define('PB_USE_LDAP_AUTH', 0);
+	//define('PB_USE_LDAP_AUTH', 0);
 
-	define('LDAP_HOST', '#ldap_host#');
-	define('LDAP_PORT', #ldap_port#);
+	define('LDAP_URI', '#ldap_host#');
 	define('LDAP_USER', '#ldap_user#');
 	define('LDAP_PASSWD', '#ldap_password#');
 	define('LDAP_BASE_DN', '#ldap_base#');
@@ -345,12 +343,11 @@ EOT;
 				case 'check_ldap':
 				{
 					if(empty($_POST['ldaphost'])) throw new Exception('LDAP Host value not defined!');
-					if(empty($_POST['ldapport'])) throw new Exception('LDAP Port value not defined!');
 					if(empty($_POST['ldapuser'])) throw new Exception('LDAP User value not defined!');
 					if(empty($_POST['ldappwd'])) throw new Exception('LDAP Password value not defined!');
 					if(empty($_POST['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
 
-					$ldap = ldap_connect(@$_POST['ldaphost'], @$_POST['ldapport']);
+					$ldap = ldap_connect(@$_POST['ldaphost']);
 					if($ldap)
 					{
 						ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -424,7 +421,7 @@ EOT;
 
 					$db = new MySQLDB();
 					$db->connect(@$_POST['host'], @$_POST['dbuser'], @$_POST['dbpwd'], @$_POST['db']);
-					$db->put("INSERT INTO pb_users (login, passwd, mail, deleted) VALUES ('".sql_escape(@$_POST['adminuser'])."', PASSWORD('".sql_escape(@$_POST['adminpwd'])."'), '".sql_escape(@$_POST['mailadmin'])."', 0)");
+					$db->put("INSERT INTO pb_users (login, passwd, mail, flags) VALUES ('".sql_escape(@$_POST['adminuser'])."', MD5('".sql_escape(@$_POST['adminpwd'])."'), '".sql_escape(@$_POST['mailadmin'])."', 0x0000)");
 
 					echo '{"code": 0, "status": "OK"}';
 				}
@@ -436,7 +433,6 @@ EOT;
 					if(empty($_POST['dbuser'])) throw new Exception('Login value not defined!');
 
 					if(empty($_POST['ldaphost'])) throw new Exception('LDAP Host value not defined!');
-					if(empty($_POST['ldapport'])) throw new Exception('LDAP Port value not defined!');
 					if(empty($_POST['ldapuser'])) throw new Exception('LDAP User value not defined!');
 					if(empty($_POST['ldappwd'])) throw new Exception('LDAP Password value not defined!');
 					if(empty($_POST['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
@@ -458,7 +454,6 @@ EOT;
 							'#password#',
 							'#db#',
 							'#ldap_host#',
-							'#ldap_port#',
 							'#ldap_user#',
 							'#ldap_password#',
 							'#ldap_base#',
@@ -482,7 +477,6 @@ EOT;
 							sql_escape(@$_POST['dbpwd']),
 							sql_escape(@$_POST['db']),
 							sql_escape(@$_POST['ldaphost']),
-							sql_escape(@$_POST['ldapport']),
 							sql_escape(@$_POST['ldapuser']),
 							sql_escape(@$_POST['ldappwd']),
 							sql_escape(@$_POST['ldapbase']),
@@ -503,9 +497,9 @@ EOT;
 						$config
 					);
 
-					if(@file_put_contents(ABSPATH.'inc.config.php', $config) === FALSE)
+					if(@file_put_contents(ROOTDIR.'inc.config.php', $config) === FALSE)
 					{
-						throw new Exception("Save config error");
+						throw new Exception("Save config error. Check write permissions");
 					}
 
 					echo '{"code": 0, "status": "OK"}';
@@ -518,7 +512,6 @@ EOT;
 					if(empty($_GET['dbuser'])) throw new Exception('Login value not defined!');
 
 					if(empty($_GET['ldaphost'])) throw new Exception('LDAP Host value not defined!');
-					if(empty($_GET['ldapport'])) throw new Exception('LDAP Port value not defined!');
 					if(empty($_GET['ldapuser'])) throw new Exception('LDAP User value not defined!');
 					if(empty($_GET['ldappwd'])) throw new Exception('LDAP Password value not defined!');
 					if(empty($_GET['ldapbase'])) throw new Exception('LDAP Base DN value not defined!');
@@ -539,7 +532,6 @@ EOT;
 							'#password#',
 							'#db#',
 							'#ldap_host#',
-							'#ldap_port#',
 							'#ldap_user#',
 							'#ldap_password#',
 							'#ldap_base#',
@@ -563,7 +555,6 @@ EOT;
 							sql_escape(@$_GET['dbpwd']),
 							sql_escape(@$_GET['db']),
 							sql_escape(@$_GET['ldaphost']),
-							sql_escape(@$_GET['ldapport']),
 							sql_escape(@$_GET['ldapuser']),
 							sql_escape(@$_GET['ldappwd']),
 							sql_escape(@$_GET['ldapbase']),
@@ -1042,7 +1033,7 @@ EOT;
 			function f_check_ldap(id)
 			{
 				f_post(id, "check_ldap",
-					'ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					'ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
 				);
 			}
@@ -1071,7 +1062,7 @@ EOT;
 				var ms = gi("mail_secure");
 				f_post(id, "save_config",
 					'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
-					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
 					+'&mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
@@ -1086,7 +1077,7 @@ EOT;
 				var ms = gi("mail_secure");
 				window.location = "install.php?action=download_config&" +
 					'host='+encodeURIComponent(gi('host').value)+'&db='+encodeURIComponent(gi('db_scheme').value)+'&dbuser='+encodeURIComponent(gi('db_user').value)+'&dbpwd='+encodeURIComponent(gi('db_pwd').value)
-					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapport='+encodeURIComponent(gi('ldap_port').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
+					+'&ldaphost='+encodeURIComponent(gi('ldap_host').value)+'&ldapuser='+encodeURIComponent(gi('ldap_user').value)+'&ldappwd='+encodeURIComponent(gi('ldap_pwd').value)
 					+'&ldapbase='+encodeURIComponent(gi('ldap_base').value)+'&ldapfilter='+encodeURIComponent(gi('ldap_filter').value)
 					+'&mailhost='+encodeURIComponent(gi('mail_host').value)+'&mailport='+encodeURIComponent(gi('mail_port').value)+'&mailuser='+encodeURIComponent(gi('mail_user').value)+'&mailpwd='+encodeURIComponent(gi('mail_pwd').value)
 					+'&mailsecure='+encodeURIComponent(ms.options[ms.selectedIndex].value)+'&mailfrom='+encodeURIComponent(gi('mail_from').value)+'&mailfromname='+encodeURIComponent(gi('mail_from_name').value)
@@ -1202,15 +1193,9 @@ EOT;
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="ldap_host" class="control-label col-sm-2">Host:</label>
+				<label for="ldap_host" class="control-label col-sm-2">LDAP URI:</label>
 				<div class="col-sm-5">
-					<input id="ldap_host" class="form-control" type="text" value="dc" />
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="ldap_port" class="control-label col-sm-2">Port:</label>
-				<div class="col-sm-5">
-					<input id="ldap_port" class="form-control" type="text" value="389" />
+					<input id="ldap_host" class="form-control" type="text" value="ldap://dc-01:389" />
 				</div>
 			</div>
 			<div class="form-group">

@@ -1,7 +1,7 @@
 <?php
 /*
     LDAP-phonebook - simple LDAP phonebook
-    Copyright (C) 2016 Dmitry V. Zimin
+    Copyright (C) 2016-2020 Dmitry V. Zimin
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,18 +17,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (!defined('ABSPATH'))
+if (!defined('ROOTDIR'))
 {
-	define('ABSPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('ROOTDIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 }
 	
-if(!file_exists(ABSPATH.'inc.config.php'))
+if(!file_exists(ROOTDIR.'inc.config.php'))
 {
 	header('Location: install.php');
 	exit;
 }
 
-require_once(ABSPATH.'inc.config.php');
+require_once(ROOTDIR.'inc.config.php');
 
 
 	if(!isset($_GET['action']) || ($_GET['action'] != 'upgrade'))
@@ -138,8 +138,77 @@ require_once(ABSPATH.'inc.config.php');
 			echo '  define("APP_LANGUAGE", "en");';
 			echo "\n\nUpgrade to version 4 complete!\n";
 		}
-		break;
 		case 4:
+		{
+			echo "Reset admin password...\n";
+			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `login` = 'admin' LIMIT 1")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Add column `flags` to table `@users`...\n";
+			if(!$db->put(rpv("ALTER TABLE `@users` ADD COLUMN `flags` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `sid`")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Copy `deleted` to `flags`...\n";
+			if(!$db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0001) WHERE `deleted` <> 0")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Copy `ldap` to `flags`...\n";
+			if(!$db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0002) WHERE `ldap` <> 0")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Remove column `deleted` from table `@users`...\n";
+			if(!$db->put(rpv("ALTER TABLE `@users` DROP COLUMN `deleted`")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Remove column `ldap` from table `@users`...\n";
+			if(!$db->put(rpv("ALTER TABLE `@users` DROP COLUMN `ldap`")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Create table `@access`...\n";
+			if(!$db->put(rpv("
+				CREATE TABLE  `@access` (
+				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `dn` varchar(1024) NOT NULL DEFAULT '',
+				  `oid` int(10) unsigned NOT NULL DEFAULT 0,
+				  `allow_bits` binary(32) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "Set db_version = '5'...\n";
+			if(!$db->put(rpv("UPDATE @config SET `value` = 5 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'Error: '.$db->get_last_error()."\n";
+			}
+
+			echo "\nNow you must add to inc.config.php something like\n\n";
+			echo '  define("LDAP_URI", "ldap://dc-01.example.org");\n';
+			echo '  LDAP_HOST and LDAP_PORT deprecated and can be removed.\n';
+
+			echo "\n****************************************************";
+			echo "\n*  Admin password now set to 'admin'.              *";
+			echo "\n*  You must reset all internal users passwords,    *";
+			echo "\n*  because PASSWORD function deprecated in MySQL.  *";
+			echo "\n****************************************************";
+			echo "\n\nUpgrade to version 5 complete!\n";
+		}
+		break;
+		case 5:
 		{
 			echo "Upgrade doesn't required\n";
 		}

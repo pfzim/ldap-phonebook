@@ -2,7 +2,7 @@
 /*
     MySQLDB class - connect on demand and allow read from one server
                     and write to another server
-    Copyright (C) 2017-2018 Dmitry V. Zimin
+    Copyright (C) 2017-2020 Dmitry V. Zimin
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+	Class for operate with MySQL database
+*/
 class MySQLDB
 {
 	private $link_ro = NULL;
@@ -35,6 +38,18 @@ class MySQLDB
 	private $transaction_started = 0;
 	private $rise_exception = FALSE;
 	public $data = array();
+
+	/**
+	 Constructor.
+	 Constructor does not actualy connect to DB.
+		\param [in] $db_rw_host Master DB host for write data
+		\param [in] $db_ro_host Slave DB host for read data
+		\param [in] $db_user User name
+		\param [in] $db_passwd Password
+		\param [in] $db_name Database name
+		\param [in] $db_cpage Codepage
+		\param [in] $rise_exception [optional] default value FALSE
+	*/
 
 	function __construct($db_rw_host, $db_ro_host, $db_user, $db_passwd, $db_name, $db_cpage, $rise_exception = FALSE)
 	{
@@ -54,6 +69,12 @@ class MySQLDB
 		$this->error_msg = '';
 		$this->rise_exception = $rise_exception;
 	}
+
+	/**
+	 Connect to DB host.
+	 If transaction started, then connecting to RW host.
+		\param [in] $read_only bool true - if need connect to Read-only DB
+	*/
 
 	private function connect($read_only)
 	{
@@ -121,6 +142,10 @@ class MySQLDB
 
 		return TRUE;
 	}
+
+	/**
+		Disconnect from DB.
+	*/
 
 	public function disconnect()
 	{
@@ -248,7 +273,7 @@ class MySQLDB
 		return TRUE;
 	}
 
-	public function put($query)
+	public function put($query, &$affected_rows = NULL)
 	{
 		if(!$this->connect(FALSE))
 		{
@@ -262,7 +287,11 @@ class MySQLDB
 			return FALSE;
 		}
 
-		//return mysqli_affected_rows($this->link_rw);
+		if(func_num_args() > 1)
+		{
+			$affected_rows = mysqli_affected_rows($this->link_rw);
+		}
+
 		return TRUE;
 	}
 

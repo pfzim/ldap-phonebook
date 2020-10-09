@@ -17,23 +17,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (!defined('ABSPATH'))
+if(!defined('ROOTDIR'))
 {
-	define('ABSPATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('ROOTDIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 }
-	
-if(!file_exists(ABSPATH.'inc.config.php'))
+
+if(!file_exists(ROOTDIR.'inc.config.php'))
 {
 	header('Location: install.php');
 	exit;
 }
 
-require_once(ABSPATH.'inc.config.php');
+require_once(ROOTDIR.'inc.config.php');
 
 
 function php_mailer($to, $name, $subject, $html, $plain)
 {
-	require_once(ABSPATH.'libs/PHPMailer/PHPMailerAutoload.php');
+	require_once(ROOTDIR.'libs/PHPMailer/PHPMailerAutoload.php');
 
 	$mail = new PHPMailer;
 
@@ -70,12 +70,6 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 	$self = $_SERVER['PHP_SELF'];
 
-	$uid = 0;
-	if(isset($_SESSION['uid']))
-	{
-		$uid = $_SESSION['uid'];
-	}
-
 	if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
 		$ip = $_SERVER['HTTP_CLIENT_IP'];
 	} elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -84,10 +78,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		$ip = @$_SERVER['REMOTE_ADDR'];
 	}
 
-	require_once(ABSPATH.'language'.DIRECTORY_SEPARATOR.APP_LANGUAGE.'.php');
-	require_once(ABSPATH.'inc.db.php');
-	//require_once('inc.dbfunc.php');
-	require_once(ABSPATH.'inc.utils.php');
+	require_once(ROOTDIR.'language'.DIRECTORY_SEPARATOR.APP_LANGUAGE.'.php');
+	require_once(ROOTDIR.'inc.db.php');
+	require_once(ROOTDIR.'inc.ldap.php');
+	require_once(ROOTDIR.'inc.user.php');
+	require_once(ROOTDIR.'inc.utils.php');
 
 	$action = '';
 	if(isset($_GET['action']))
@@ -113,12 +108,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				break;
 		}
 
-		include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.message.php');
+		include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.message.php');
 		exit;
 	}
 
 	$db = new MySQLDB(DB_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
-	//$db->connect();
 
 	$config = array();
 
@@ -130,176 +124,63 @@ function php_mailer($to, $name, $subject, $html, $plain)
 		}
 	}
 
-	if(!isset($config['db_version']) || (intval($config['db_version']) != 4))
+	if(!isset($config['db_version']) || (intval($config['db_version']) != 5))
 	{
 		header('Location: upgrade.php');
 		exit;
 	}
 
-	$uid = 0;
-	if(isset($_SESSION['uid']))
-	{
-		$uid = $_SESSION['uid'];
-	}
+	$ldap = new LDAP(LDAP_URI, LDAP_USER, LDAP_PASSWD, FALSE);
+	$user = new UserAuth($db, !empty(LDAP_ADMIN_GROUP_DN) ? $ldap : NULL);
 
-	if(empty($uid))
-	{
-		if(!empty($_COOKIE['zh']) && !empty($_COOKIE['zl']))
-		{
-			if($db->select(rpv('SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`sid` IS NOT NULL AND m.`sid` = ! AND m.`deleted` = 0 LIMIT 1', $_COOKIE['zl'], $_COOKIE['zh'])))
-			{
-				$_SESSION['uid'] = $db->data[0][0];
-				$uid = $_SESSION['uid'];
-				setcookie('zh', $_COOKIE['zh'], time()+2592000, '/');
-				setcookie('zl', $_COOKIE['zl'], time()+2592000, '/');
-			}
-		}
-	}
-
-	if(empty($uid))
+	if(!$user->get_id())
 	{
 		header('Content-Type: text/html; charset=utf-8');
 		switch($action)
 		{
 			case 'logon':
 			{
-				if(empty($_POST['login']) || empty($_POST['passwd']))
+				if(!$user->logon(@$_POST['login'], @$_POST['passwd']))
 				{
 					$error_msg = 'Неверное имя пользователя или пароль!';
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
+					include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
 					exit;
 				}
 
-				$login = @$_POST['login'];
-
-				if(defined('PB_USE_LDAP_AUTH') && (PB_USE_LDAP_AUTH == 1))
+				if(!$user->is_member(LDAP_ADMIN_GROUP_DN))
 				{
-					if(strpos($login, '\\'))
-					{
-						list($domain, $login) = explode('\\', $login, 2);
-					}
-					else if(strpos($login, '@'))
-					{
-						list($login, $domain) = explode('@', $login, 2);
-					}
-					else
-					{
-						$error_msg = 'Неверный формат логина (user@domain, domain\\user)!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-
-					$ldap = @ldap_connect(LDAP_HOST, LDAP_PORT);
-					if(!$ldap)
-					{
-						$error_msg = 'LDAP connection error!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-
-					ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-					ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-					if(!@ldap_bind($ldap, $login.'@'.$domain, @$_POST['passwd']))
-					{
-						$error_msg = 'Неверное имя пользователя или пароль!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-					$cookie = '';
-					ldap_control_paged_result($ldap, 200, true, $cookie);
-
-					$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($login, null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.LDAP_ADMIN_GROUP_DN.'))', array('samaccountname', 'objectsid'));
-					if(!$sr)
-					{
-						ldap_unbind($ldap);
-						$error_msg = 'LDAP error!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-
-					$records = ldap_get_entries($ldap, $sr);
-					if(($records['count'] != 1) || empty($records[0]['samaccountname'][0]) || (strcasecmp($records[0]['samaccountname'][0], $login) != 0))
-					{
-						ldap_free_result($sr);
-						ldap_unbind($ldap);
-						// print_r($records);
-						$error_msg = 'Access denied!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-
-					$login = $records[0]['samaccountname'][0];
-
-					if($db->select(rpv('SELECT m.`id`, m.`passwd` FROM `@users` AS m WHERE m.`login` = ! AND m.`ldap` = 1 AND m.`deleted` = 0 LIMIT 1', $login)))
-					{
-						if(!empty($db->data[0][1]))
-						{
-							ldap_free_result($sr);
-							ldap_unbind($ldap);
-							$error_msg = 'Access denied!';
-							include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-							exit;
-						}
-						$_SESSION['uid'] = $db->data[0][0];
-					}
-					else // add new LDAP user
-					{
-						$db->put(rpv('INSERT INTO @users (login, passwd, mail, ldap, deleted) VALUES (!, \'\', !, 1, 0)', $login, @$records[0]['mail'][0]));
-						$_SESSION['uid'] = $db->last_id();
-					}
-
-					$uid = $_SESSION['uid'];
-
-					ldap_free_result($sr);
-					ldap_unbind($ldap);
+					$user->logoff();
+					$error_msg = 'Access denied!';
+					include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
+					exit;
 				}
-				else // internal authorization method
-				{
-					if(!$db->select(rpv('SELECT m.`id` FROM @users AS m WHERE m.`login` = ! AND m.`passwd` = PASSWORD(!) AND m.`ldap` = 0 AND m.`deleted` = 0 LIMIT 1', $login, @$_POST['passwd'])))
-					{
-						//$db->put(rpv('INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)', 0, LOG_LOGIN_FAILED, 0, $ip));
-						$error_msg = 'Неверное имя пользователя или пароль!';
-						include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
-						exit;
-					}
-
-					$_SESSION['uid'] = $db->data[0][0];
-					$uid = $_SESSION['uid'];
-				}
-
-				$sid = uniqid();
-				setcookie('zh', $sid, time()+2592000, '/');
-				setcookie('zl', $login, time()+2592000, '/');
-
-				$db->put(rpv('UPDATE @users SET `sid` = ! WHERE `id` = # LIMIT 1', $sid, $uid));
-				//$db->put(rpv('INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)', $uid, LOG_LOGIN, 0, $ip));
 
 				header('Location: '.$self);
-				exit;
 			}
+			exit;
+
 			case 'register': // show registartion form
 			{
-				include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
-				exit;
+				include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
 			}
+			exit;
+
 			case 'reg': // register new account
 			{
 				if(empty($_POST['login']) || empty($_POST['passwd']) || empty($_POST['mail']) || !preg_match('/'.ALLOW_MAILS.'/i', $_POST['mail']))
 				{
 					$error_msg = 'Указаны неверные данные!';
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
+					include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
 					exit;
 				}
 
-				if($db->select(rpv('SELECT m.`id` FROM @users AS m WHERE m.`login`= ! OR m.`mail` = ! LIMIT 1', @$_POST['login'], @$_POST['mail'])))
+				$uid = $user->add($_POST['login'], $_POST['passwd'], $_POST['mail']);
+				if(!$uid)
 				{
-					$res = $db->data;
-					$error_msg = 'Пользователь существует!';
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
+					$error_msg = $user->get_last_error();
+					include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
 					exit;
 				}
-				$db->put(rpv('INSERT INTO @users (login, passwd, mail, ldap, deleted) VALUES (!, PASSWORD(!), !, 0, 1)', @$_POST['login'], @$_POST['passwd'], @$_POST['mail']));
-				$uid = $db->last_id();
 
 				// send mail to admin for accept registration
 				if(!php_mailer(
@@ -310,328 +191,323 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				))
 				{
 					$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
+					include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.register.php');
 					exit;
 				}
 
 				header('Location: '.$self.'?action=message&id=1');
-				exit;
 			}
-			case 'login': // activate account after registartion
+			exit;
+
+			case 'login':  // show login form
 			{
-				include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php'); // show login form
-				exit;
+				include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php');
 			}
+			exit;
 		}
 	}
 
-
-	
 	switch($action)
 	{
 		case 'logoff':
 		{
-			$db->put(rpv('UPDATE @users SET `sid` = NULL WHERE `id` = # LIMIT 1', $uid));
-			$_SESSION['uid'] = 0;
-			$uid = $_SESSION['uid'];
-			setcookie('zh', NULL, time()-60, '/');
-			setcookie('zl', NULL, time()-60, '/');
-
-			break;
+			$user->logoff();
 		}
+		break;
+
 		case 'activate': // activate account after registartion
 		{
 			if(empty($_GET['login']) || empty($id))
 			{
-				$error_msg = 'Неверные данные активации!';
-				include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.error.php');
+				$error_msg = 'Invalid activation data!';
+				include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.error.php');
 				exit;
 			}
 
-			$db->put(rpv('UPDATE @users SET `deleted` = 0 WHERE `login` = ! AND `id` = #', @$_GET['login'], $id));
-			//$db->put(rpv('INSERT INTO `zxs_log` (`date`, `uid`, `type`, `p1`, `ip`) VALUES (NOW(), #, #, #, !)', 0, LOG_LOGIN_ACTIVATE, $id, $ip));
-
-			if($db->select(rpv('SELECT m.`id`, m.`mail` FROM @users AS m WHERE m.`login`= ! AND m.`id` = # LIMIT 1', @$_GET['login'], $id)))
+			if($user->activate($id, $_GET['login'], $mail))
 			{
-				if(!php_mailer(
-					$db->data[0][1], @$_GET['login'],
-					'Registration accepted',
-					'Hello!<br /><br />You account activated.<br /><br/><a href="'.$self.'">Login</a>',
-					'Hello! You account activated.'
-				))
+				if($mail !== FALSE)
 				{
-					$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.error.php');
-					exit;
+					if(!php_mailer(
+						$db->data[0][1], @$_GET['login'],
+						'Registration accepted',
+						'Hello!<br /><br />You account activated.<br /><br/><a href="'.$self.'">Login</a>',
+						'Hello! You account activated.'
+					))
+					{
+						$error_msg = 'Mailer Error: ' . $mail->ErrorInfo;
+						include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.error.php');
+						exit;
+					}
 				}
 			}
-			break;
 		}
-		case 'login': // activate account after registartion
+		break;
+
+		case 'login':  // show login form
 		{
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php'); // show login form
-			exit;
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.login.php'); // show login form
 		}
+		exit;
+
+		case 'get_token':
+		{
+			header('Content-Type: text/plain; charset=utf-8');
+			if(!$user->get_id())
+			{
+				echo '{"code": 1, "message": "Please, log in"}';
+				exit;
+			}
+
+			echo '{"code": 0, "message": "You token is: '.$user->get_token().'"}';
+		}
+		exit;
+
 		case 'sync':
 		{
-			if(!$uid) break;
+			if(!$user->get_id()) break;
 			//header('Content-Type: text/plain; charset=utf-8');
 			header('Content-Type: text/html; charset=utf-8');
 
-			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
-			if($ldap)
+			$upload_dir = dirname(__FILE__).DIRECTORY_SEPARATOR.'photos';
+
+			$data = array();
+			$count_updated = 0;
+			$count_added = 0;
+			$cookie = '';
+			do
 			{
-				ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
+				ldap_control_paged_result($ldap->get_link(), 200, true, $cookie);
+
+				$sr = ldap_search($ldap->get_link(), LDAP_BASE_DN, LDAP_FILTER, explode(',', LDAP_ATTRS));
+				if($sr)
 				{
-					$upload_dir = dirname(__FILE__).DIRECTORY_SEPARATOR.'photos';
-
-					$data = array();
-					$count_updated = 0;
-					$count_added = 0;
-					$cookie = '';
-					do
+					$records = ldap_get_entries($ldap->get_link(), $sr);
+					foreach($records as $account)
 					{
-						ldap_control_paged_result($ldap, 200, true, $cookie);
-
-						$sr = ldap_search($ldap, LDAP_BASE_DN, LDAP_FILTER, explode(',', LDAP_ATTRS));
-						if($sr)
+						if(!empty($account['samaccountname'][0]) && !empty($account['givenname'][0]) && !empty($account['sn'][0]))
 						{
-							$records = ldap_get_entries($ldap, $sr);
-							foreach($records as $account)
+							/*
+							echo @$account['samaccountname'][0];
+							echo ' '.@$account['sn'][0];
+							echo ' '.@$account['givenname'][0];
+							//echo ' '.@$account['name'][0];
+							echo ' '.@$account['displayname'][0];
+							echo ' '.@$account['mail'][0];
+							echo ' '.@$account['telephonenumber'][0];
+							echo ' '.@$account['mobile'][0];
+							echo ' '.@$account['description'][0];
+							echo ' '.@$account['title'][0];
+							echo ' '.@$account['department'][0];
+							echo ' '.@$account['company'][0];
+							echo ' '.@$account['info'][0];
+							echo "\n";
+							/**/
+
+							//print_r($account);
+
+							// *********************************************************
+
+							$s_login = @$account['samaccountname'][0];
+							$s_first_name = @$account['givenname'][0];
+							$s_last_name = @$account['sn'][0];
+							$s_department = @$account['department'][0];
+							$s_organization = @$account['company'][0];
+							$s_position = @$account['title'][0];
+							$s_phone_internal = @$account['telephonenumber'][0];
+							$s_phone_mobile = @$account['mobile'][0];
+							$s_mail = @$account['mail'][0];
+							$s_photo = @$account['thumbnailphoto'][0];
+							$s_visible = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?0:1;
+
+							// *********************************************************
+
+							if($db->select(rpv("
+									SELECT
+										m.`id`,
+										m.`samname`
+									FROM
+										`@contacts` AS m
+									WHERE
+										m.`samname` = !
+									LIMIT 1
+								",
+								$s_login
+							)))
 							{
-								if(!empty($account['samaccountname'][0]) && !empty($account['givenname'][0]) && !empty($account['sn'][0]))
-								{
-									/*
-									echo @$account['samaccountname'][0];
-									echo ' '.@$account['sn'][0];
-									echo ' '.@$account['givenname'][0];
-									//echo ' '.@$account['name'][0];
-									echo ' '.@$account['displayname'][0];
-									echo ' '.@$account['mail'][0];
-									echo ' '.@$account['telephonenumber'][0];
-									echo ' '.@$account['mobile'][0];
-									echo ' '.@$account['description'][0];
-									echo ' '.@$account['title'][0];
-									echo ' '.@$account['department'][0];
-									echo ' '.@$account['company'][0];
-									echo ' '.@$account['info'][0];
-									echo "\n";
-									/**/
+								$id = $db->data[0][0];
+								$db->put(rpv("
+										UPDATE
+											`@contacts`
+										SET
+											`fname` = !,
+											`lname` = !,
+											`dep` = !,
+											`org` = !,
+											`pos` = !,
+											`pint` = !,
+											`pcell` = !,
+											`mail` = !,
+											`photo` = #
+										WHERE
+											`samname` = ! LIMIT 1
+									",
+									$s_first_name,
+									$s_last_name,
+									$s_department,
+									$s_organization,
+									$s_position,
+									$s_phone_internal,
+									$s_phone_mobile,
+									$s_mail,
+									isset($account['thumbnailphoto'][0])?1:0,
+									$s_login
+								));
 
-									//print_r($account);
-
-									// *********************************************************
-
-									$s_login = @$account['samaccountname'][0];
-									$s_first_name = @$account['givenname'][0];
-									$s_last_name = @$account['sn'][0];
-									$s_department = @$account['department'][0];
-									$s_organization = @$account['company'][0];
-									$s_position = @$account['title'][0];
-									$s_phone_internal = @$account['telephonenumber'][0];
-									$s_phone_mobile = @$account['mobile'][0];
-									$s_mail = @$account['mail'][0];
-									$s_photo = @$account['thumbnailphoto'][0];
-									$s_visible = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?0:1;
-
-									// *********************************************************
-
-									if($db->select(rpv("
-											SELECT
-												m.`id`,
-												m.`samname`
-											FROM `@contacts` AS m
-											WHERE m.`samname` = !
-											LIMIT 1
-										",
-										$s_login
-									)))
-									{
-										$id = $db->data[0][0];
-										$db->put(rpv("
-												UPDATE `@contacts`
-												SET
-													`fname` = !,
-													`lname` = !,
-													`dep` = !,
-													`org` = !,
-													`pos` = !,
-													`pint` = !,
-													`pcell` = !,
-													`mail` = !,
-													`photo` = #
-												WHERE
-													`samname` = ! LIMIT 1
-											",
-											$s_first_name,
-											$s_last_name,
-											$s_department,
-											$s_organization,
-											$s_position,
-											$s_phone_internal,
-											$s_phone_mobile,
-											$s_mail,
-											isset($account['thumbnailphoto'][0])?1:0,
-											$s_login
-										));
-										
-										$count_updated++;
-									}
-									else
-									{
-										$db->put(rpv("
-												INSERT INTO `@contacts` (
-													`samname`,
-													`fname`,
-													`lname`,
-													`dep`,
-													`org`,
-													`pos`,
-													`pint`,
-													`pcell`,
-													`mail`,
-													`photo`,
-													`visible`
-												) VALUES (!, !, !, !, !, !, !, !, !, #, 1)
-											",
-											$s_login,
-											$s_first_name,
-											$s_last_name,
-											$s_department,
-											$s_organization,
-											$s_position,
-											$s_phone_internal,
-											$s_phone_mobile,
-											$s_mail,
-											isset($account['thumbnailphoto'][0])?1:0
-										));
-										
-										$id = $db->last_id();
-										$count_added++;
-
-										$data[] = array(
-											$id,
-											$s_login,
-											$s_first_name,
-											$s_last_name,
-											$s_department,
-											$s_organization,
-											$s_position,
-											$s_phone_internal,
-											$s_phone_mobile,
-											$s_mail,
-											isset($account['thumbnailphoto'][0])?1:0,
-											0,
-											0,
-											0,
-											1
-										);
-									}
-									//echo "\r\n".$db->get_last_error()."\r\n";
-
-									if(isset($account['thumbnailphoto'][0]))
-									{
-										$w = 64;
-										$h = 64;
-										list($width, $height) = getimagesizefromstring($s_photo);
-										$r = $w / $h;
-										if($width/$height > $r)
-										{
-											$src_width = ceil($height*$r);
-											$src_x = ceil(($width - $src_width)/2);
-											$src_y = 0;
-											$src_height = $height;
-										}
-										else
-										{
-											$src_height = ceil($width/$r);
-											$src_y = ceil(($height - $src_height)/2);
-											$src_x = 0;
-											$src_width = $width;
-										}
-										$src = imagecreatefromstring($s_photo);
-										$dst = imagecreatetruecolor($w, $h);
-										imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
-										imagejpeg($dst, $upload_dir.DIRECTORY_SEPARATOR.'t'.$id.'.jpg', 100);
-										imagedestroy($dst);
-										imagedestroy($src);
-									}
-								}
+								$count_updated++;
 							}
-							ldap_control_paged_result_response($ldap, $sr, $cookie);
-							ldap_free_result($sr);
+							else
+							{
+								$db->put(rpv("
+										INSERT INTO `@contacts` (
+											`samname`,
+											`fname`,
+											`lname`,
+											`dep`,
+											`org`,
+											`pos`,
+											`pint`,
+											`pcell`,
+											`mail`,
+											`photo`,
+											`visible`
+										) VALUES (!, !, !, !, !, !, !, !, !, #, 1)
+									",
+									$s_login,
+									$s_first_name,
+									$s_last_name,
+									$s_department,
+									$s_organization,
+									$s_position,
+									$s_phone_internal,
+									$s_phone_mobile,
+									$s_mail,
+									isset($account['thumbnailphoto'][0])?1:0
+								));
+
+								$id = $db->last_id();
+								$count_added++;
+
+								$data[] = array(
+									$id,
+									$s_login,
+									$s_first_name,
+									$s_last_name,
+									$s_department,
+									$s_organization,
+									$s_position,
+									$s_phone_internal,
+									$s_phone_mobile,
+									$s_mail,
+									isset($account['thumbnailphoto'][0])?1:0,
+									0,
+									0,
+									0,
+									1
+								);
+							}
+							//echo "\r\n".$db->get_last_error()."\r\n";
+
+							if(isset($account['thumbnailphoto'][0]))
+							{
+								$w = 64;
+								$h = 64;
+								list($width, $height) = getimagesizefromstring($s_photo);
+								$r = $w / $h;
+								if($width/$height > $r)
+								{
+									$src_width = ceil($height*$r);
+									$src_x = ceil(($width - $src_width)/2);
+									$src_y = 0;
+									$src_height = $height;
+								}
+								else
+								{
+									$src_height = ceil($width/$r);
+									$src_y = ceil(($height - $src_height)/2);
+									$src_x = 0;
+									$src_width = $width;
+								}
+								$src = imagecreatefromstring($s_photo);
+								$dst = imagecreatetruecolor($w, $h);
+								imagecopyresampled($dst, $src, 0, 0, $src_x, $src_y, $w, $h, $src_width, $src_height);
+								imagejpeg($dst, $upload_dir.DIRECTORY_SEPARATOR.'t'.$id.'.jpg', 100);
+								imagedestroy($dst);
+								imagedestroy($src);
+							}
 						}
-
 					}
-					while($cookie !== null && $cookie != '');
-
-					ldap_unbind($ldap);
-					//echo 'Updated: '.$count_updated.', added: '.$count_added.' contacts';
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.sync.php');
+					ldap_control_paged_result_response($ldap->get_link(), $sr, $cookie);
+					ldap_free_result($sr);
 				}
+
 			}
+			while($cookie !== null && $cookie != '');
+
+			//echo 'Updated: '.$count_updated.', added: '.$count_added.' contacts';
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.sync.php');
 		}
 		exit;
+
 		case 'hide_disabled':
 		{
-			if(!$uid) break;
+			if(!$user->get_id()) break;
 			header('Content-Type: text/html; charset=utf-8');
-			$ldap = ldap_connect(LDAP_HOST, LDAP_PORT);
-			if($ldap)
+
+			$data = array();
+			$count_updated = 0;
+			$count_added = 0;
+			$cookie = '';
+			do
 			{
-				ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-				ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-				if(ldap_bind($ldap, LDAP_USER, LDAP_PASSWD))
+				ldap_control_paged_result($ldap->get_link(), 200, true, $cookie);
+
+				$sr = ldap_search($ldap->get_link(), LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))', array('samaccountname', 'useraccountcontrol')); // OR (sAMAccountType=805306368)
+				if($sr)
 				{
-					$data = array();
-					$count_updated = 0;
-					$count_added = 0;
-					$cookie = '';
-					do
+					$records = ldap_get_entries($ldap->get_link(), $sr);
+					foreach($records as &$account)
 					{
-						ldap_control_paged_result($ldap, 200, true, $cookie);
-
-						$sr = ldap_search($ldap, LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))', array('samaccountname', 'useraccountcontrol')); // OR (sAMAccountType=805306368)
-						if($sr)
+						if(!empty($account['samaccountname'][0]))
 						{
-							$records = ldap_get_entries($ldap, $sr);
-							foreach($records as &$account)
+							// *********************************************************
+
+							$s_login = @$account['samaccountname'][0];
+							$s_disabled = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?1:0;
+
+							// *********************************************************
+
+							if($s_disabled && $db->select(rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1', $s_login)))
 							{
-								if(!empty($account['samaccountname'][0]))
-								{
-									// *********************************************************
-
-									$s_login = @$account['samaccountname'][0];
-									$s_disabled = ((bool)(@$account['useraccountcontrol'][0] & 0x2))?1:0;
-
-									// *********************************************************
-
-									if($s_disabled && $db->select(rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible` FROM `@contacts` AS m WHERE m.`samname` = ! AND m.`visible` = 1 LIMIT 1', $s_login)))
-									{
-										$id = $db->data[0][0];
-										$db->data[0][14] = 0;
-										$data[] = $db->data[0];
-										$db->put(rpv('UPDATE `@contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1', $id));
-										$count_updated++;
-									}
-								}
+								$id = $db->data[0][0];
+								$db->data[0][14] = 0;
+								$data[] = $db->data[0];
+								$db->put(rpv('UPDATE `@contacts` SET `visible` = 0 WHERE `id` = # LIMIT 1', $id));
+								$count_updated++;
 							}
-							ldap_control_paged_result_response($ldap, $sr, $cookie);
-							ldap_free_result($sr);
 						}
-
 					}
-					while($cookie !== null && $cookie != '');
-
-					ldap_unbind($ldap);
-
-					include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.sync.php');
+					ldap_control_paged_result_response($ldap->get_link(), $sr, $cookie);
+					ldap_free_result($sr);
 				}
+
 			}
+			while($cookie !== null && $cookie != '');
+
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.sync.php');
 		}
 		exit;
+
 		case 'export':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -641,9 +517,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$result = $db->data;
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.export.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.export.php');
 		}
 		exit;
+
 		case 'export_xml':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -651,9 +528,10 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$db->select_assoc_ex($result, rpv('SELECT * FROM `@contacts` AS m'));
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.export-all.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.export-all.php');
 		}
 		exit;
+
 		case 'dump_db':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -685,6 +563,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 		}
 		exit;
+
 		case 'import_xml':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -742,6 +621,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "ok": '.$result_ok.', "fail": '.$result_fail.', "message": "XML imported (OK: '.$result_ok.', FAIL: '.$result_fail.')"}';
 		}
 		exit;
+
 		case 'export_selected':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -774,13 +654,14 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				}
 			}
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.export.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.export.php');
 		}
 		exit;
+
 		case 'hide':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -791,10 +672,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "message": "Successful hide (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'show':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -805,10 +687,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "message": "Successful show (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'setlocation':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -824,10 +707,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "id": '.$id.', "map": '.json_escape(@$_POST['map']).', "x": '.json_escape(@$_POST['x']).', "y": '.json_escape(@$_POST['y']).', "message": "Location set (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'setphoto':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -874,10 +758,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "id": '.$id.', "message": "Photo set (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'deletephoto':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -893,10 +778,11 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "id": '.$id.', "message": "Photo deleted (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'save':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -928,8 +814,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				$nd = intval(@$d[0]);
 				$nm = intval(@$d[1]);
 				$ny = intval(@$d[2]);
-				$s_bday = sprintf("%04d-%02d-%02d", $ny, $nm, $nd);
-				$s_bday_human = sprintf("%02d.%02d.%04d", $nd, $nm, $ny);
+				$s_bday = sprintf('%04d-%02d-%02d', $ny, $nm, $nd);
+				$s_bday_human = sprintf('%02d.%02d.%04d', $nd, $nm, $ny);
 
 				if(!datecheck($nd, $nm, $ny))
 				{
@@ -951,72 +837,73 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			if(!$s_id)
 			{
-				$db->put(rpv("INSERT INTO `@contacts` 
-								(`samname`, 
-								`fname`, 
-								`lname`, 
-								`dep`, 
-								`org`, 
-								`pos`, 
-								`pint`, 
-								`pcity`, 
-								`pcell`, 
-								`mail`, 
-								`photo`, 
-								`bday`, 
-								`type`, 
-								`visible`) 
-							VALUES ('', !, !, !, !, !, !, !, !, !, #, !, #, 1)", 
-								$s_first_name, 
-								$s_last_name, 
-								$s_department, 
-								$s_organization, 
-								$s_position, 
-								$s_phone_internal, 
-								$s_phone_city, 
-								$s_phone_mobile, 
-								$s_mail, 
-								$s_photo, 
-								$s_bday, 
+				$db->put(rpv("INSERT INTO `@contacts`
+								(`samname`,
+								`fname`,
+								`lname`,
+								`dep`,
+								`org`,
+								`pos`,
+								`pint`,
+								`pcity`,
+								`pcell`,
+								`mail`,
+								`photo`,
+								`bday`,
+								`type`,
+								`visible`)
+							VALUES ('', !, !, !, !, !, !, !, !, !, #, !, #, 1)",
+								$s_first_name,
+								$s_last_name,
+								$s_department,
+								$s_organization,
+								$s_position,
+								$s_phone_internal,
+								$s_phone_city,
+								$s_phone_mobile,
+								$s_mail,
+								$s_photo,
+								$s_bday,
 								$s_type));
 				$s_id = $db->last_id();
 				echo '{"code": 0, "id": '.$s_id.', "message": "Added (ID '.$s_id.')"}';
 			} else {
-				$db->put(rpv("UPDATE `@contacts` 
-							SET `fname` = !, 
-								`lname` = !, 
-								`dep` = !, 
-								`org` = !, 
-								`pos` = !, 
-								`pint` = !, 
-								`pcity` = !, 
-								`pcell` = !, 
-								`mail` = !, 
-								`photo` = #, 
-								`bday` = !, 
-								`type` = # 
-							WHERE `id` = # AND `samname` = '' LIMIT 1", 
-							$s_first_name, 
-							$s_last_name, 
-							$s_department, 
-							$s_organization, 
-							$s_position, 
-							$s_phone_internal, 
-							$s_phone_city, 
-							$s_phone_mobile, 
-							$s_mail, 
-							$s_photo, 
-							$s_bday, 
-							$s_type, 
+				$db->put(rpv("UPDATE `@contacts`
+							SET `fname` = !,
+								`lname` = !,
+								`dep` = !,
+								`org` = !,
+								`pos` = !,
+								`pint` = !,
+								`pcity` = !,
+								`pcell` = !,
+								`mail` = !,
+								`photo` = #,
+								`bday` = !,
+								`type` = #
+							WHERE `id` = # AND `samname` = '' LIMIT 1",
+							$s_first_name,
+							$s_last_name,
+							$s_department,
+							$s_organization,
+							$s_position,
+							$s_phone_internal,
+							$s_phone_city,
+							$s_phone_mobile,
+							$s_mail,
+							$s_photo,
+							$s_bday,
+							$s_type,
 							$s_id));
 				echo '{"code": 0, "id": '.$s_id.',"message": "Updated (ID '.$s_id.')"}';
 			}
 		}
 		exit;
+
 		case 'delete':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
-			if(!$uid)
+			if(!$user->get_id())
 			{
 				echo '{"code": 1, "message": "Please, log in"}';
 				exit;
@@ -1038,6 +925,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "message": "Deleted (ID '.$id.')"}';
 		}
 		exit;
+
 		case 'get_contact':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -1047,22 +935,22 @@ function php_mailer($to, $name, $subject, $html, $plain)
 				exit;
 			}
 
-			if(!$db->select_assoc(rpv("SELECT 	m.`id`, 
-												m.`samname`, 
-												m.`fname`, 
-												m.`lname`, 
-												m.`dep`, 
-												m.`org`, 
-												m.`pos`, 
-												m.`pint`, 
-												m.`pcell`, 
-												m.`mail`, 
-												m.`photo`, 
-												m.`map`, 
-												m.`x`, 
-												m.`y`, 
-												m.`visible`, 
-												DATE_FORMAT(m.`bday`, '%d.%m.%Y') AS create_date, 
+			if(!$db->select_assoc(rpv("SELECT 	m.`id`,
+												m.`samname`,
+												m.`fname`,
+												m.`lname`,
+												m.`dep`,
+												m.`org`,
+												m.`pos`,
+												m.`pint`,
+												m.`pcell`,
+												m.`mail`,
+												m.`photo`,
+												m.`map`,
+												m.`x`,
+												m.`y`,
+												m.`visible`,
+												DATE_FORMAT(m.`bday`, '%d.%m.%Y') AS create_date,
 												m.`type`,
 												m.`pcity`
 								FROM `@contacts` AS m WHERE m.`id` = # LIMIT 1", $id)))
@@ -1073,8 +961,8 @@ function php_mailer($to, $name, $subject, $html, $plain)
 
 			$row = $db->data[0];
 			$compname = array('', '', '');
-			
-			if($db->select_ex($comps, rpv('SELECT m.`computer` FROM `@handshake` AS m WHERE m.`user` = ! ORDER BY m.`date` DESC LIMIT 3', $row["samname"])))
+
+			if($db->select_ex($comps, rpv('SELECT m.`computer` FROM `@handshake` AS m WHERE m.`user` = ! ORDER BY m.`date` DESC LIMIT 3', $row['samname'])))
 			{
 				$i = 0;
 				foreach($comps as &$comp)
@@ -1082,7 +970,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 					$compname[$i++] = &$comp[0];
 				}
 			}
-			
+
 			/* // *** start cut here ***
 			$line = '';
 
@@ -1118,30 +1006,31 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 			// *** end cut here *** */
 
-			echo '{"code": 0, 
-					"data": {"id": '.intval($row["id"]).', 
+			echo '{"code": 0,
+					"data": {"id": '.intval($row["id"]).',
 							"samname": "'.json_escape($row["samname"]).'",
 							"firstname": "'.json_escape($row["fname"]).'",
-							"lastname": "'.json_escape($row["lname"]).'", 
-							"department": "'.json_escape($row["dep"]).'", 
-							"company": "'.json_escape($row["org"]).'", 
-							"position": "'.json_escape($row["pos"]).'", 
-							"phone": "'.json_escape($row["pint"]).'", 
-							"phonecity": "'.json_escape($row["pcity"]).'", 
-							"mobile": "'.json_escape($row["pcell"]).'", 
-							"mail": "'.json_escape($row["mail"]).'", 
-							"photo": '.intval($row["photo"]).', 
-							"map": '.intval($row["map"]).', 
-							"x": '.intval($row["x"]).', 
-							"y": '.intval($row["y"]).', 
-							"visible": '.intval($row["visible"]).', 
-							"bday": "'.json_escape($row["create_date"]).'", 
-							"type": '.intval($row["type"]).', 
-							"pc": ["'.json_escape($compname[0]).'", 
-							"'.json_escape($compname[1]).'", 
+							"lastname": "'.json_escape($row["lname"]).'",
+							"department": "'.json_escape($row["dep"]).'",
+							"company": "'.json_escape($row["org"]).'",
+							"position": "'.json_escape($row["pos"]).'",
+							"phone": "'.json_escape($row["pint"]).'",
+							"phonecity": "'.json_escape($row["pcity"]).'",
+							"mobile": "'.json_escape($row["pcell"]).'",
+							"mail": "'.json_escape($row["mail"]).'",
+							"photo": '.intval($row["photo"]).',
+							"map": '.intval($row["map"]).',
+							"x": '.intval($row["x"]).',
+							"y": '.intval($row["y"]).',
+							"visible": '.intval($row["visible"]).',
+							"bday": "'.json_escape($row["create_date"]).'",
+							"type": '.intval($row["type"]).',
+							"pc": ["'.json_escape($compname[0]).'",
+							"'.json_escape($compname[1]).'",
 							"'.json_escape($compname[2]).'"]}}';
 		}
 		exit;
+
 		case 'get_acs_location':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -1162,6 +1051,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "id": '.intval($db->data[0][0]).', "location": '.intval(get_acs_location($db->data[0][0], $db->data[0][1], $db->data[0][2], $db->data[0][3])).'}';
 		}
 		exit;
+
 		case 'hello':
 		{
 			header('Content-Type: text/plain; charset=utf-8');
@@ -1180,31 +1070,35 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			echo '{"code": 0, "message": "HI"}';
 		}
 		exit;
+
 		case 'services':
 		{
 			header('Content-Type: text/html; charset=utf-8');
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.services.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.services.php');
 		}
 		exit;
+
 		case 'handshakes':
 		{
 			header('Content-Type: text/html; charset=utf-8');
 
 			$db->select_ex($handshakes, rpv('SELECT m.`id`, m.`date`, m.`user`, m.`computer`, m.`ip` FROM `@handshake` AS m ORDER BY m.`date` DESC, m.`user` LIMIT 1000'));
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.handshakes.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.handshakes.php');
 		}
 		exit;
+
 		case 'map':
 		{
 			header('Content-Type: text/html; charset=utf-8');
 
 			$db->select(rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`type`, m.`visible` FROM `@contacts` AS m WHERE m.`visible` = 1 AND m.`map` = # ORDER BY m.`lname`, m.`fname`', $id));
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.map.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.map.php');
 		}
 		exit;
+
 		case 'all':
 		{
 			header('Content-Type: text/html; charset=utf-8');
@@ -1212,44 +1106,60 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			$db->select_assoc_ex($birthdays, rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible`, DATE_FORMAT(m.`bday`, \'%d.%m\') FROM `@contacts` AS m WHERE m.`visible` = 1 AND ((DAY(m.`bday`) = DAY(NOW()) AND MONTH(m.`bday`) = MONTH(NOW())) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 1 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 1 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 2 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 2 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 3 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 3 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 4 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 4 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 5 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 5 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 6 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 6 DAY)) OR (DAY(m.`bday`) = DAY(NOW() + INTERVAL 7 DAY) AND MONTH(m.`bday`) = MONTH(NOW() + INTERVAL 7 DAY))) ORDER BY MONTH(m.`bday`), DAY(m.`bday`), m.`lname`, m.`fname`'));
 			$db->select_assoc(rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail`, m.`photo`, m.`map`, m.`x`, m.`y`, m.`visible`, m.`pcity` FROM `@contacts` AS m ORDER BY m.`lname`, m.`fname`'));
 
-			include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.main.php');
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.main.php');
 		}
 		exit;
 	}
 
 	header('Content-Type: text/html; charset=utf-8');
 
-	$db->select_assoc_ex($birthdays, rpv("SELECT 	m.`id`, 
-													m.`samname`, 
-													m.`fname`, 
-													m.`lname`, 
-													DATE_FORMAT(m.`bday`, '%d.%m') AS DayMonth
-									FROM `@contacts` AS m 
-									WHERE 	m.`visible` = 1 AND 
-											MONTH(m.`bday`) = MONTH(NOW()) AND
-											DAY(m.`bday`) >= DAY(NOW()) AND
-											DAY(m.`bday`) <= DAY(NOW() + INTERVAL 7 DAY)					
-									ORDER BY MONTH(m.`bday`), DAY(m.`bday`), m.`lname`, m.`fname`"));
-	
-	$db->select_assoc(rpv("SELECT 	m.`id`, 
-									m.`samname`, 
-									m.`fname`, 
-									m.`lname`, 
-									m.`dep`, 
-									m.`org`, 
-									m.`pos`, 
-									m.`pint`, 
-									m.`pcell`, 
-									m.`mail`, 
-									m.`photo`, 
-									m.`map`, 
-									m.`x`, 
-									m.`y`, 
-									m.`visible`,
-									m.`pcity` 
-							FROM `@contacts` AS m 
-							WHERE m.`visible` = 1 
-							ORDER BY m.`lname`, m.`fname`"));
+	$db->select_assoc_ex($birthdays, rpv("
+		SELECT
+			m.`id`,
+			m.`samname`,
+			m.`fname`,
+			m.`lname`,
+			DATE_FORMAT(m.`bday`, '%d.%m') AS DayMonth
+		FROM
+			`@contacts` AS m
+		WHERE
+			m.`visible` = 1
+			AND MONTH(m.`bday`) = MONTH(NOW())
+			AND DAY(m.`bday`) >= DAY(NOW())
+			AND DAY(m.`bday`) <= DAY(NOW() + INTERVAL 7 DAY)
+		ORDER BY
+			MONTH(m.`bday`),
+			DAY(m.`bday`),
+			m.`lname`,
+			m.`fname`
+	"));
 
-	include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.main.php');
-	//include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.debug.php');
+	$db->select_assoc(rpv("
+		SELECT
+			m.`id`,
+			m.`samname`,
+			m.`fname`,
+			m.`lname`,
+			m.`dep`,
+			m.`org`,
+			m.`pos`,
+			m.`pint`,
+			m.`pcell`,
+			m.`mail`,
+			m.`photo`,
+			m.`map`,
+			m.`x`,
+			m.`y`,
+			m.`visible`,
+			m.`pcity`
+		FROM
+			`@contacts` AS m
+		WHERE
+			m.`visible` = 1
+		ORDER BY
+			m.`lname`,
+			m.`fname`
+	"));
+
+	include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.main.php');
+	//include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.debug.php');

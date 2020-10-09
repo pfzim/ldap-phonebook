@@ -1,8 +1,8 @@
-<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
+<?php include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
 		<h3 align="center">Synced contacts</h3>
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 		<input type="text" id="search" class="form-field" onkeyup="filter_table()" placeholder="Search..">
-		<?php if($uid) { ?>
+		<?php if($user->get_id()) { ?>
 		<span class="command f-right" onclick="f_edit(null);">Add contact</span>
 		<?php } ?>
 		<table id="table" class="main-table">
@@ -14,7 +14,7 @@
 				<th width="25%" onclick="sortTable(3)">E-Mail</th>
 				<th width="10%" onclick="sortTable(4)">Position</th>
 				<th width="10%" onclick="sortTable(5)">Department</th>
-				<?php if($uid) { ?>
+				<?php if($user->get_id()) { ?>
 				<th width="15%">Operations</th>
 				<?php } ?>
 			</tr>
@@ -28,7 +28,7 @@
 				<td><a href="mailto:<?php eh($row[9]); ?>"><?php eh($row[9]); ?></a></td>
 				<td><?php eh($row[6]); ?></td>
 				<td><?php eh($row[4]); ?></td>
-				<?php if($uid) { ?>
+				<?php if($user->get_id()) { ?>
 				<td>
 <div id="temporary-fix">
 					<?php if(empty($row[1])) { ?>
@@ -85,4 +85,4 @@
 		<form method="post" id="photo-upload" name="photo-upload">		
 			<input id="upload" type="file" name="photo" style="display: none"/>
 		</form>
-<?php include(ABSPATH.'templ'.DIRECTORY_SEPARATOR.'tpl.footer.php'); ?>
+<?php include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.footer.php'); ?>
