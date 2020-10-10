@@ -1,6 +1,7 @@
 <?php include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.header.php'); ?>
 		<h3 align="center"><?php eh($lang["servicesTools"]) ?></h3>
 		
+		<a href="?action=passwd_form"><?php eh('Change password') ?></a><br />
 		<a href="?action=hide_disabled"><?php eh($lang["servicesHideСontacts"]) ?></a><br />
 		<a href="?action=dump_db"><?php eh($lang["servicesDumpDB"]) ?></a><br />
 		<a href="?action=export_xml"><?php eh($lang["servicesExportXML"]) ?></a><br />

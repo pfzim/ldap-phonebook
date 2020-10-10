@@ -247,6 +247,35 @@ class UserAuth
 		return $this->db->last_id();
 	}
 
+	public function change_password($passwd)
+	{
+		if($this->uid && !$this->is_ldap_user())  // Only internal user can change self password
+		{
+			if($this->db->put(rpv('UPDATE `@users` SET `passwd` = MD5(!) WHERE `id` = # AND (`flags` & 0x0002) = 0x0000 LIMIT 1', $passwd, $this->uid)))
+			{
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	public function check_password($passwd)
+	{
+		if($this->uid && !$this->is_ldap_user())  // Only internal user can change self password
+		{
+			if($this->db->select_ex($user, rpv('SELECT u.`id` FROM `@users` AS u WHERE u.`id` = # AND u.`passwd` = MD5(!) AND (u.`flags` & 0x0002) = 0x0000 LIMIT 1', $this->uid, $passwd)))
+			{
+				if(intval($user[0][0]) == $this->uid)
+				{
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+	
 	/**
 	 *  \brief Activate other user
 	 *

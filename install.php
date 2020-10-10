@@ -492,7 +492,7 @@ EOT;
 							sql_escape(@$_POST['mailfromname']),
 							sql_escape(@$_POST['allowmails']),
 							empty($_POST['mailuser'])?'false':'true',
-							sql_escape(@$_GET['language'])
+							sql_escape(@$_POST['language'])
 						),
 						$config
 					);

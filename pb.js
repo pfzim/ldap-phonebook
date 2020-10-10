@@ -410,6 +410,92 @@ function f_save(form_id)
 	);
 }
 
+function f_post_form(form_id)
+{
+	var form_data = {};
+	var el = gi(form_id);
+	for(i = 0; i < el.elements.length; i++)
+	{
+		var err = gi('error-message');
+		if(err)
+		{
+			err.style.display='none';
+		}
+		
+		err = gi(el.elements[i].name + '-error');
+		if(err)
+		{
+			err.style.display='none';
+		}
+		if(el.elements[i].name)
+		{
+			if(el.elements[i].type == 'checkbox')
+			{
+				if(el.elements[i].checked)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else if(el.elements[i].type == 'select-one')
+			{
+				if(el.elements[i].selectedIndex != -1)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else
+			{
+				form_data[el.elements[i].name] = el.elements[i].value;
+			}
+		}
+	}
+
+	//alert(json2url(form_data));
+	//return;
+
+	gi('loading').style.display = 'block';
+	f_http('pb.php?action=' + form_id,
+		function(data, params)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				gi(params+'-container').style.display='none';
+			}
+			else
+			{
+				var el;
+				if(data.message)
+				{
+					el = gi('error-message');
+					if(el)
+					{
+						el.textContent = data.message;
+						el.style.display='block';
+					}
+				}
+				
+				if(data.errors)
+				{
+					for(i = 0; i < data.errors.length; i++)
+					{
+						el = gi(data.errors[i].name + "-error");
+						if(el)
+						{
+							el.textContent = data.errors[i].msg;
+							el.style.display='block';
+						}
+					}
+				}
+			}
+		},
+		form_id,
+		'application/x-www-form-urlencoded',
+		json2url(form_data)
+	);
+}
+
 function f_update_row(id)
 {
 	f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),

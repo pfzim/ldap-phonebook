@@ -140,8 +140,8 @@ require_once(ROOTDIR.'inc.config.php');
 		}
 		case 4:
 		{
-			echo "Reset admin password...\n";
-			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `login` = 'admin' LIMIT 1")))
+			echo "Reset all users passwords...\n";
+			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0'")))
 			{
 				echo 'Error: '.$db->get_last_error()."\n";
 			}
@@ -200,11 +200,11 @@ require_once(ROOTDIR.'inc.config.php');
 			echo "  define('LDAP_URI', 'ldap://dc-01.example.org');\n";
 			echo "  LDAP_HOST and LDAP_PORT deprecated and can be removed.\n";
 
-			echo "\n****************************************************";
-			echo "\n*  Admin password now set to 'admin'.              *";
-			echo "\n*  You must reset all internal users passwords,    *";
-			echo "\n*  because PASSWORD function deprecated in MySQL.  *";
-			echo "\n****************************************************";
+			echo "\n*******************************************************";
+			echo "\n*  For all local users passwords now set to 'admin'.  *";
+			echo "\n*  You must reset all internal users passwords,       *";
+			echo "\n*  because PASSWORD function deprecated in MySQL.     *";
+			echo "\n*******************************************************";
 			echo "\n\nUpgrade to version 5 complete!\n";
 		}
 		break;

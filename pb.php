@@ -243,6 +243,61 @@ function php_mailer($to, $name, $subject, $html, $plain)
 			}
 		}
 		break;
+		
+		case 'passwd_form':  // show change password form
+		{
+			include(ROOTDIR.'templ'.DIRECTORY_SEPARATOR.'tpl.passwd.php');
+		}
+		exit;
+
+		case 'passwd_change':  // change password
+		{
+			if(!$user->get_id())
+			{
+				echo '{"code": 1, "message": "Please, log in"}';
+				exit;
+			}
+
+			$result_json = array(
+				'code' => 0,
+				'message' => '',
+				'errors' => array()
+			);
+
+			if(empty($_POST['old_passwd']) || !$user->check_password($_POST['old_passwd']))
+			{
+				$result_json['code'] = 1;
+				$result_json['errors'][] = array('name' => 'old_passwd', 'msg' => 'Password does not match');
+			}
+
+			if(empty($_POST['passwd']))
+			{
+				$result_json['code'] = 1;
+				$result_json['errors'][] = array('name' => 'passwd', 'msg' => 'Password cannot be empty');
+			}
+			else if(empty($_POST['passwd2']) || $_POST['passwd'] !== $_POST['passwd2'])
+			{
+				$result_json['code'] = 1;
+				$result_json['errors'][] = array('name' => 'passwd2', 'msg' => 'Passwords does not match');
+			}
+
+			if($result_json['code'])
+			{
+				$result_json['message'] = 'Password not changed. Fix errors.';
+				echo json_encode($result_json);
+				exit;
+			}
+
+			if($user->change_password($_POST['passwd']))
+			{
+				echo '{"code": 0, "message": "Password changed"}';
+			}
+			else
+			{
+				echo '{"code": 1, "message": "Something gone wrong"}';
+			}
+		}
+		exit;
 
 		case 'login':  // show login form
 		{

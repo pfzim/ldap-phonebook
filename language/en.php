@@ -56,6 +56,8 @@ $lang = array (
 	"servicesDumpDB"			=>  	"Dump DB",
 	"servicesExportXML"			=>  	"Export XML",
 	"servicesImportXML"			=>  	"Import XML (replace existing contacts)",
+//----tpl.footer.php
+	"footerLoading"				=>  	"Loading...",
 //----tpl.header.php
 	"headerLDAPPhonebook"		=>  	"LDAP phonebook",	
 	"headerHome"				=>  	"Home",
