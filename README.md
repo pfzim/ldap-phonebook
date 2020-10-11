@@ -1,7 +1,7 @@
 # LDAP phonebook
 [:ru:](#корпоративный-телефонный-справочник-с-отображением-контактов-на-карте-офиса) [:us:](#corporate-phone-directory-with-contacts-displayed-on-the-office-map)  
 [Development ветка](https://github.com/pfzim/ldap-phonebook/tree/dev)  
-[Вопросы предпочтительнее задавать здесь, а не по почте](https://github.com/pfzim/ldap-phonebook/issues?q=)
+Вопросы предпочтительнее [задавать здесь](https://github.com/pfzim/ldap-phonebook/issues?q=), а не по почте
 
 # Корпоративный телефонный справочник с отображением контактов на карте офиса
 
@@ -39,10 +39,8 @@
 - Заменить изображения карт `templ/map[1-5].png` своими схемами
 
 ## Дополнительные настройки в inc.config.php (опционально)
-Включить LDAP авторизацию:
+Для включения LDAP аутентификации в LDAP_ADMIN_GROUP_DN нужно указать группу AD через которую предоставляется доступ:
 ```
-define('PB_USE_LDAP_AUTH', 1);
-
 // Группа в AD с пользователями имеющими доступ на редактирование справочника
 define('LDAP_ADMIN_GROUP_DN', 'CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local');
 ```
@@ -57,6 +55,11 @@ $map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
 define('APP_LANGUAGE', 'ru');
 ```
 
+## Изменения в новых версиях
+**10.10.2020**
+- Параметры LDAP_HOST и LDAP_PORT заменены на LDAP_URI. Пример: `ldaps://dc-01 ldap://dc-02:389`
+- При обнолении пароли у учётных записей будут заменены на 'admin', т.к. функция PASSWORD больше не поддерживается MySQL. Их требуется сменить.
+- Теперь аутентифакация LDAP и локальная работают параллельно. Для активации LDAP аутентификации в LDAP_ADMIN_GROUP_DN нужно указать группу доступа AD.
 
 This service import users info from LDAP/AD to MySQL DB
 
@@ -82,7 +85,7 @@ Installation
 
 ![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_7.png)
 
-
+---
 
 # Corporate phone directory with contacts displayed on the office map
 
