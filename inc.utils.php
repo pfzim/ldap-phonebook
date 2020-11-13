@@ -679,7 +679,7 @@ function rpv_old()
 }
 
 /**
- *  \brief Replace placeholders with numbered parameters
+ *  \brief Replace placeholders with numbered parameters (zero-based)
  *  
  *  \return Return replaced string
  *  
