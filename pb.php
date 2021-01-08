@@ -131,7 +131,7 @@ function php_mailer($to, $name, $subject, $html, $plain)
 	}
 
 	$ldap = new LDAP(LDAP_URI, LDAP_USER, LDAP_PASSWD, FALSE);
-	$user = new UserAuth($db, !empty(LDAP_ADMIN_GROUP_DN) ? $ldap : NULL);
+	$user = new UserAuth($db, (defined('LDAP_ADMIN_GROUP_DN') && !empty(LDAP_ADMIN_GROUP_DN)) ? $ldap : NULL);
 
 	if(!$user->get_id())
 	{
