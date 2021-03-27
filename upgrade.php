@@ -141,7 +141,7 @@ require_once(ROOTDIR.'inc.config.php');
 		case 4:
 		{
 			echo "Reset all users passwords...\n";
-			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0'")))
+			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0")))
 			{
 				echo 'Error: '.$db->get_last_error()."\n";
 			}
