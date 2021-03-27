@@ -7,6 +7,15 @@
 		<a href="?action=export_xml"><?php eh($lang["servicesExportXML"]) ?></a><br />
 		<a href="#" onclick="f_import_xml(); return false;"><?php eh($lang["servicesImportXML"]) ?></a><br />
 		
+		<p>
+			Current user token: <?php eh($user->get_token()); ?><br />
+			The token will be reset if you logout.
+		</p>
+		<p>Example usage:</p>
+		<pre>
+			curl --silent --cookie <?php eh('"zl='.$user->get_login().';zh='.$user->get_token().'"'); ?>" --output /dev/null "http://localhost<?php eh($_SERVER['PHP_SELF'].'?action=sync'); ?>"
+		</pre>
+		
 		<form method="post" id="form-file-upload" name="form-file-upload">
 			<input id="file-upload" type="file" name="file" style="display: none"/>
 		</form>
