@@ -400,7 +400,7 @@ class UserAuth
 					return FALSE;
 				}
 
-				if(strcasecmp($records[0]['samaccountname'][0], $this->get_login()) == 0)
+				if(strcasecmp($records[0]['sAMAccountName'][0], $this->get_login()) == 0)
 				{
 					return TRUE;
 				}

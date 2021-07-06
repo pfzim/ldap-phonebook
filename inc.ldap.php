@@ -126,7 +126,7 @@ class LDAP
 		$record = ldap_first_entry($lnk, $search_result);
 		while($record)
 		{
-			$result[] = $record;
+			$result[] = ldap_get_attributes($lnk, $record);
 			$i++;
 			$record = ldap_next_entry($lnk, $record);
 		}
