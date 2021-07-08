@@ -206,6 +206,12 @@ class UserAuth
 		$this->loaded = TRUE;
 		$this->uid = $_SESSION['uid'];
 
+		if(empty($this->token))
+		{
+			$this->token = uniqid();
+			$this->db->put(rpv('UPDATE @users SET `sid` = ! WHERE `id` = # LIMIT 1', $this->token, $this->uid));
+		}
+
 		setcookie('zh', $this->token, time() + 2592000, '/');
 		setcookie('zl', $this->login, time() + 2592000, '/');
 
