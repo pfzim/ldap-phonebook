@@ -83,5 +83,3 @@ $lang = array (
 	"registerLoginHREF"			=>  	"Login",
 	"registerRegister"			=>  	"Register",
 );
-?>
-
