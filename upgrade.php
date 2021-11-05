@@ -17,18 +17,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (!defined('ROOTDIR'))
+if (!defined('ROOT_DIR'))
 {
-	define('ROOTDIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('ROOT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 }
 	
-if(!file_exists(ROOTDIR.'inc.config.php'))
+if(!file_exists(ROOT_DIR.'inc.config.php'))
 {
 	header('Location: install.php');
 	exit;
 }
 
-require_once(ROOTDIR.'inc.config.php');
+require_once(ROOT_DIR.'inc.config.php');
 
 
 	if(!isset($_GET['action']) || ($_GET['action'] != 'upgrade'))
@@ -51,57 +51,46 @@ require_once(ROOTDIR.'inc.config.php');
 
 	header("Content-Type: text/plain; charset=utf-8");
 
-	require_once('inc.db.php');
-	//require_once('inc.dbfunc.php');
-	require_once('inc.utils.php');
+	require_once(ROOT_DIR.'inc.utils.php');
+	require_once(ROOT_DIR.'modules'.DIRECTORY_SEPARATOR.'Core.php');
 
-	$db = new MySQLDB(DB_HOST, NULL, DB_USER, DB_PASSWD, DB_NAME, DB_CPAGE, FALSE);
-	//$db->connect();
+	$core = new Core(TRUE);
+	$core->load_ex('db', 'MySQLDB');
 	
-	$config = array('db_version' => 0);
-
-	if($db->select(rpv("SELECT m.`name`, m.`value` FROM @config AS m WHERE m.`name` = 'db_version'")))
-	{
-		foreach($db->data as $row)
-		{
-			$config[$row[0]] = $row[1];
-		}
-	}
-
 	echo "Upgrading...\n";
 
-	switch(intval($config['db_version']))
+	switch(intval($core->Config->get_global('db_version', 0)))
 	{
 		case 0:
 		{
 			echo "\nCreate 'config' table...\n";
-			if(!$db->put(rpv("CREATE TABLE @config (`name` VARCHAR(255) NOT NULL DEFAULT '', `value` VARCHAR(8192) NOT NULL DEFAULT '', PRIMARY KEY(`name`)) ENGINE = InnoDB")))
+			if(!$core->db->put(rpv("CREATE TABLE @config (`name` VARCHAR(255) NOT NULL DEFAULT '', `value` VARCHAR(8192) NOT NULL DEFAULT '', PRIMARY KEY(`name`)) ENGINE = InnoDB")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Add column 'ldap' to 'users' table...\n";
-			if(!$db->put(rpv("ALTER TABLE @users ADD COLUMN `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `mail`")))
+			if(!$core->db->put(rpv("ALTER TABLE @users ADD COLUMN `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `mail`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Set db_version = '1'...\n";
-			if(!$db->put(rpv("INSERT INTO @config (`name`, `value`) VALUES('db_version', 1) ON DUPLICATE KEY UPDATE `value` = 1")))
+			if(!$core->db->put(rpv("INSERT INTO @config (`name`, `value`) VALUES('db_version', 1) ON DUPLICATE KEY UPDATE `value` = 1")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Upgrade to version 1 complete!\n";
 		}
 		case 1:
 		{
 			echo "\nAdd column 'type' to 'contacts' table...\n";
-			if(!$db->put(rpv("ALTER TABLE @contacts ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
+			if(!$core->db->put(rpv("ALTER TABLE @contacts ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Set db_version = '2'...\n";
-			if(!$db->put(rpv("UPDATE @config SET `value` = 2 WHERE `name` = 'db_version' LIMIT 1")))
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 2 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
 			echo '  $g_icons = array("Human", "Printer", "Fax");';
@@ -111,28 +100,28 @@ require_once(ROOTDIR.'inc.config.php');
 		case 2:
 		{
 			echo "\nCreate 'handshake' table...\n";
-			if(!$db->put(rpv("CREATE TABLE @handshake (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `user` VARCHAR(255) NOT NULL, `date` DATETIME NOT NULL, `computer` VARCHAR(255) NOT NULL DEFAULT '', `ip` VARCHAR(255) NOT NULL DEFAULT '', PRIMARY KEY(`id`)) ENGINE = InnoDB")))
+			if(!$core->db->put(rpv("CREATE TABLE @handshake (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `user` VARCHAR(255) NOT NULL, `date` DATETIME NOT NULL, `computer` VARCHAR(255) NOT NULL DEFAULT '', `ip` VARCHAR(255) NOT NULL DEFAULT '', PRIMARY KEY(`id`)) ENGINE = InnoDB")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Set db_version = '3'...\n";
-			if(!$db->put(rpv("UPDATE @config SET `value` = 3 WHERE `name` = 'db_version' LIMIT 1")))
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 3 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "\n\nUpgrade to version 3 complete!\n";
 		}
 		case 3:
 		{
 			echo "\nAdd column 'pcity' to 'contacts' table...\n";
-			if(!$db->put(rpv("ALTER TABLE @contacts ADD COLUMN `pcity` varchar(255) NOT NULL DEFAULT '' AFTER `pint`")))
+			if(!$core->db->put(rpv("ALTER TABLE @contacts ADD COLUMN `pcity` varchar(255) NOT NULL DEFAULT '' AFTER `pint`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "Set db_version = '4'...\n";
-			if(!$db->put(rpv("UPDATE @config SET `value` = 4 WHERE `name` = 'db_version' LIMIT 1")))
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 4 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
 			echo '  define("APP_LANGUAGE", "en");';
@@ -141,43 +130,43 @@ require_once(ROOTDIR.'inc.config.php');
 		case 4:
 		{
 			echo "Reset all users passwords...\n";
-			if(!$db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0")))
+			if(!$core->db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Add column `flags` to table `@users`...\n";
-			if(!$db->put(rpv("ALTER TABLE `@users` ADD COLUMN `flags` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `sid`")))
+			if(!$core->db->put(rpv("ALTER TABLE `@users` ADD COLUMN `flags` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `sid`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Copy `deleted` to `flags`...\n";
-			if(!$db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0001) WHERE `deleted` <> 0")))
+			if(!$core->db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0001) WHERE `deleted` <> 0")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Copy `ldap` to `flags`...\n";
-			if(!$db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0002) WHERE `ldap` <> 0")))
+			if(!$core->db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0002) WHERE `ldap` <> 0")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Remove column `deleted` from table `@users`...\n";
-			if(!$db->put(rpv("ALTER TABLE `@users` DROP COLUMN `deleted`")))
+			if(!$core->db->put(rpv("ALTER TABLE `@users` DROP COLUMN `deleted`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Remove column `ldap` from table `@users`...\n";
-			if(!$db->put(rpv("ALTER TABLE `@users` DROP COLUMN `ldap`")))
+			if(!$core->db->put(rpv("ALTER TABLE `@users` DROP COLUMN `ldap`")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Create table `@access`...\n";
-			if(!$db->put(rpv("
+			if(!$core->db->put(rpv("
 				CREATE TABLE  `@access` (
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `dn` varchar(1024) NOT NULL DEFAULT '',
@@ -187,13 +176,13 @@ require_once(ROOTDIR.'inc.config.php');
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 			")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "Set db_version = '5'...\n";
-			if(!$db->put(rpv("UPDATE @config SET `value` = 5 WHERE `name` = 'db_version' LIMIT 1")))
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 5 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$db->get_last_error()."\n";
+				echo 'Error: '.$core->db->get_last_error()."\n";
 			}
 
 			echo "\nNow you must add to inc.config.php something like\n\n";
@@ -209,6 +198,17 @@ require_once(ROOTDIR.'inc.config.php');
 		}
 		break;
 		case 5:
+		{
+			echo "Upgrade not yet supported. Please reinstall\n";
+			/*
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 6 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'Error: '.$core->db->get_last_error()."\n";
+			}
+			*/
+		}
+		break;
+		case 6:
 		{
 			echo "Upgrade doesn't required\n";
 		}

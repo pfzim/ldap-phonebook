@@ -687,6 +687,7 @@ function rpv_old()
  *           {s0} - safe trimmed sql string
  *           {f0} - safe float
  *           {r0} - unsafe raw string
+ *           {%NAME} - unsafe raw contant (i.e. define('NAME', 'my param'))
  *           @    - DB_PREFIX
  *           {{   - {
  *           {@   - @
@@ -769,6 +770,9 @@ function rpv()
 						break;
 					case 'r':
 						$out_string .= $data[intval($param) + 1];
+						break;
+					case '%':
+						$out_string .= defined($param) ? constant($param): 'undefined_constant';
 						break;
 				}
 			}

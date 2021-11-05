@@ -8,7 +8,7 @@ function gi(name)
 
 function escapeHtml(text)
 {
-  return text
+  return (''+text)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -18,8 +18,7 @@ function escapeHtml(text)
 
 function json2url(data)
 {
-	return Object.keys(data).map
-	(
+	return Object.keys(data).map(
 		function(k)
 		{
 			return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
@@ -108,11 +107,417 @@ function f_http(url, _f_callback, _callback_params, content_type, data)
 	return true;
 }
 
+/*
+form_data = {
+	code = '0 - success, otherwise error',
+	message = 'error message',
+	title = 'form name',
+	fields = [
+		{
+			type = 'hidden, list, date, number, string',
+			name = 'post name',
+			title = 'human readable caption'
+			value = 'default value'
+			list = [
+				'select value 1',
+				'list values',
+				...
+			]
+		},
+		...
+	]
+}
+*/
+
+function f_append_fields(el, fields, form_id, spoiler_id)
+{
+	//console.log('f_append_fields' + spoiler_id);
+	for(var i = 0, ec = fields.length; i < ec; i++)
+	{
+		if(fields[i].type == 'hidden')
+		{
+			html = '<input name="' + escapeHtml(fields[i].name) + '" type="hidden" value="' + escapeHtml(fields[i].value) + '" />';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
+		else if(fields[i].type == 'list' && fields[i].list)
+		{
+			html = '<div class="form-title"><label for="' + escapeHtml(form_id + fields[i].name) + '">'+ escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<select class="form-field" id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '">'
+				+ '<option value=""></option>';
+			for(j = 0; j < fields[i].list.length; j++)
+			{
+				selected = ''
+				if(fields[i].values)
+				{
+					if(fields[i].values[j] == fields[i].value)
+					{
+						selected = ' selected="selected"'
+					}
+				}
+				else if(fields[i].list[j] == fields[i].value)
+				{
+					selected = ' selected="selected"'
+				}
+				html += '<option value="' + escapeHtml(fields[i].values ? fields[i].values[j] : fields[i].list[j]) + '"' + selected + '>' + escapeHtml(fields[i].list[j]) + '</option>';
+			}
+			html += '</select>'
+				+ '<div id="' + escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
+		else if(fields[i].type == 'flags' && fields[i].list)
+		{
+			value = parseInt(fields[i].value, 10);
+
+			html = '<div class="form-title">' + escapeHtml(fields[i].title) + ':</div>';
+			for(j = 0; j < fields[i].list.length; j++)
+			{
+				checked = '';
+				if(value & (0x01 << j))
+				{
+					checked = ' checked="checked"';
+				}
+
+				html += '<span><input id="' + escapeHtml(form_id + fields[i].name) + '[' + j +']" name="' + escapeHtml(fields[i].name) + '[' + j +']" type="checkbox" value="' + (fields[i].values?fields[i].values[j]:'1') + '"' + checked + '/><label for="'+ escapeHtml(form_id + fields[i].name) + '[' + j + ']">' + escapeHtml(fields[i].list[j]) + '</label></span>'
+			}
+			html += '<div id="' + escapeHtml(form_id + fields[i].name) + '[0]-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
+		else if(fields[i].type == 'datetime')
+		{
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = '<div class="form-title"><label for="' + escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="'+ escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="edit" value="' + escapeHtml(fields[i].value) + '"/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+			el.appendChild(wrapper);
+
+			flatpickr(
+				gi(form_id + fields[i].name),
+				{
+					allowInput: true,
+					enableTime: true,
+					time_24hr: true,
+					defaultHour: 0,
+					defaultMinute: 0,
+					dateFormat: "d.m.Y H:i"
+				}
+			);
+		}
+		else if(fields[i].type == 'time')
+		{
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = '<div class="form-title"><label for="' + escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="'+ escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="edit" value="' + escapeHtml(fields[i].value) + '"/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+			el.appendChild(wrapper);
+
+			flatpickr(
+				gi(form_id + fields[i].name),
+				{
+					allowInput: true,
+					enableTime: true,
+					noCalendar: true,
+					time_24hr: true,
+					defaultHour: 0,
+					defaultMinute: 0,
+					dateFormat: "H:i"
+				}
+			);
+		}
+		else if(fields[i].type == 'date')
+		{
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = '<div class="form-title"><label for="' + escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="'+ escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="edit" value="' + escapeHtml(fields[i].value) + '"/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+			el.appendChild(wrapper);
+
+			flatpickr(
+				gi(form_id + fields[i].name),
+				{
+					allowInput: true,
+					dateFormat: "d.m.Y"
+				}
+			);
+			/*
+			var picker = new Pikaday({
+				field: gi(form_id + fields[i].name),
+				format: 'DD.MM.YYYY'
+			});
+			*/
+		}
+		else if(fields[i].type == 'password')
+		{
+			html = '<div class="form-title"><label for="'+ escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="password" value=""/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
+		else if(fields[i].type == 'upload')
+		{
+			html = '<div class="form-title"><label for="'+ escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<span class="form-upload" id="' + escapeHtml(form_id + fields[i].name) + '-file">&nbsp;</span> <a href="#" onclick="gi(\'' + escapeHtml(form_id + fields[i].name) + '\').click(); return false;"/>' + LL.SelectFile + '</a>'
+				+ '<input id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="file" style="display: none"/>'
+				+ '<div id="' + escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+
+			gi(form_id + fields[i].name).onchange = function(name) {
+				return function() {
+					gi(name + '-file').textContent = this.files.item(0).name;
+				}
+			}(form_id + fields[i].name);
+		}
+		else if(fields[i].type == 'spoiler')
+		{
+			spoiler_id++;
+
+			var wrapper = document.createElement('div');
+			wrapper.setAttribute('onclick', 'f_toggle_spoiler(\'' + escapeHtml(form_id + '_spoiler_' + spoiler_id) + '\');');
+			wrapper.className = 'spoiler';
+			wrapper.textContent = fields[i].title;
+			el.appendChild(wrapper);
+
+			wrapper = document.createElement('div');
+			wrapper.id = form_id + '_spoiler_' + spoiler_id;
+			wrapper.style.display = 'none';
+			el.appendChild(wrapper);
+
+			spoiler_id = f_append_fields(wrapper, fields[i].fields, form_id, spoiler_id);
+		}
+		else
+		{
+			var placeholder = '';
+			if(fields[i].placeholder)
+			{
+				placeholder = '" placeholder="' + fields[i].placeholder;
+			}
+
+			html = '<div class="form-title"><label for="'+ escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="edit" value="'+ escapeHtml(fields[i].value) + placeholder + '"/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+			
+			if(fields[i].autocomplete)
+			{
+				autocomplete_create(gi(form_id + fields[i].name), fields[i].autocomplete);
+			}
+		}
+	}
+
+	return spoiler_id;
+}
+
+function on_received_form(data, form_id)
+{
+	gi('loading').style.display = 'none';
+	if(data.code)
+	{
+		f_notify(data.message, 'error');
+	}
+	else
+	{
+		gi(form_id + '-title').innerText = data.title;
+
+		var el = gi(form_id + '-description');
+		if(data.description && (data.description.length > 0))
+		{
+			el.innerText = data.description;
+			el.style.display = 'block';
+		}
+		else
+		{
+			el.innerText = '';
+			el.style.display = 'none';
+		}
+
+		el = gi(form_id + '-fields');
+		el.innerHTML = '';
+		html = '';
+		
+		f_append_fields(el, data.fields, form_id, 0);
+		
+		html = '<br /><div class="f-right">'
+			+ '<button class="button-accept" type="submit" onclick="return f_send_form(\'' + data.action + '\');">' + LL.OK + '</button>'
+			+ '&nbsp;'
+			+ '<button class="button-decline" type="button" onclick="this.parentNode.parentNode.parentNode.parentNode.parentNode.style.display=\'none\'">' + LL.Cancel + '</button>'
+			+ '</div>';
+
+		var wrapper = document.createElement('div');
+		wrapper.innerHTML = html;
+		el.appendChild(wrapper);
+
+		gi(form_id +'-container').style.display='block';
+	}
+}
+
+function f_show_form(url)
+{
+	var form_id = 'uform';
+	gi('loading').style.display = 'block';
+	f_http(
+		url,
+		on_received_form,
+		form_id
+	);
+
+	return false;
+}
+
+function f_send_form(action)
+{
+	var form_id = 'uform';
+	var form_data = {};
+	var el = gi(form_id + '-fields');
+	for(i = 0; i < el.elements.length; i++)
+	{
+		if(el.elements[i].name)
+		{
+			var err = gi(form_id + el.elements[i].name + '-error');
+			if(err)
+			{
+				err.style.display = 'none';
+			}
+
+			/*
+			if(el.elements[i].type == 'checkbox')
+			{
+				if(el.elements[i].checked)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else if(el.elements[i].type == 'select-one')
+			{
+				if(el.elements[i].selectedIndex != -1)
+				{
+					form_data[el.elements[i].name] = el.elements[i].value;
+				}
+			}
+			else
+			{
+				form_data[el.elements[i].name] = el.elements[i].value;
+			}
+			*/
+		}
+	}
+
+	//alert(json2url(form_data));
+	//return;
+
+	gi('loading').style.display = 'block';
+	f_http(
+		g_link_prefix + action,
+		function(data, form_id)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				gi(form_id+'-container').style.display='none';
+				//window.location = '?action=doc&id='+data.id;
+				//window.location = window.location;
+				//f_update_doc(data.data);
+				//f_get_perms();
+				on_saved(action, data);
+			}
+			else if(data.errors)
+			{
+				for(i = 0; i < data.errors.length; i++)
+				{
+					var el = gi(form_id + data.errors[i].name + '-error');
+					if(el)
+					{
+						el.textContent = data.errors[i].msg;
+						el.style.display = 'block';
+					}
+				}
+			}
+		},
+		form_id,
+		null,                                    //'application/x-www-form-urlencoded',
+		new FormData(gi(form_id + '-fields'))    //json2url(form_data)
+	);
+
+	return false;
+}
+
+function f_notify(text, type)
+{
+	var el;
+	var temp;
+	el = gi('notify-block');
+	if(!el)
+	{
+		temp = document.getElementsByTagName('body')[0];
+		el = document.createElement('div');
+		el.id = 'notify-block';
+		el.style.top = '0px';
+		el.style.right = '0px';
+		el.className = 'notifyjs-corner';
+		temp.appendChild(el);
+	}
+
+	temp = document.createElement('div');
+	temp.innerHTML = '<div class="notifyjs-wrapper notifyjs-hidable"><div class="notifyjs-arrow"></div><div class="notifyjs-container" style=""><div class="notifyjs-bootstrap-base notifyjs-bootstrap-'+escapeHtml(type)+'"><span data-notify-text="">'+escapeHtml(text)+'</span></div>';
+	temp = el.appendChild(temp.firstChild);
+
+	setTimeout(
+		(function(el)
+		{
+			return function() {
+				el.parentNode.removeChild(el);
+			};
+		})(temp),
+		5000
+	);
+}
+
+function f_msg(text)
+{
+	gi('message-text').innerText = text;
+	gi('message-box').style.display = 'block';
+	return false;
+}
+
+function on_saved(action, data)
+{
+	if(action == 'permission_save')
+	{
+		//f_get_perms(data.pid);
+		window.location = window.location;
+	}
+	else if(action == 'user_save')
+	{
+		window.location = window.location;
+	}
+	else if(action == 'register')
+	{
+		f_msg(data.message);
+	}
+}
+
 function f_sw_img(ev)
 {
 	var el_src = ev.target || ev.srcElement;
-	var img = el_src.parentNode.getAttribute('data-photo');
-	if(parseInt(img, 10))
+	var img = el_src.parentNode.getAttribute('data-flags');
+	if(parseInt(img, 10) & 0x0008)
 	{
 		var el = gi('userphoto');
 		el.src = 'photos/t'+el_src.parentNode.getAttribute('data-id')+'.jpg';
@@ -162,14 +567,15 @@ function f_sw_map(ev)
 				}
 			}
 		}(x, y);
-		map.src = 'templ/map' + id + '.png';
+		map.src = g_link_static_prefix + 'templates/map' + id + '.png';
 	}
 }
 
 function f_set_location(id, map, x, y)
 {
 	//alert("map: "+map+"    x: "+x+"    y: "+y);
-	f_http("pb.php?action=setlocation&id="+id,
+	f_http(
+		g_link_prefix + 'contact_location_set',
 		function(data, params)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -186,7 +592,7 @@ function f_set_location(id, map, x, y)
 		},
 		null,
 		'application/x-www-form-urlencoded',
-		json2url({'map': map, 'x': x, 'y': y })
+		json2url({'id' : id, 'map': map, 'x': x, 'y': y })
 	);
 }
 
@@ -197,7 +603,7 @@ function f_map_set(ev)
 	var map = el_src.getAttribute('data-map');
 	gi('map-container').onclick = null;
 	gi('map-image').onload = null;
-	gi('map-image').src = 'templ/map'+map+'.png';
+	gi('map-image').src = g_link_static_prefix + 'templates/map'+map+'.png';
 	gi('map-container').style.display='block';
 	gi('map-marker').style.display='none';
 	gi('map-image').onclick = function(event)
@@ -225,7 +631,8 @@ function f_hide(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_hide',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -235,7 +642,9 @@ function f_hide(ev)
 				el.onclick = function(event) { f_show(event); };
 			}
 		},
-		el_src
+		el_src,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
 	);
 };
 
@@ -243,7 +652,8 @@ function f_hide2(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'hide', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_hide',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -253,7 +663,9 @@ function f_hide2(ev)
 				gi('menu-cmd-show').style.display = 'block';
 			}
 		},
-		el_src
+		el_src,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
 	);
 };
 
@@ -261,7 +673,8 @@ function f_show(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_show',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -271,7 +684,9 @@ function f_show(ev)
 				el.onclick = function(event) { f_hide(event); };
 			}
 		},
-		el_src
+		el_src,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
 	);
 };
 
@@ -279,7 +694,8 @@ function f_show2(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'show', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_show',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -289,7 +705,9 @@ function f_show2(ev)
 				gi('menu-cmd-show').style.display = 'none';
 			}
 		},
-		el_src
+		el_src,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
 	);
 };
 
@@ -297,7 +715,8 @@ function f_get_acs_location(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'get_acs_location', 'id': id }),
+	f_http(
+		g_link_prefix + 'get_acs_location/' + id,
 		function(data, el)
 		{
 			if(!data.code)
@@ -327,7 +746,8 @@ function f_delete(ev)
 {
 	var el_src = ev.target || ev.srcElement;
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-	f_http("pb.php?"+json2url({'action': 'delete', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_delete',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
@@ -338,167 +758,116 @@ function f_delete(ev)
 
 			}
 		},
-		el_src
+		el_src,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
 	);
 };
 
 
-function f_save(form_id)
+function on_action_success(el, action, data)
 {
-	var form_data = {};
-	var el = gi(form_id);
-	for(i = 0; i < el.elements.length; i++)
+	if(action == 'user_deactivate')
 	{
-		var err = gi(el.elements[i].name + '-error');
-		if(err)
-		{
-			err.style.display='none';
-		}
-		if(el.elements[i].name)
-		{
-			if(el.elements[i].type == 'checkbox')
-			{
-				if(el.elements[i].checked)
-				{
-					form_data[el.elements[i].name] = el.elements[i].value;
-				}
-			}
-			else if(el.elements[i].type == 'select-one')
-			{
-				if(el.elements[i].selectedIndex != -1)
-				{
-					form_data[el.elements[i].name] = el.elements[i].value;
-				}
-			}
-			else
-			{
-				form_data[el.elements[i].name] = el.elements[i].value;
-			}
-		}
+		window.location = window.location;
 	}
+	else if(action == 'user_activate')
+	{
+		window.location = window.location;
+	}
+	else
+	{
+		var row = el.parentNode.parentNode;
+		row.parentNode.removeChild(row);
+	}
+}
 
-	//alert(json2url(form_data));
-	//return;
-
+function f_call_action(ev, action)
+{
 	gi('loading').style.display = 'block';
-	f_http("pb.php?action=save",
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.getAttribute('data-id');
+	f_http(
+		g_link_prefix + action,
 		function(data, params)
 		{
 			gi('loading').style.display = 'none';
 			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
-				gi(params+'-container').style.display='none';
-				f_update_row(data.id);
-			}
-			else if(data.errors)
-			{
-				for(i = 0; i < data.errors.length; i++)
-				{
-					var el = gi(data.errors[i].name + "-error");
-					if(el)
-					{
-						el.textContent = data.errors[i].msg;
-						el.style.display='block';
-					}
-				}
+				on_action_success(params.el, params.action, data);
 			}
 		},
-		form_id,
+		{el: el_src, action: action},
 		'application/x-www-form-urlencoded',
-		json2url(form_data)
+		json2url({id: id})
 	);
 }
 
-function f_post_form(form_id)
+function f_deactivate_user(ev)
 {
-	var form_data = {};
-	var el = gi(form_id);
-	for(i = 0; i < el.elements.length; i++)
+	f_call_action(ev, 'user_deactivate');
+}
+
+function f_delete_user(ev)
+{
+	if(window.confirm(LL.ConfirmDelete))
 	{
-		var err = gi('error-message');
-		if(err)
-		{
-			err.style.display='none';
-		}
-		
-		err = gi(el.elements[i].name + '-error');
-		if(err)
-		{
-			err.style.display='none';
-		}
-		if(el.elements[i].name)
-		{
-			if(el.elements[i].type == 'checkbox')
-			{
-				if(el.elements[i].checked)
-				{
-					form_data[el.elements[i].name] = el.elements[i].value;
-				}
-			}
-			else if(el.elements[i].type == 'select-one')
-			{
-				if(el.elements[i].selectedIndex != -1)
-				{
-					form_data[el.elements[i].name] = el.elements[i].value;
-				}
-			}
-			else
-			{
-				form_data[el.elements[i].name] = el.elements[i].value;
-			}
-		}
+		f_call_action(ev, 'user_delete');
+	}
+}
+
+function f_activate_user(ev)
+{
+	f_call_action(ev, 'user_activate');
+}
+
+function f_confirm_async(a)
+{
+	if(window.confirm(LL.ConfirmOperation))
+	{
+		return f_async_ex(a.href);
 	}
 
-	//alert(json2url(form_data));
-	//return;
+	return false;
+}
 
+function f_async(a)
+{
+	return f_async_ex(a.href);
+}
+
+function f_async_ex(url)
+{
 	gi('loading').style.display = 'block';
-	f_http('pb.php?action=' + form_id,
-		function(data, params)
+	f_http(
+		url,
+		function(data, el)
 		{
 			gi('loading').style.display = 'none';
 			f_notify(data.message, data.code?"error":"success");
-			if(!data.code)
-			{
-				gi(params+'-container').style.display='none';
-			}
-			else
-			{
-				var el;
-				if(data.message)
-				{
-					el = gi('error-message');
-					if(el)
-					{
-						el.textContent = data.message;
-						el.style.display='block';
-					}
-				}
-				
-				if(data.errors)
-				{
-					for(i = 0; i < data.errors.length; i++)
-					{
-						el = gi(data.errors[i].name + "-error");
-						if(el)
-						{
-							el.textContent = data.errors[i].msg;
-							el.style.display='block';
-						}
-					}
-				}
-			}
+			f_msg(data.message);
 		},
-		form_id,
-		'application/x-www-form-urlencoded',
-		json2url(form_data)
+		null
 	);
+
+	return false;
+}
+
+function f_search(f)
+{
+    //f.action = f.action + '/' + encodeURIComponent(gi('search').value);
+    //f.submit();
+
+	window.location = f.action + '/' + encodeURIComponent(gi('search').value);
+
+	return false;
 }
 
 function f_update_row(id)
 {
-	f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),
+	f_http(
+		g_link_prefix + 'contact_get/' + id,
 		function(data, params)
 		{
 			if(data.code)
@@ -539,7 +908,7 @@ function f_update_row(id)
 				row.setAttribute("data-map", 	data.data.map);
 				row.setAttribute("data-x", 		data.data.x);
 				row.setAttribute("data-y", 		data.data.y);
-				row.setAttribute("data-photo", 	data.data.photo);
+				row.setAttribute("data-flags", 	data.data.flags);
 				
 				// Получаем ячейки таблицы по ID
 				var nameCell 				= gi("nameCell"+data.data.id);					// ФИО
@@ -574,93 +943,20 @@ function f_update_row(id)
 	);
 }
 
-function f_edit(ev, form_id)
+function f_edit(ev)
 {
-	var id = 0;
-	var el_src;
-	if(ev)
-	{
-		el_src = ev.target || ev.srcElement;
-		id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
-		//id = ev;
-	}
-	if(!id)
-	{
-		var form_data = {};
-		var el = gi(form_id);
-		for(i = 0; i < el.elements.length; i++)
-		{
-			var err = gi(el.elements[i].name + '-error');
-			if(err)
-			{
-				err.style.display='none';
-			}
-			if(el.elements[i].name == 'id')
-			{
-				el.elements[i].value = id;
-			}
-			else if(el.elements[i].name == 'pid')
-			{
-				el.elements[i].value = g_pid;
-			}
-			else
-			{
-				if(el.elements[i].type == 'checkbox')
-				{
-					el.elements[i].checked = false;
-				}
-				else
-				{
-					el.elements[i].value = '';
-				}
-			}
-		}
-		gi(form_id + '-container').style.display='block';
-	}
-	else
-	{
-		gi('loading').style.display = 'block';
-		f_http("pb.php?"+json2url({'action': 'get_' + form_id, 'id': id }),
-			function(data, params)
-			{
-				gi('loading').style.display = 'none';
-				if(data.code)
-				{
-					f_notify(data.message, "error");
-				}
-				else
-				{
-					var el = gi(params);
-					for(i = 0; i < el.elements.length; i++)
-					{
-						if(el.elements[i].name)
-						{
-							if(data.data[el.elements[i].name])
-							{
-								if(el.elements[i].type == 'checkbox')
-								{
-									el.elements[i].checked = (parseInt(data.data[el.elements[i].name], 10) != 0);
-								}
-								else
-								{
-									el.elements[i].value = data.data[el.elements[i].name];
-								}
-							}
-						}
-					}
-					gi(params+'-container').style.display='block';
-				}
-			},
-			form_id
-		);
-	}
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
+	f_show_form(g_link_prefix + 'contact_edit/' + id);
 }
 
 function f_upload_photo(id)
 {
 	gi('loading').style.display = 'block';
 	var fd = new FormData(gi("form-file-upload"));
-	f_http("pb.php?action=setphoto&id="+id,
+	fd.append('id', id);
+	f_http(
+		g_link_prefix + 'contact_photo_set',
 		function(data, params)
 		{
 			gi('loading').style.display = 'none';
@@ -682,7 +978,8 @@ function f_upload_file(action)
 {
 	gi('loading').style.display = 'block';
 	var fd = new FormData(gi("form-file-upload"));
-	f_http("pb.php?action="+action,
+	f_http(
+		g_link_prefix + action,
 		function(data, params)
 		{
 			gi('loading').style.display = 'none';
@@ -774,42 +1071,40 @@ function f_menu_id(ev, el_src, id)
 		parentElement = el_src;
 		document.addEventListener('click', documentClick, false);
 		
-		f_http("pb.php?"+json2url({'action': 'get_contact', 'id': id }),
+		f_http(
+			g_link_prefix + 'contact_get/' + id,
 			function(data, el)
 			{
 				gi('menu-loading').style.display = 'none';
-				if(!data.code)
+				// add pc to list
+				if(data.code)
 				{
-					// add pc to list
-					if(data.code)
+					f_notify(data.message, "error");
+				}
+				else
+				{
+					if(data.data.adid == '')
 					{
-						f_notify(data.message, "error");
+						gi('menu-cmd-edit').style.display = 'block';
+						gi('menu-cmd-photo').style.display = 'block';
+						gi('menu-cmd-delete').style.display = 'block';
+					}
+					if(data.data.flags & 0x0001)
+					{
+						gi('menu-cmd-hide').style.display = 'block';
 					}
 					else
 					{
-						if(data.data.samname == '')
+						gi('menu-cmd-show').style.display = 'block';
+					}
+					var i;
+					for(i = 0; i < 3; i++)
+					{
+						if(data.computers[i] != '')
 						{
-							gi('menu-cmd-edit').style.display = 'block';
-							gi('menu-cmd-photo').style.display = 'block';
-							gi('menu-cmd-delete').style.display = 'block';
-						}
-						if(data.data.visible)
-						{
-							gi('menu-cmd-hide').style.display = 'block';
-						}
-						else
-						{
-							gi('menu-cmd-show').style.display = 'block';
-						}
-						var i;
-						for(i = 0; i < 3; i++)
-						{
-							if(data.data.pc[i] != '')
-							{
-								gi('menu-cmd-connect-'+i).href = 'msraurl:' + data.data.pc[i];
-								gi('menu-cmd-connect-'+i).style.display = 'block';
-								gi('menu-cmd-connect-'+i).textContent = 'Connect to ' + data.data.pc[i];
-							}
+							gi('menu-cmd-connect-'+i).href = 'msraurl:' + data.computers[i];
+							gi('menu-cmd-connect-'+i).style.display = 'block';
+							gi('menu-cmd-connect-'+i).textContent = 'Connect to ' + data.computers[i];
 						}
 					}
 				}
@@ -823,7 +1118,7 @@ function f_import_xml()
 {
 	gi('file-upload').onchange = function() {
 		return function() {
-			f_upload_file('import_xml');
+			f_upload_file('contacts_import_xml');
 		}
 	}();
 	gi('file-upload').click();
@@ -889,7 +1184,7 @@ function f_hide_selected(ev)
 	if(j > 0)
 	{
 		f_http(
-			"/zxsa.php?action=hide_selected",
+			g_link_prefix + 'contacts_hide_selected',
 			function(data, params)
 			{
 				f_notify(data.message, data.code?"error":"success");
@@ -914,13 +1209,13 @@ function si(ev)
 	document.getElementById('popup').style.display = 'block';
 	document.getElementById('popup').style.left = (pX+10)  + "px";
 	document.getElementById('popup').style.top = (pY+10)  + "px";
-	if(parseInt(el_src.getAttribute('data-photo'), 10))
+	if(parseInt(el_src.getAttribute('data-flags'), 10) & 0x0008)
 	{
-		document.getElementById('u_photo').src = 'photos/t'+el_src.getAttribute('data-id')+'.jpg';
+		document.getElementById('u_photo').src = g_link_static_prefix + 'photos/t'+el_src.getAttribute('data-id')+'.jpg';
 	}
 	else
 	{
-		document.getElementById('u_photo').src = 'templ/nophoto.png';
+		document.getElementById('u_photo').src = g_link_static_prefix + 'templates/nophoto.png';
 	}
 	document.getElementById('u_name').innerHTML = escapeHtml(el_src.getAttribute('data-name'));
 	document.getElementById('u_position').innerHTML = escapeHtml(el_src.getAttribute('data-position'));
@@ -1026,37 +1321,6 @@ function f_drop(ev)
 	el_src.onmouseup = null;
 }
 
-function f_notify(text, type)
-{
-	var el;
-	var temp;
-	el = gi('notify-block');
-	if(!el)
-	{
-		temp = document.getElementsByTagName('body')[0];
-		el = document.createElement('div');
-		el.id = 'notify-block';
-		el.style.top = '0px';
-		el.style.right = '0px';
-		el.className = 'notifyjs-corner';
-		temp.appendChild(el);
-	}
-
-	temp = document.createElement('div');
-	temp.innerHTML = '<div class="notifyjs-wrapper notifyjs-hidable"><div class="notifyjs-arrow"></div><div class="notifyjs-container" style=""><div class="notifyjs-bootstrap-base notifyjs-bootstrap-'+escapeHtml(type)+'"><span data-notify-text="">'+escapeHtml(text)+'</span></div>';
-	temp = el.appendChild(temp.firstChild);
-
-	setTimeout(
-		(function(el)
-		{
-			return function() {
-				el.parentNode.removeChild(el);
-			};
-		})(temp),
-		5000
-	);
-}
-
 function filter_table() {
   // Declare variables
   var input, filter, table, tr, td, i;
@@ -1141,3 +1405,184 @@ function sortTable(n) {
     }
   }
 }
+
+function autocomplete_on_click(id, value)
+{
+	gi(id).value = value;
+	autocomplete_destroy();
+}
+
+function autocomplete_on_input(ev)
+{
+	var el = ev.target || ev.srcElement;
+
+	if(!el.value )
+	{
+		return false;
+	}
+
+	action = el.getAttribute('data-action');
+
+	f_http(
+		g_link_prefix + action,
+		function(data, el)
+		{
+			gi('loading').style.display = 'none';
+			if(data.code)
+			{
+				f_notify(data.message, 'error');
+			}
+			else
+			{
+				var a, b, i;
+				autocomplete_current_focus = -1;
+
+				autocomplete_destroy(null);
+				a = document.createElement('DIV');
+				a.setAttribute('id', 'autocomplete-container');
+				a.setAttribute('class', 'autocomplete-items');
+
+				el.parentNode.appendChild(a);
+				for(i = 0; i < data.list.length; i++)
+				{
+					b = document.createElement('DIV');
+					b.innerHTML = (''+data.list[i]).replace(new RegExp('(' + el.value + ')', 'i'), '<strong>$1</strong>');
+					b.setAttribute('onclick', 'autocomplete_on_click(\'' + el.id + '\', \'' + data.list[i] + '\');');
+					a.appendChild(b);
+				}
+			}
+		},
+		el,
+		'application/x-www-form-urlencoded',
+		json2url({search: el.value})
+	);
+}
+
+function autocomplete_on_keydown(e)
+{
+	var el = e.target || e.srcElement;
+	var x = gi('autocomplete-container');
+	if(!x)
+	{
+		return;
+	}
+
+	items = x.getElementsByTagName('div');
+
+	if(e.keyCode == 40)
+	{
+		autocomplete_current_focus++;
+		autocomplete_add_active(items);
+	}
+	else if(e.keyCode == 38) //up
+	{
+		autocomplete_current_focus--;
+		autocomplete_add_active(items);
+	}
+	else if (e.keyCode == 13)
+	{
+		e.preventDefault();
+		if (autocomplete_current_focus > -1)
+		{
+			if(items)
+			{
+				items[autocomplete_current_focus].click();
+			}
+		}
+	}
+}
+
+function autocomplete_create(input, action)
+{
+	input.setAttribute('data-action', action);
+	//input.setAttribute('autocomplete', 'off');
+	input.addEventListener('input', autocomplete_on_input);
+	input.addEventListener('keydown', autocomplete_on_keydown);
+}
+
+function autocomplete_add_active(items)
+{
+	if(!items) return false;
+
+	autocomplete_remove_active(items);
+
+	if(autocomplete_current_focus >= items.length)
+	{
+		autocomplete_current_focus = 0;
+	}
+
+	if(autocomplete_current_focus < 0)
+	{
+		autocomplete_current_focus = (items.length - 1);
+	}
+
+	items[autocomplete_current_focus].classList.add('autocomplete-active');
+}
+
+function autocomplete_remove_active(items)
+{
+	for(var i = 0; i < items.length; i++)
+	{
+		items[i].classList.remove('autocomplete-active');
+	}
+}
+
+function autocomplete_destroy(e)
+{
+	var el = gi('autocomplete-container');
+	if(el)
+	{
+		el.parentNode.removeChild(el);
+	}
+}
+
+// https://github.com/jfriend00/docReady
+// https://github.com/dmilisic/docReady
+(function() {
+    "use strict";
+    var readyFired = false;
+
+    // call this when the document is ready
+    // this function protects itself against being called more than once
+    function docReady() {
+        if (!readyFired) {
+            // this must be set to true before we start calling callbacks
+            readyFired = true;
+            // TODO: Enter your code here
+
+			/*execute a function when someone clicks in the document:*/
+        	if(document.addEventListener)
+        	{
+				document.addEventListener('click', 	autocomplete_destroy);
+			}
+			else
+			{
+            	document.attachEvent('onclick', autocomplete_destroy);
+			}
+        }
+    }
+
+    function readyStateChange() {
+        if ( document.readyState === "complete" ) {
+            docReady();
+        }
+    }
+
+    // if document already ready to go, schedule the docReady function to run
+    // IE only safe when readyState is "complete", others safe when readyState is "interactive"
+    if (document.readyState === "complete" || (!document.attachEvent && document.readyState === "interactive")) {
+        setTimeout(docReady, 1);
+    } else {
+        // otherwise install event handlers
+        if (document.addEventListener) {
+            // first choice is DOMContentLoaded event
+            document.addEventListener("DOMContentLoaded", docReady, false);
+            // backup is window load event
+            window.addEventListener("load", docReady, false);
+        } else {
+            // must be IE
+            document.attachEvent("onreadystatechange", readyStateChange);
+            window.attachEvent("onload", docReady);
+        }
+    }
+})();
