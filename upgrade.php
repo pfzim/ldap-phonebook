@@ -20,8 +20,11 @@
 if (!defined('ROOT_DIR'))
 {
 	define('ROOT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('TEMPLATES_DIR', ROOT_DIR.'templates'.DIRECTORY_SEPARATOR);
+	define('MODULES_DIR', ROOT_DIR.'modules'.DIRECTORY_SEPARATOR);
+	define('ROUTES_DIR', ROOT_DIR.'routes'.DIRECTORY_SEPARATOR);
 }
-	
+
 if(!file_exists(ROOT_DIR.'inc.config.php'))
 {
 	header('Location: install.php');
@@ -54,9 +57,14 @@ require_once(ROOT_DIR.'inc.config.php');
 	require_once(ROOT_DIR.'inc.utils.php');
 	require_once(ROOT_DIR.'modules'.DIRECTORY_SEPARATOR.'Core.php');
 
+	if(!defined('DB_RW_HOST') && defined('DB_HOST'))
+	{
+		define('DB_RW_HOST', DB_HOST);
+	}
+
 	$core = new Core(TRUE);
 	$core->load_ex('db', 'MySQLDB');
-	
+
 	echo "Upgrading...\n";
 
 	switch(intval($core->Config->get_global('db_version', 0)))
@@ -66,17 +74,17 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "\nCreate 'config' table...\n";
 			if(!$core->db->put(rpv("CREATE TABLE @config (`name` VARCHAR(255) NOT NULL DEFAULT '', `value` VARCHAR(8192) NOT NULL DEFAULT '', PRIMARY KEY(`name`)) ENGINE = InnoDB")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Add column 'ldap' to 'users' table...\n";
 			if(!$core->db->put(rpv("ALTER TABLE @users ADD COLUMN `ldap` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `mail`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Set db_version = '1'...\n";
 			if(!$core->db->put(rpv("INSERT INTO @config (`name`, `value`) VALUES('db_version', 1) ON DUPLICATE KEY UPDATE `value` = 1")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Upgrade to version 1 complete!\n";
 		}
@@ -85,12 +93,12 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "\nAdd column 'type' to 'contacts' table...\n";
 			if(!$core->db->put(rpv("ALTER TABLE @contacts ADD COLUMN `type` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `photo`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Set db_version = '2'...\n";
 			if(!$core->db->put(rpv("UPDATE @config SET `value` = 2 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
 			echo '  $g_icons = array("Human", "Printer", "Fax");';
@@ -102,12 +110,12 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "\nCreate 'handshake' table...\n";
 			if(!$core->db->put(rpv("CREATE TABLE @handshake (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `user` VARCHAR(255) NOT NULL, `date` DATETIME NOT NULL, `computer` VARCHAR(255) NOT NULL DEFAULT '', `ip` VARCHAR(255) NOT NULL DEFAULT '', PRIMARY KEY(`id`)) ENGINE = InnoDB")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Set db_version = '3'...\n";
 			if(!$core->db->put(rpv("UPDATE @config SET `value` = 3 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "\n\nUpgrade to version 3 complete!\n";
 		}
@@ -116,12 +124,12 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "\nAdd column 'pcity' to 'contacts' table...\n";
 			if(!$core->db->put(rpv("ALTER TABLE @contacts ADD COLUMN `pcity` varchar(255) NOT NULL DEFAULT '' AFTER `pint`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "Set db_version = '4'...\n";
 			if(!$core->db->put(rpv("UPDATE @config SET `value` = 4 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 			echo "\nNow you must add to inc.config.php something like\n\n";
 			echo '  define("APP_LANGUAGE", "en");';
@@ -132,37 +140,37 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "Reset all users passwords...\n";
 			if(!$core->db->put(rpv("UPDATE @users SET `passwd` = MD5('admin') WHERE `ldap` = 0")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Add column `flags` to table `@users`...\n";
 			if(!$core->db->put(rpv("ALTER TABLE `@users` ADD COLUMN `flags` INTEGER UNSIGNED NOT NULL DEFAULT 0 AFTER `sid`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Copy `deleted` to `flags`...\n";
 			if(!$core->db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0001) WHERE `deleted` <> 0")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Copy `ldap` to `flags`...\n";
 			if(!$core->db->put(rpv("UPDATE @users SET `flags` = (`flags` | 0x0002) WHERE `ldap` <> 0")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Remove column `deleted` from table `@users`...\n";
 			if(!$core->db->put(rpv("ALTER TABLE `@users` DROP COLUMN `deleted`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Remove column `ldap` from table `@users`...\n";
 			if(!$core->db->put(rpv("ALTER TABLE `@users` DROP COLUMN `ldap`")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Create table `@access`...\n";
@@ -176,13 +184,13 @@ require_once(ROOT_DIR.'inc.config.php');
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 			")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "Set db_version = '5'...\n";
 			if(!$core->db->put(rpv("UPDATE @config SET `value` = 5 WHERE `name` = 'db_version' LIMIT 1")))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
 			echo "\nNow you must add to inc.config.php something like\n\n";
@@ -196,16 +204,265 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "\n*******************************************************";
 			echo "\n\nUpgrade to version 5 complete!\n";
 		}
-		break;
 		case 5:
 		{
-			echo "Upgrade not yet supported. Please reinstall\n";
-			/*
-			if(!$core->db->put(rpv("UPDATE @config SET `value` = 6 WHERE `name` = 'db_version' LIMIT 1")))
+			//echo "Upgrade not yet supported. Please reinstall\n";
+			//break;
+
+			if(!$core->db->put(rpv('
+				CREATE TABLE `@access` (
+					`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+					`sid` varchar(256) NOT NULL DEFAULT \'\',
+					`dn` varchar(1024) NOT NULL DEFAULT \'\',
+					`oid` int(10) unsigned NOT NULL DEFAULT 0,
+					`allow_bits` binary(32) NOT NULL DEFAULT \'\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\',
+					PRIMARY KEY (`id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8
+			')))
 			{
-				echo 'Error: '.$core->db->get_last_error()."\n";
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
-			*/
+
+			if(!$core->db->put(rpv('
+				CREATE TABLE `@logs` (
+					`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+					`date` datetime NOT NULL,
+					`uid` int(10) unsigned NOT NULL,
+					`operation` varchar(1024) NOT NULL,
+					`params` varchar(4096) NOT NULL,
+					`flags` int(10) unsigned NOT NULL,
+					PRIMARY KEY (`id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8
+			')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@handshake` RENAME TO `@handshakes`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@users` ADD COLUMN `reset_token` VARCHAR(16) NOT NULL AFTER `sid`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@config` ADD COLUMN `uid` INT NOT NULL DEFAULT 0 FIRST')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `adid` VARCHAR(20) NOT NULL DEFAULT \'\' AFTER `id`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `samname` `samaccountname` VARCHAR(20) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `fname` `first_name` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `lname` `last_name` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `dep` `department` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `org` `organization` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `pos` `position` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `pint` `phone_internal` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `pcity` `phone_external` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `pcell` `phone_mobile` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `bday` `birthday` DATE DEFAULT NULL')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `reserved1` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `birthday`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `reserved2` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved1`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `reserved3` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved2`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `reserved4` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved3`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `reserved5` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved4`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `flags` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved5`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `visible` `flags` int(10) unsigned NOT NULL DEFAULT 0')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = `flags` | 0x0001 WHERE `id` in (SELECT id FROM @contacts WHERE visible = 1)')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = `flags` | 0x0008 WHERE `id` in (SELECT id FROM @contacts WHERE photo = 1)')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` DROP COLUMN `photo`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` DROP COLUMN `visible`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 6 WHERE `uid` = 0 AND `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			$count_updated = 0;
+			$cookie = '';
+
+			do
+			{
+				$result = ldap_search(
+					$core->LDAP->get_link(),
+					LDAP_BASE_DN,
+					PB_LDAP_FILTER,
+					['objectguid', 'samaccountname'],
+					0,
+					0,
+					0,
+					LDAP_DEREF_NEVER,
+					[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 200, 'cookie' => $cookie]]]
+				);
+
+				if($result === FALSE)
+				{
+					echo 'ERROR['.__LINE__.']: ldap_search return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+					exit;
+				}
+
+				if(!ldap_parse_result($core->LDAP->get_link(), $result, $errcode , $matcheddn , $errmsg , $referrals, $controls))
+				{
+					echo 'ERROR['.__LINE__.']: ldap_parse_result return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+					exit;
+				}
+
+				$entries = ldap_get_entries($core->LDAP->get_link(), $result);
+				if($entries === FALSE)
+				{
+					echo 'ERROR['.__LINE__.']: ldap_get_entries return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+					exit;
+				}
+
+				$i = $entries['count'];
+
+				while($i > 0)
+				{
+					$i--;
+					if(!empty($entries[$i]['samaccountname'][0]) && (!empty($entries[$i]['givenname'][0]) || !empty($entries[$i]['sn'][0])))
+					{
+						$v_adid = bin2hex(@$entries[$i]['objectguid'][0]);  // unique active directory id
+						$v_samaccountname = @$entries[$i]['samaccountname'][0];
+
+						if($core->db->select_ex($data, rpv("
+								SELECT
+									c.`id`,
+									c.`adid`
+								FROM
+									`@contacts` AS c
+								WHERE
+									c.`samaccountname` = !
+								LIMIT 1
+							",
+							$v_samaccountname
+						)))
+						{
+							$v_id = $data[0][0];
+							$core->db->put(rpv('
+									UPDATE `@contacts` SET
+										`adid` = !
+									WHERE
+										`id` = #
+									LIMIT 1
+								',
+								$v_adid,
+								$v_id
+							));
+
+							$count_updated++;
+						}
+					}
+				}
+
+				ldap_free_result($result);
+			}
+			while(!empty($cookie));
+
+			echo 'Unique ID updated for '.$count_updated.' contacts'.PHP_EOL.PHP_EOL;
+
+			echo "\n**************************************************************************";
+			echo "\n*  Please, reset password for local accounts using Reset password link!  *";
+			echo "\n**************************************************************************";
+			echo "\n\nNow you must update inc.config.php\n\n";
+			echo "  rename DB_HOST to DB_RW_HOST\n";
+			echo "  add define('USE_LDAP', TRUE);\n";
+			echo "  add define('PB_LDAP_FILTER', '(objectCategory=person)');\n";
+			echo "  add define('MAIL_VERIFY_PEER', TRUE);\n";
+			echo "  add define('MAIL_VERIFY_PEER_NAME', TRUE);\n";
+			echo "  add define('MAIL_ALLOW_SELF_SIGNED', FALSE);\n";
+			echo "  and other missing parameters look at examples/inc.config.php.example\n";
+			echo "\n\nUpgrade to version 6 complete!\n";
 		}
 		break;
 		case 6:

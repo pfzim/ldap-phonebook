@@ -15,7 +15,7 @@
 		</div>
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 
-		<form id="search_form" action="<?php ln($action.'/0'); ?>" method="get" onsubmit="return f_search(this);">
+		<form id="search_form" action="<?php ln($action.'/search'); ?>" method="get" onsubmit="return f_search(this);">
 			<?php L('Find') ?>: <input type="text" id="search" class="form-field" placeholder="<?php L('Search') ?>..." value="<?php if(isset($search)) eh($search); ?>">
 			<input class="button-other" type="submit" value="<?php L('Search') ?>" /><br />
 		</form>
@@ -30,13 +30,13 @@
 				<?php if($is_admin) { ?>
 				<th width="1%"><input type="checkbox" onclick="f_select_all(event)"/></th>
 				<?php $i++; } ?>
-				<th width="20%"><?php L('Name') ?></th>
-				<th width="10%"><?php L('Phone') ?></th>
-				<th width="10%"><?php L('PhoneCity') ?></th>
-				<th width="10%"><?php L('Mobile') ?></th>
-				<th width="15%"><?php L('Mail') ?></th>
-				<th width="10%"><?php L('Position') ?></th>
-				<th width="10%"><?php L('Department') ?></th>
+				<th width="20%"><a href="<?php ln($action.'/sort/0/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Name') ?></a><?php if($sort == 0) { echo ' &UpArrow;'; } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/1/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Phone') ?></a><?php if($sort == 1) { echo ' &UpArrow;'; } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/2/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('PhoneCity') ?></a><?php if($sort == 2) { echo ' &UpArrow;'; } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/3/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mobile') ?></a><?php if($sort == 3) { echo ' &UpArrow;'; } ?></th>
+				<th width="15%"><a href="<?php ln($action.'/sort/4/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mail') ?></a><?php if($sort == 4) { echo ' &UpArrow;'; } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/5/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Position') ?></a><?php if($sort == 5) { echo ' &UpArrow;'; } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/6/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Department') ?></a><?php if($sort == 6) { echo ' &UpArrow;'; } ?></th>
 				<?php if($is_admin) { ?>
 				<th width="15%"><?php L('Operations') ?></th>
 				<?php } ?>
@@ -64,6 +64,7 @@
 		<?php } ?>
 			</tbody>
 		</table>
+		
 		<?php if($is_admin) { ?>
 		<form id="contacts" method="post" action="?action=export_selected">
 			<input id="list" type="hidden" name="list" value="" />
@@ -71,7 +72,9 @@
 		<a href="#" onclick="f_export_selected(event); return false;"><?php L('ExportSelected') ?></a>
 		<?php } ?>
 
-		<a class="page-number<?php if($offset == 0) eh(' boldtext'); ?>" href="<?php ln($action.'/0/'.urlencode($search)); ?>">1</a>
+		<br />
+
+		<a class="page-number<?php if($offset == 0) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/0/search/'.urlencode($search)); ?>">1</a>
 		<?php 
 			$min = max(100, $offset - 1000);
 			$max = min($offset + 1000, $total - ($total % 100));
@@ -81,7 +84,7 @@
 			for($i = $min; $i <= $max; $i += 100)
 			{
 			?>
-				<a class="page-number<?php if($offset == $i) eh(' boldtext'); ?>" href="<?php ln($action.'/'.$i.'/'.urlencode($search)); ?>"><?php eh($i/100 + 1); ?></a>
+				<a class="page-number<?php if($offset == $i) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$i.'/search/'.urlencode($search)); ?>"><?php eh($i/100 + 1); ?></a>
 			<?php
 			}
 
@@ -89,12 +92,11 @@
 			if($i < $max)
 			{
 			?>
-				&nbsp;...&nbsp;<a class="page-number<?php if($offset == $max) eh(' boldtext'); ?>" href="<?php ln($action.'/'.$max.'/'.urlencode($search)); ?>"><?php eh($max/100 + 1); ?></a>
+				&nbsp;...&nbsp;<a class="page-number<?php if($offset == $max) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$max.'/search/'.urlencode($search)); ?>"><?php eh($max/100 + 1); ?></a>
 			<?php
 			}
 		?>
 
-		<br />
 		<br />
 
 <?php include(TEMPLATES_DIR.'tpl.universal-form.php'); ?>

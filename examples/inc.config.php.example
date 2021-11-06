@@ -1,35 +1,47 @@
 <?php
-	define("DB_HOST", "localhost");
-	define("DB_USER", "root");
-	define("DB_PASSWD", "");
-	define("DB_NAME", "pb");
-	define("DB_CPAGE", "utf8");
-	define("DB_PREFIX", "pb_");
+	define('DB_RW_HOST', 'localhost');
+	define('DB_USER', 'root');
+	define('DB_PASSWD', '');
+	define('DB_NAME', 'pb');
+	define('DB_CPAGE', 'utf8');
+	define('DB_PREFIX', 'pb_');
 
-	define("PB_USE_LDAP_AUTH", 0);
+	define('APP_LANGUAGE', 'en');
 
-	define("LDAP_HOST", "dc-01");
-	define("LDAP_PORT", 389);
-	define("LDAP_USER", "domain\\login");
-	define("LDAP_PASSWD", "password");
-	define("LDAP_BASE_DN", "DC=domain,DC=local");
-	define("LDAP_FILTER", "(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))");
-	define("LDAP_ATTRS", "samaccountname,ou,sn,givenname,mail,department,company,title,telephonenumber,mobile,thumbnailphoto,useraccountcontrol");
-	define("LDAP_ADMIN_GROUP_DN", "CN=Phonebook admin,OU=Admin Roles,OU=Groups,OU=Company,DC=domain,DC=local");
+	define('USE_GSSAPI', FALSE);  // look for details https://github.com/pfzim/websco
 
-	define("MAIL_HOST", "smtp.example.com");
-	define("MAIL_FROM", "admin@example.com");
-	define("MAIL_FROM_NAME", "Robot");
-	define("MAIL_ADMIN", "admin@example.com");
-	define("MAIL_ADMIN_NAME", "Admin");
-	define("MAIL_AUTH", true);
-	define("MAIL_LOGIN", "robot@example.com");
-	define("MAIL_PASSWD", "smtp-password-here");
-	define("MAIL_SECURE", "tls");
-	define("MAIL_PORT", 587);
+	define('USE_LDAP', TRUE);
+	define('LDAP_URI', 'ldap://dc-01.contoso.com ldap://dc-02.contoso.com:389 ldaps://dc-03.contoso.com');
+	define('LDAP_USER', 'domain\\login');
+	define('LDAP_PASSWD', 'password');
+	define('LDAP_BASE_DN', 'DC=domain,DC=local');
+	define('LDAP_USE_SID', TRUE);
 
-	define("ALLOW_MAILS", '^.+@.+$');
-	define("PB_MAPS_COUNT", 5);
+	define('MAIL_HOST', 'smtp.example.com');
+	define('MAIL_FROM', 'admin@example.com');
+	define('MAIL_FROM_NAME', 'Robot');
+	define('MAIL_ADMIN', 'admin@example.com');
+	define('MAIL_ADMIN_NAME', 'Admin');
+	define('MAIL_AUTH', true);
+	define('MAIL_LOGIN', 'robot@example.com');
+	define('MAIL_PASSWD', 'smtp-password-here');
+	define('MAIL_SECURE', 'tls');
+	define('MAIL_PORT', 587);
+	define('MAIL_VERIFY_PEER', TRUE);
+	define('MAIL_VERIFY_PEER_NAME', TRUE);
+	define('MAIL_ALLOW_SELF_SIGNED', FALSE);
 
-	$map_names = array("Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25");
-	$g_icons = array("Human", "Printer", "Fax");
+	define('USE_MEMCACHED', TRUE);
+
+	define('WEB_URL', 'https://pb.contoso.com/pb/');
+	define('USE_PRETTY_LINKS', FALSE);
+	define('USE_PRETTY_LINKS_FORCE', FALSE);
+	define('PRETTY_LINKS_BASE_PATH', '/pb/');
+	
+	define('LOG_FILE', '/var/log/pb/pb.log');
+
+	define('PB_LDAP_FILTER', '(&(objectCategory=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))');
+	define('PB_MAPS_COUNT', 5);
+
+	$map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
+	$g_icons = array('Human', 'Printer', 'Fax');

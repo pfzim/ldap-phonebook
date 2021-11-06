@@ -2,9 +2,9 @@
 
 <h3><?php L('Tools') ?></h3>
 
-<a href="<?php ln('contacts_sync') ?>"><?php L('Sync') ?></a>
-<a href="<?php ln('contacts_export') ?>"><?php L('Export') ?></a>
-<a href="<?php ln('contacts_hide_disabled') ?>"><?php L('HideDisabledContacts') ?></a><br />
+<a href="<?php ln('contacts_sync') ?>" onclick="return f_confirm_async(this);"><?php L('Sync') ?></a><br />
+<a href="<?php ln('contacts_hide_disabled') ?>" onclick="return f_confirm_async(this);"><?php L('HideDisabledContacts') ?></a><br />
+<a href="<?php ln('contacts_export') ?>"><?php L('Export') ?></a><br />
 <a href="<?php ln('contacts_dump_db') ?>"><?php L('DumpDB') ?></a><br />
 <a href="<?php ln('contacts_export_xml') ?>"><?php L('ExportXML') ?></a><br />
 <a href="#" onclick="f_import_xml(); return false;"><?php L('ImportXML') ?></a><br />
@@ -15,12 +15,10 @@
 </p>
 <p><?php L('UsageExample') ?>:</p>
 <pre>
-  curl --silent --cookie <?php eh('"zl='.$core->UserAuth->get_login().';zh='.$core->UserAuth->get_token().'"'); ?> --output /dev/null "http://localhost<?php ln('sync') ?>"
-  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path sync
-  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path sync_jobs
-  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path sync_jobs/&lt;runbook guid&gt;
-  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path start_runbook --data 'guid=00000000-0000-0000-0000-000000000000&amp;param[00000000-0000-0000-0000-000000000000]=value'
-  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --password &lt;password&gt; --path sync
+  curl --silent --cookie <?php eh('"zl='.$core->UserAuth->get_login().';zh='.$core->UserAuth->get_token().'"'); ?> --output /dev/null "http://localhost/<?php ln('contacts_sync') ?>"
+  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path contacts_sync
+  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --token <?php eh($core->UserAuth->get_token()); ?> --path contacts_hide_disabled
+  php -f <?php eh($_SERVER['SCRIPT_FILENAME']); ?> -- --user <?php eh($core->UserAuth->get_login()); ?> --password &lt;password&gt; --path contacts_sync
 </pre>
 
 <br />

@@ -45,7 +45,7 @@ function handshakes(&$core, $params, $post_data)
 		$where
 	)))
 	{
-		$total = intval($runbooks_total[0][0]);
+		$total = intval($handshakes_total[0][0]);
 	}
 
 	$core->db->select_assoc_ex($handshakes, rpv('

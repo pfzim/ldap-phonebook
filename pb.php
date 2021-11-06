@@ -80,7 +80,10 @@ function log_db($operation, $params, $flags)
 
 function log_file($message)
 {
-	error_log(date('c').'  '.$message."\n", 3, '/var/log/pb/pb.log');
+	if(defined('LOG_FILE'))
+	{
+		error_log(date('c').'  '.$message."\n", 3, LOG_FILE);
+	}
 }
 
 function LL($key)
@@ -229,40 +232,46 @@ function exception_handler_ajax($exception)
 	$core->Router->set_exception_handler_regular('exception_handler');
 	$core->Router->set_exception_handler_ajax('exception_handler_ajax');
 
-define('PB_CONTACT_VISIBLE',       0x0001);
-define('PB_CONTACT_AD_DELETED',    0x0002);
-define('PB_CONTACT_AD_DISABLED',   0x0004);
-define('PB_CONTACT_WITH_PHOTO',    0x0008);
+	define('PB_CONTACT_VISIBLE',       0x0001);
+	define('PB_CONTACT_AD_DELETED',    0x0002);
+	define('PB_CONTACT_AD_DISABLED',   0x0004);
+	define('PB_CONTACT_WITH_PHOTO',    0x0008);
 
 	//$core->Router->add_route('info', 'info');
 
 	$core->Router->add_route('contacts', 'contacts');						// default route
-	$core->Router->add_route('all', 'contacts');
 
 	$core->Router->add_route('map', 'map');
 	$core->Router->add_route('hello', 'hello', TRUE);
-	$core->Router->add_route('handshakes', 'handshakes');
-	$core->Router->add_route('contacts_sync', 'contacts_sync', TRUE);
-	$core->Router->add_route('contacts_hide_disabled', 'contacts_hide_disabled', TRUE);
-	$core->Router->add_route('contacts_dump_db', 'contacts_dump_db', TRUE);
-	$core->Router->add_route('contacts_export', 'contacts_export', TRUE);
-	$core->Router->add_route('contacts_export_selected', 'contacts_export_selected', TRUE);
-	$core->Router->add_route('contacts_export_xml', 'contacts_export_xml', TRUE);
-	$core->Router->add_route('contacts_import_xml', 'contacts_import_xml', TRUE);
-	$core->Router->add_route('contact_get', 'contact_get', TRUE);
-	$core->Router->add_route('contact_edit', 'contact_edit', TRUE);
-	$core->Router->add_route('contact_save', 'contact_save', TRUE);
-	$core->Router->add_route('contact_show', 'contact_show', TRUE);
-	$core->Router->add_route('contact_hide', 'contact_hide', TRUE);
-	$core->Router->add_route('contact_delete', 'contact_delete', TRUE);
-	$core->Router->add_route('contact_photo_delete', 'contact_photo_delete', TRUE);
-	$core->Router->add_route('contact_photo_set', 'contact_photo_set', TRUE);
-	$core->Router->add_route('contact_location_set', 'contact_location_set', TRUE);
 
-	$core->Router->add_route('tools', 'tools');
-
+	if(!$core->UserAuth->get_id())
+	{
 		$core->Router->add_route('login', 'login');
 		$core->Router->add_route('logon', 'logon');
+	}
+	else
+	{
+		$core->Router->add_route('all', 'contacts');
+
+		$core->Router->add_route('handshakes', 'handshakes');
+		$core->Router->add_route('contacts_sync', 'contacts_sync', TRUE);
+		$core->Router->add_route('contacts_hide_disabled', 'contacts_hide_disabled', TRUE);
+		$core->Router->add_route('contacts_dump_db', 'contacts_dump_db', TRUE);
+		$core->Router->add_route('contacts_export', 'contacts_export', TRUE);
+		$core->Router->add_route('contacts_export_selected', 'contacts_export_selected', TRUE);
+		$core->Router->add_route('contacts_export_xml', 'contacts_export_xml', TRUE);
+		$core->Router->add_route('contacts_import_xml', 'contacts_import_xml', TRUE);
+		$core->Router->add_route('contact_get', 'contact_get', TRUE);
+		$core->Router->add_route('contact_edit', 'contact_edit', TRUE);
+		$core->Router->add_route('contact_save', 'contact_save', TRUE);
+		$core->Router->add_route('contact_show', 'contact_show', TRUE);
+		$core->Router->add_route('contact_hide', 'contact_hide', TRUE);
+		$core->Router->add_route('contact_delete', 'contact_delete', TRUE);
+		$core->Router->add_route('contact_photo_delete', 'contact_photo_delete', TRUE);
+		$core->Router->add_route('contact_photo_set', 'contact_photo_set', TRUE);
+		$core->Router->add_route('contact_location_set', 'contact_location_set', TRUE);
+
+		$core->Router->add_route('tools', 'tools');
 
 		$core->Router->add_route('complete_account', 'complete_account', TRUE);
 		$core->Router->add_route('complete_group', 'complete_group', TRUE);
@@ -288,8 +297,10 @@ define('PB_CONTACT_WITH_PHOTO',    0x0008);
 
 		$core->Router->add_route('memcached_flush', 'memcached_flush', TRUE);
 
-	$core->Router->add_route('logoff', 'logoff');
+	}
 	
+	$core->Router->add_route('logoff', 'logoff');
+
 	$core->Router->add_route('password_reset_send_form', 'password_reset_send_form', TRUE);
 	$core->Router->add_route('password_reset_send', 'password_reset_send', TRUE);
 	$core->Router->add_route('password_reset_form', 'password_reset_form');
@@ -297,8 +308,6 @@ define('PB_CONTACT_WITH_PHOTO',    0x0008);
 
 	$core->Router->add_route('register_form', 'register_form', TRUE);
 	$core->Router->add_route('register', 'register', TRUE);
-
-
 
 	$core->Router->process($path, $data);
 

@@ -85,7 +85,7 @@ class Config
 		$uid = $this->core->UserAuth->get_id();
 		if(!$uid)
 		{
-			$this->core->error('Algorithm error. User not logged in!');
+			//$this->core->error('Algorithm error. User not logged in!');
 			return;
 		}
 
@@ -97,8 +97,8 @@ class Config
 		$uid = $this->core->UserAuth->get_id();
 		if(!$uid)
 		{
-			$this->core->error('Algorithm error. User not logged in!');
-			return NULL;
+			//$this->core->error('Algorithm error. User not logged in!');
+			return $def_value;
 		}
 
 		return $this->get_ex($this->core->UserAuth->get_id(), $key, $def_value);

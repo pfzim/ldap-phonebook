@@ -1,5 +1,4 @@
 <?php
-define('PB_LDAP_FILTER', '(&(objectClass=person)(objectClass=user)(sAMAccountType=805306368)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))');
 
 function contacts_sync(&$core, $params, $post_data)
 {
@@ -10,6 +9,7 @@ function contacts_sync(&$core, $params, $post_data)
 	$data = array();
 	$count_updated = 0;
 	$count_added = 0;
+	$cookie = '';
 
 	if(!defined('USE_LDAP') || !USE_LDAP)
 	{
@@ -26,7 +26,7 @@ function contacts_sync(&$core, $params, $post_data)
 			$core->LDAP->get_link(),
 			LDAP_BASE_DN,
 			PB_LDAP_FILTER,
-			['samaccountname' , 'sn', 'initials', 'middleName', 'givenname', 'mail' , 'department', 'company', 'title', 'telephonenumber', 'mobile', 'thumbnailphoto', 'useraccountcontrol'],
+			['objectguid', 'samaccountname' , 'sn', 'initials', 'middleName', 'givenname', 'mail', 'department', 'company', 'title', 'telephonenumber', 'mobile', 'thumbnailphoto', 'useraccountcontrol'],
 			0,
 			0,
 			0,
@@ -62,7 +62,7 @@ function contacts_sync(&$core, $params, $post_data)
 				// *********************************************************
 
 				$v_flags = 0;				
-				$v_adid = @$entries[$i]['samaccountname'][0];
+				$v_adid = bin2hex(@$entries[$i]['objectguid'][0]);  // unique active directory id
 				$v_samaccountname = @$entries[$i]['samaccountname'][0];
 				$v_first_name = @$entries[$i]['givenname'][0];
 				$v_last_name = @$entries[$i]['sn'][0];
