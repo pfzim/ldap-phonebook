@@ -73,27 +73,27 @@ define('APP_LANGUAGE', 'ru');
 
 This service import users info from LDAP/AD to MySQL DB
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_0.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_0.png)
 
 Show all contacts on map
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_1.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_1.png)
 
 Show selected contact on map
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_2.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_2.png)
 
 Installation
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_3.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_3.png)
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_4.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_4.png)
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_5.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_5.png)
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_6.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_6.png)
 
-![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/other/screenshot_7.png)
+![screenshot](https://raw.githubusercontent.com/pfzim/ldap-phonebook/master/docs/screenshots/screenshot_7.png)
 
 ---
 
