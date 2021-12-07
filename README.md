@@ -22,13 +22,15 @@
 - Восстановление контактов из XML бекапа
 - Скрытие всех контактов, которые были отключены в AD
 
-Карты хранятся в файлах `templ/map[1-5].png`
+Карты хранятся в файлах `templates/map[1-5].png`
 
 ## Системные требования
-- Apache
+- Apache (nginx)
 - MariaDB (MySQL)
 - PHP
 - Active Directory (опционально)
+- memcaсhed (опционально)
+- Kerberos (опционально)
 
 Подключить модули расширения в php.ini или скомпилировать PHP с поддержкой LDAP
 - `extension=php_ldap.dll`
@@ -36,7 +38,15 @@
 
 ## Установка
 - Открыть в браузере `install.php` и заполнить предлагаемые параметры
-- Заменить изображения карт `templ/map[1-5].png` своими схемами
+- Заменить изображения карт `templates/map[1-5].png` своими схемами
+
+## Обновление
+* Сделайте резервную копию базы данных и файлов.
+* Переименуйте старую папку с файлами справочника.
+* Распакуйте дистрибутив справочника в старое расположение
+* Перенесите из старой версии файл inc.config.php, папку photos и карты из templ
+* Запустите скрипт обновления открыв в браузере `upgrade.php`
+* Скорее всего предварительно потребуется обновить конфигурационный файл `inc.config.php` добавив в него новые параметра по примеру из examples
 
 ## Дополнительные настройки в inc.config.php (опционально)
 Для включения LDAP аутентификации в LDAP_ADMIN_GROUP_DN нужно указать группу AD через которую предоставляется доступ:
@@ -106,7 +116,7 @@ Functionality:
 - Restore all contacts from XML file
 - Hide all contacts that was disabled in AD
 
-Maps are stored in the files `templ / map [1-5] .png`
+Maps are stored in the files `templates/map[1-5].png`
 
 ## System requirements
 - Apache
@@ -120,7 +130,7 @@ Plug-ins in php.ini or compile PHP with LDAP support
 
 ## Installation
 - Open in the browser `install.php` and fill in the proposed parameters
-- Replace the images of the maps `templ / map [1-5] .png` with their schemes
+- Replace the images of the maps `templates/map[1-5].png` with their schemes
 
 
-Dmitry V. Zimin <pfzim@mail.ru>
+Dmitry V. Zimin <pfzim@mail.ru> Ask in [Issues](https://github.com/pfzim/ldap-phonebook/issues?q=) before mail me.

@@ -27,10 +27,9 @@ function contacts_export_selected(&$core, $params, $post_data)
 
 		if($j > 0)
 		{
-			$core->db->select_ex($result, rpv('SELECT m.`id`, m.`samname`, m.`fname`, m.`lname`, m.`dep`, m.`org`, m.`pos`, m.`pint`, m.`pcell`, m.`mail` FROM `@contacts` AS m WHERE m.`id` IN ({r0}) ORDER BY m.`lname`, m.`fname`', $list_safe));
+			$core->db->select_ex($result, rpv('SELECT m.`id`, m.`samaccountname`, m.`first_name`, m.`last_name`, m.`department`, m.`organization`, m.`position`, m.`phone_internal`, m.`phone_mobile`, m.`mail` FROM `@contacts` AS m WHERE m.`id` IN ({r0}) ORDER BY m.`last_name`, m.`first_name`', $list_safe));
 		}
 	}
 
 	include(TEMPLATES_DIR.'tpl.contacts-export.php');
 }
-

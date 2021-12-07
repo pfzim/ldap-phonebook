@@ -243,6 +243,8 @@ function exception_handler_ajax($exception)
 
 	$core->Router->add_route('map', 'map');
 	$core->Router->add_route('hello', 'hello', TRUE);
+	$core->Router->add_route('contact_get', 'contact_get', TRUE);
+	$core->Router->add_route('contact_location_set', 'contact_location_set', TRUE);
 
 	if(!$core->UserAuth->get_id())
 	{
@@ -261,7 +263,6 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('contacts_export_selected', 'contacts_export_selected', TRUE);
 		$core->Router->add_route('contacts_export_xml', 'contacts_export_xml', TRUE);
 		$core->Router->add_route('contacts_import_xml', 'contacts_import_xml', TRUE);
-		$core->Router->add_route('contact_get', 'contact_get', TRUE);
 		$core->Router->add_route('contact_edit', 'contact_edit', TRUE);
 		$core->Router->add_route('contact_save', 'contact_save', TRUE);
 		$core->Router->add_route('contact_show', 'contact_show', TRUE);
@@ -269,7 +270,6 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('contact_delete', 'contact_delete', TRUE);
 		$core->Router->add_route('contact_photo_delete', 'contact_photo_delete', TRUE);
 		$core->Router->add_route('contact_photo_set', 'contact_photo_set', TRUE);
-		$core->Router->add_route('contact_location_set', 'contact_location_set', TRUE);
 
 		$core->Router->add_route('tools', 'tools');
 

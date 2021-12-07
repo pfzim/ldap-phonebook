@@ -381,7 +381,7 @@ function rpv()
 					$param .= $string[$i];
 					$i++;
 				}
-				
+
 				switch($prefix)
 				{
 					case 'd':
@@ -403,7 +403,7 @@ function rpv()
 		{
 			$out_string .= $string[$i];
 		}
-		
+
 		$i++;
 	}
 
@@ -698,7 +698,7 @@ function build_config($config, $params)
 					{
 						ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
 						ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-						
+
 						if($use_gssapi)
 						{
 							$bind = @ldap_sasl_bind($ldap, NULL, NULL, 'GSSAPI');
@@ -707,7 +707,7 @@ function build_config($config, $params)
 						{
 							$bind = ldap_bind($ldap, @$_POST['ldap_user'], @$_POST['ldap_passwd']);
 						}
-						
+
 						if($bind)
 						{
 							$sr = ldap_search($ldap, @$_POST['ldap_base'], @$_POST['ldap_filter'], array('samaccountname'));
@@ -735,7 +735,7 @@ function build_config($config, $params)
 					$mail_verify_peer = (!empty($_POST['mail_verify_peer']) && intval($_POST['mail_verify_peer']));
 					$mail_verify_peer_name = (!empty($_POST['mail_verify_peer_name']) && intval($_POST['mail_verify_peer_name']));
 					$mail_allow_self_signed = (!empty($_POST['mail_allow_self_signed']) && intval($_POST['mail_allow_self_signed']));
-					
+
 					//require_once 'libs/PHPMailer/PHPMailerAutoload.php';
 					//require_once(ROOT_DIR.DIRECTORY_SEPARATOR.'libs/PHPMailer/class.phpmailer.php');
 					//require_once(ROOT_DIR.DIRECTORY_SEPARATOR.'libs/PHPMailer/class.smtp.php');
@@ -800,7 +800,7 @@ function build_config($config, $params)
 						",
 						@$_POST['admin_user'],
 						@$_POST['admin_passwd'].'UserAuth',
-						@$_POST['mail_admin']						
+						@$_POST['mail_admin']
 					));
 
 					echo '{"code": 0, "message": "OK"}';
@@ -841,7 +841,7 @@ function build_config($config, $params)
 	}
 
 	header("Content-Type: text/html; charset=utf-8");
-	
+
 	$pretty_links_base_path = preg_replace('#/[^/]+$#', '/', $_SERVER['REQUEST_URI']);
 	$web_url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$pretty_links_base_path;
 ?>
@@ -1150,8 +1150,8 @@ function build_config($config, $params)
 			@-ms-viewport {
 				width: device-width
 			}
-			
-/*--------- SLIDER --------*/			
+
+/*--------- SLIDER --------*/
 .switch {
   position: relative;
   display: inline-block;
@@ -1215,11 +1215,11 @@ input:checked + .slider:before {
 }
 
 input:checked + .slider:after
-{  
+{
   content:'ON';
 }
 
-/*--------- END --------*/			
+/*--------- END --------*/
 		</style>
 		<script type="text/javascript">
 			function gi(name)

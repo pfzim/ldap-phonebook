@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (!defined('ROOT_DIR'))
+if(!defined('ROOT_DIR'))
 {
 	define('ROOT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 	define('TEMPLATES_DIR', ROOT_DIR.'templates'.DIRECTORY_SEPARATOR);
@@ -54,19 +54,57 @@ require_once(ROOT_DIR.'inc.config.php');
 
 	header("Content-Type: text/plain; charset=utf-8");
 
+	if(!defined('DB_RW_HOST') || !defined('DB_USER') || !defined('DB_PASSWD') || !defined('DB_NAME') || !defined('DB_CPAGE') || !defined('DB_PREFIX') || !defined('USE_LDAP') || !defined('PB_LDAP_FILTER') || !defined('WEB_URL'))
+	{
+		echo "Missing parameters in inc.config.php:\n\n";
+		if(!defined('DB_RW_HOST')) { echo "  define('DB_RW_HOST', 'localhost');\n"; }
+		if(!defined('DB_USER')) { echo "  define('DB_USER', 'root');\n"; }
+		if(!defined('DB_PASSWD')) { echo "  define('DB_PASSWD', '');\n"; }
+		if(!defined('DB_NAME')) { echo "  define('DB_NAME', 'pb');\n"; }
+		if(!defined('DB_CPAGE')) { echo "  define('DB_CPAGE', 'utf8');\n"; }
+		if(!defined('DB_PREFIX')) { echo "  define('DB_PREFIX', 'pb_');\n"; }
+		if(!defined('USE_LDAP')) { echo "  define('USE_LDAP', TRUE);\n"; }
+		if(!defined('PB_LDAP_FILTER')) { echo "  define('PB_LDAP_FILTER', '(objectCategory=person)');\n"; }
+		if(!defined('WEB_URL')) { echo "  define('WEB_URL', 'https://pb.contoso.com/pb/');\n"; }
+		exit;
+	}
+
+	if(USE_LDAP && (!defined('LDAP_URI') || !defined('LDAP_BASE_DN')))
+	{
+		echo "Missing parameters in inc.config.php:\n\n";
+		if(!defined('LDAP_URI')) { echo "  define('LDAP_URI', 'ldap://dc-01.contoso.com ldap://dc-02.contoso.com:389 ldaps://dc-03.contoso.com');\n"; }
+		if(!defined('LDAP_BASE_DN')) { echo "  define('LDAP_BASE_DN', 'DC=domain,DC=local');\n"; }
+		exit;
+	}
+
 	require_once(ROOT_DIR.'inc.utils.php');
 	require_once(ROOT_DIR.'modules'.DIRECTORY_SEPARATOR.'Core.php');
-
-	if(!defined('DB_RW_HOST') && defined('DB_HOST'))
-	{
-		define('DB_RW_HOST', DB_HOST);
-	}
 
 	$core = new Core(TRUE);
 	$core->load_ex('db', 'MySQLDB');
 
+	if(!$core->db->select_ex($data, rpv("SHOW COLUMNS FROM @config LIKE 'uid'")))
+	{
+		if(!$core->db->put(rpv('ALTER TABLE `@config` ADD COLUMN `uid` INT NOT NULL DEFAULT 0 FIRST')))
+		{
+			echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+		}
+	}
+
+	/*
+	$config = array('db_version' => 0);
+	if($core->db->select_ex($data, rpv("SELECT m.`name`, m.`value` FROM @config AS m WHERE m.`name` = 'db_version' LIMIT 1")))
+	{
+		foreach($data as &$row)
+		{
+			$config[$row[0]] = $row[1];
+		}
+	}
+	*/
+
 	echo "Upgrading...\n";
 
+	//switch(intval($config['db_version']))
 	switch(intval($core->Config->get_global('db_version', 0)))
 	{
 		case 0:
@@ -243,17 +281,24 @@ require_once(ROOT_DIR.'inc.config.php');
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
-			if(!$core->db->put(rpv('ALTER TABLE `@users` ADD COLUMN `reset_token` VARCHAR(16) NOT NULL AFTER `sid`')))
+			if(!$core->db->put(rpv('ALTER TABLE `@users` MODIFY COLUMN `sid` VARCHAR(16) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
+			if(!$core->db->put(rpv('ALTER TABLE `@users` ADD COLUMN `reset_token` VARCHAR(16) NULL AFTER `sid`')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			/*
 			if(!$core->db->put(rpv('ALTER TABLE `@config` ADD COLUMN `uid` INT NOT NULL DEFAULT 0 FIRST')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
+			*/
 
-			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `adid` VARCHAR(20) NOT NULL DEFAULT \'\' AFTER `id`')))
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `adid` VARCHAR(35) NOT NULL DEFAULT \'\' AFTER `id`')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
@@ -269,6 +314,11 @@ require_once(ROOT_DIR.'inc.config.php');
 			}
 
 			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `lname` `last_name` VARCHAR(255) NOT NULL DEFAULT \'\'')))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `middle_name` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `last_name`')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
@@ -303,7 +353,7 @@ require_once(ROOT_DIR.'inc.config.php');
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
-			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `bday` `birthday` DATE DEFAULT NULL')))
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `bday` `birthday` DATE NULL DEFAULT NULL')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
@@ -333,22 +383,24 @@ require_once(ROOT_DIR.'inc.config.php');
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
-			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `flags` VARCHAR(255) NOT NULL DEFAULT \'\' AFTER `reserved5`')))
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `flags` INT NOT NULL DEFAULT 0 AFTER `reserved5`')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
+			/*
 			if(!$core->db->put(rpv('ALTER TABLE `@contacts` CHANGE COLUMN `visible` `flags` int(10) unsigned NOT NULL DEFAULT 0')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
+			*/
 
-			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = `flags` | 0x0001 WHERE `id` in (SELECT id FROM @contacts WHERE visible = 1)')))
+			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = (`flags` | 0x0001) WHERE `visible` = 1')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
-			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = `flags` | 0x0008 WHERE `id` in (SELECT id FROM @contacts WHERE photo = 1)')))
+			if(!$core->db->put(rpv('UPDATE @contacts SET `flags` = (`flags` | 0x0008) WHERE `photo` = 1')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
@@ -369,87 +421,99 @@ require_once(ROOT_DIR.'inc.config.php');
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
 
-			$count_updated = 0;
-			$cookie = '';
-
-			do
+			if(defined('USE_LDAP') && USE_LDAP)
 			{
-				$result = ldap_search(
-					$core->LDAP->get_link(),
-					LDAP_BASE_DN,
-					PB_LDAP_FILTER,
-					['objectguid', 'samaccountname'],
-					0,
-					0,
-					0,
-					LDAP_DEREF_NEVER,
-					[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 200, 'cookie' => $cookie]]]
-				);
+				$count_updated = 0;
+				$cookie = '';
 
-				if($result === FALSE)
+				do
 				{
-					echo 'ERROR['.__LINE__.']: ldap_search return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
-					exit;
-				}
+					$result = ldap_search(
+						$core->LDAP->get_link(),
+						LDAP_BASE_DN,
+						PB_LDAP_FILTER,
+						['objectguid', 'samaccountname'],
+						0,
+						0,
+						0,
+						LDAP_DEREF_NEVER,
+						[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 200, 'cookie' => $cookie]]]
+					);
 
-				if(!ldap_parse_result($core->LDAP->get_link(), $result, $errcode , $matcheddn , $errmsg , $referrals, $controls))
-				{
-					echo 'ERROR['.__LINE__.']: ldap_parse_result return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
-					exit;
-				}
-
-				$entries = ldap_get_entries($core->LDAP->get_link(), $result);
-				if($entries === FALSE)
-				{
-					echo 'ERROR['.__LINE__.']: ldap_get_entries return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
-					exit;
-				}
-
-				$i = $entries['count'];
-
-				while($i > 0)
-				{
-					$i--;
-					if(!empty($entries[$i]['samaccountname'][0]) && (!empty($entries[$i]['givenname'][0]) || !empty($entries[$i]['sn'][0])))
+					if($result === FALSE)
 					{
-						$v_adid = bin2hex(@$entries[$i]['objectguid'][0]);  // unique active directory id
-						$v_samaccountname = @$entries[$i]['samaccountname'][0];
+						echo 'ERROR['.__LINE__.']: ldap_search return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+						exit;
+					}
 
-						if($core->db->select_ex($data, rpv("
-								SELECT
-									c.`id`,
-									c.`adid`
-								FROM
-									`@contacts` AS c
-								WHERE
-									c.`samaccountname` = !
-								LIMIT 1
-							",
-							$v_samaccountname
-						)))
+					if(!ldap_parse_result($core->LDAP->get_link(), $result, $errcode , $matcheddn , $errmsg , $referrals, $controls))
+					{
+						echo 'ERROR['.__LINE__.']: ldap_parse_result return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+						exit;
+					}
+
+					$entries = ldap_get_entries($core->LDAP->get_link(), $result);
+					if($entries === FALSE)
+					{
+						echo 'ERROR['.__LINE__.']: ldap_get_entries return: '.ldap_error($core->LDAP->get_link()).PHP_EOL;
+						exit;
+					}
+
+					$i = $entries['count'];
+
+					while($i > 0)
+					{
+						$i--;
+						if(!empty($entries[$i]['samaccountname'][0]))
 						{
-							$v_id = $data[0][0];
-							$core->db->put(rpv('
-									UPDATE `@contacts` SET
-										`adid` = !
-									WHERE
-										`id` = #
-									LIMIT 1
-								',
-								$v_adid,
-								$v_id
-							));
+							$v_adid = bin2hex(@$entries[$i]['objectguid'][0]);  // unique active directory id
+							$v_samaccountname = @$entries[$i]['samaccountname'][0];
 
-							$count_updated++;
+							if($core->db->select_ex($data, rpv("
+									SELECT
+										c.`id`,
+										c.`adid`
+									FROM
+										`@contacts` AS c
+									WHERE
+										c.`samaccountname` = !
+									LIMIT 1
+								",
+								$v_samaccountname
+							)))
+							{
+								$v_id = &$data[0][0];
+								$core->db->put(rpv('
+										UPDATE `@contacts` SET
+											`adid` = !
+										WHERE
+											`id` = #
+										LIMIT 1
+									',
+									$v_adid,
+									$v_id
+								));
+
+								$count_updated++;
+							}
 						}
 					}
+
+					if(isset($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']))
+					{
+						$cookie = $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
+					}
+					else
+					{
+						$cookie = '';
+					}
+
+					ldap_free_result($result);
 				}
+				while(!empty($cookie));
 
-				ldap_free_result($result);
+				echo 'Unique ID updated for '.$count_updated.' contacts'.PHP_EOL.PHP_EOL;
 			}
-			while(!empty($cookie));
-
-			echo 'Unique ID updated for '.$count_updated.' contacts'.PHP_EOL.PHP_EOL;
 
 			echo "\n**************************************************************************";
 			echo "\n*  Please, reset password for local accounts using Reset password link!  *";

@@ -256,8 +256,17 @@ function contacts_sync(&$core, $params, $post_data)
 			}
 		}
 
+		if(isset($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']))
+		{
+			$cookie = $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
+		}
+		else
+		{
+			$cookie = '';
+		}
+
 		ldap_free_result($result);
-		break;
+		//break;
 	}
 	while(!empty($cookie));
 

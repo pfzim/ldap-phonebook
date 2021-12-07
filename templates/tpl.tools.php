@@ -28,7 +28,7 @@
 
 
 <?php if(!$core->UserAuth->is_ldap_user() && $core->UserAuth->get_id()) { ?>
-<a href="#" onclick="f_show_form('<?php ln('password_form') ?>');"><?php L('ChangePassword') ?></a><br />
+<a href="#" onclick="f_show_form('<?php ln('password_change_form') ?>');"><?php L('ChangePassword') ?></a><br />
 <?php } ?>
 
 <form method="post" id="form-file-upload" name="form-file-upload">

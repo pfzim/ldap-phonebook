@@ -66,7 +66,7 @@
 		</table>
 		
 		<?php if($is_admin) { ?>
-		<form id="contacts" method="post" action="?action=export_selected">
+		<form id="contacts" method="post" action="<?php ln('contacts_export_selected'); ?>">
 			<input id="list" type="hidden" name="list" value="" />
 		</form>
 		<a href="#" onclick="f_export_selected(event); return false;"><?php L('ExportSelected') ?></a>
