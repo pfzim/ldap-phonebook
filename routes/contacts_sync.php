@@ -18,7 +18,7 @@ function contacts_sync(&$core, $params, $post_data)
 	}
 
 	// mark all contacts as deleted before sync
-	$core->db->put(rpv('UPDATE `@contacts` SET `flags` = (`flags` | {%PB_CONTACT_AD_DELETED}) WHERE `adid` = \'\''));
+	$core->db->put(rpv('UPDATE `@contacts` SET `flags` = (`flags` | {%PB_CONTACT_AD_DELETED}) WHERE `adid` <> \'\''));
 
 	do
 	{
