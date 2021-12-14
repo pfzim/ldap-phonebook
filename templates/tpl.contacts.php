@@ -30,13 +30,13 @@
 				<?php if($is_admin) { ?>
 				<th width="1%"><input type="checkbox" onclick="f_select_all(event)"/></th>
 				<?php $i++; } ?>
-				<th width="20%"><a href="<?php ln($action.'/sort/0/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Name') ?></a><?php if($sort == 0) { echo ' &UpArrow;'; } ?></th>
-				<th width="10%"><a href="<?php ln($action.'/sort/1/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Phone') ?></a><?php if($sort == 1) { echo ' &UpArrow;'; } ?></th>
-				<th width="10%"><a href="<?php ln($action.'/sort/2/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('PhoneCity') ?></a><?php if($sort == 2) { echo ' &UpArrow;'; } ?></th>
-				<th width="10%"><a href="<?php ln($action.'/sort/3/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mobile') ?></a><?php if($sort == 3) { echo ' &UpArrow;'; } ?></th>
-				<th width="15%"><a href="<?php ln($action.'/sort/4/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mail') ?></a><?php if($sort == 4) { echo ' &UpArrow;'; } ?></th>
-				<th width="10%"><a href="<?php ln($action.'/sort/5/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Position') ?></a><?php if($sort == 5) { echo ' &UpArrow;'; } ?></th>
-				<th width="10%"><a href="<?php ln($action.'/sort/6/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Department') ?></a><?php if($sort == 6) { echo ' &UpArrow;'; } ?></th>
+				<th width="20%"><a href="<?php ln($action.'/sort/'.(0 | ((($sort & 0xFF) == 0 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Name') ?></a><?php if(($sort & 0xFF) == 0) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/'.(1 | ((($sort & 0xFF) == 1 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Phone') ?></a><?php if(($sort & 0xFF) == 1) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/'.(2 | ((($sort & 0xFF) == 2 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('PhoneCity') ?></a><?php if(($sort & 0xFF) == 2) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/'.(3 | ((($sort & 0xFF) == 3 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mobile') ?></a><?php if(($sort & 0xFF) == 3) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="15%"><a href="<?php ln($action.'/sort/'.(4 | ((($sort & 0xFF) == 4 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Mail') ?></a><?php if(($sort & 0xFF) == 4) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/'.(5 | ((($sort & 0xFF) == 5 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Position') ?></a><?php if(($sort & 0xFF) == 5) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
+				<th width="10%"><a href="<?php ln($action.'/sort/'.(6 | ((($sort & 0xFF) == 6 && ($sort & 0x0100) == 0)?0x0100:0)).'/offset/'.$offset.'/search/'.urlencode($search)); ?>"><?php L('Department') ?></a><?php if(($sort & 0xFF) == 6) { echo ' '.(($sort & 0x0100)?'&#9660;':'&#9650;'); } ?></th>
 				<?php if($is_admin) { ?>
 				<th width="15%"><?php L('Operations') ?></th>
 				<?php } ?>

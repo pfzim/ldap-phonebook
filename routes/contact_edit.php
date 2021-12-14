@@ -95,55 +95,55 @@ function contact_edit(&$core, $params, $post_data)
 			array(
 				'type' => 'string',
 				'name' => 'first_name',
-				'title' => LL('FirstName').'*',
+				'title' => LL('FirstName'),
 				'value' => $contact['first_name']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'middle_name',
-				'title' => LL('MiddleName').'*',
+				'title' => LL('MiddleName'),
 				'value' => $contact['middle_name']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'department',
-				'title' => LL('Department').'*',
+				'title' => LL('Department'),
 				'value' => $contact['department']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'organization',
-				'title' => LL('Organization').'*',
+				'title' => LL('Organization'),
 				'value' => $contact['organization']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'position',
-				'title' => LL('Position').'*',
+				'title' => LL('Position'),
 				'value' => $contact['position']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'phone_internal',
-				'title' => LL('PhoneInternal').'*',
+				'title' => LL('PhoneInternal'),
 				'value' => $contact['phone_internal']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'phone_external',
-				'title' => LL('PhoneExternal').'*',
+				'title' => LL('PhoneExternal'),
 				'value' => $contact['phone_external']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'phone_mobile',
-				'title' => LL('PhoneCell').'*',
+				'title' => LL('PhoneCell'),
 				'value' => $contact['phone_mobile']
 			),
 			array(
 				'type' => 'string',
 				'name' => 'mail',
-				'title' => LL('Mail').'*',
+				'title' => LL('Mail'),
 				'value' => $contact['mail']
 			),
 			array(
@@ -152,7 +152,7 @@ function contact_edit(&$core, $params, $post_data)
 				'title' => LL('Type').'*',
 				'value' => $contact['type'],
 				'list' => $g_icons,
-				'values' => array(0, 1),
+				'values' => range(0, count($g_icons) - 1)
 			),
 			/*
 			array(
@@ -189,8 +189,8 @@ function contact_edit(&$core, $params, $post_data)
 			array(
 				'type' => 'date',
 				'name' => 'birthday',
-				'title' => LL('Birthday').'*',
-				'value' => $contact['birthday']
+				'title' => LL('Birthday'),
+				'value' => empty($contact['birthday'])?'':$contact['birthday']
 			)
 		)
 	);

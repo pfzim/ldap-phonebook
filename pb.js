@@ -507,6 +507,10 @@ function on_saved(action, data)
 	{
 		window.location = window.location;
 	}
+	else if(action == 'contact_save')
+	{
+		window.location = window.location;
+	}
 	else if(action == 'register')
 	{
 		f_msg(data.message);

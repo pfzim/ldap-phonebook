@@ -4,7 +4,7 @@ function contacts(&$core, $params, $post_data)
 {
 	$action = @$params[0];
 	$offset = 0;
-	$sort = $core->Config->get_user('contacts_sort', @$_SESSION['contacts_sort']);
+	$sort = intval($core->Config->get_user('contacts_sort', @$_SESSION['contacts_sort']));
 	$search = '';
 	
 	$i = 1;
@@ -88,29 +88,35 @@ function contacts(&$core, $params, $post_data)
 		);
 	}
 	
-	switch($sort)
+	$sort_direction = '';
+	if($sort & 0x0100)
+	{
+		$sort_direction = ' DESC';
+	}
+	
+	switch($sort & 0x00FF)
 	{
 		case 1: 
-			$order = 'c.`phone_internal`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`phone_internal`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		case 2: 
-			$order = 'c.`phone_external`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`phone_external`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		case 3: 
-			$order = 'c.`phone_mobile`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`phone_mobile`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		case 4: 
-			$order = 'c.`mail`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`mail`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		case 5: 
-			$order = 'c.`position`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`position`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		case 6: 
-			$order = 'c.`department`, c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			$order = 'c.`department`'.$sort_direction.', c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 			break;
 		default: 
-			$sort = 0;
-			$order = 'c.`last_name`, c.`first_name`, c.`middle_name`, c.`id`';
+			//$sort = 0;
+			$order = 'c.`last_name`'.$sort_direction.', c.`first_name`'.$sort_direction.', c.`middle_name`'.$sort_direction.', c.`id`'.$sort_direction;
 	}
 
 	$core->db->select_assoc_ex($birthdays, rpv("

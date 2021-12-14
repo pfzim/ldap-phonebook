@@ -17,11 +17,11 @@
 			</thead>
 			<tbody id="table-data">
 		<?php $i = 0; foreach($handshakes as &$row) { $i++; ?>
-			<tr id="<?php eh("row".$row[0]);?>" data-id=<?php eh($row[0]);?>>
-				<td><?php eh($row[1]); ?></td>
-				<td><?php eh($row[2]); ?></td>
-				<td><a href="msraurl:<?php eh($row[3]); ?>"><?php eh($row[3]); ?></a></td>
-				<td><?php eh($row[4]); ?></td>
+			<tr id="<?php eh("row".$row['id']);?>" data-id=<?php eh($row['id']);?>>
+				<td><?php eh($row['date']); ?></td>
+				<td><?php eh($row['user']); ?></td>
+				<td><a href="msraurl:<?php eh($row['computer']); ?>"><?php eh($row['computer']); ?></a></td>
+				<td><?php eh($row['ip']); ?></td>
 			</tr>
 		<?php } ?>
 			</tbody>

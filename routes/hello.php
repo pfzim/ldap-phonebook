@@ -19,7 +19,7 @@ function hello(&$core, $params, $post_data)
 		exit;
 	}
 
-	$core->db->put(rpv('INSERT INTO `@handshake` (`user`, `date`, `computer`, `ip`) VALUES (!, NOW(), !, !)', $s_user_name, $s_comp_name, $ip));
+	$core->db->put(rpv('INSERT INTO `@handshakes` (`user`, `date`, `computer`, `ip`) VALUES (!, NOW(), !, !)', $s_user_name, $s_comp_name, $ip));
 
 	echo '{"code": 0, "message": "HI"}';
 }

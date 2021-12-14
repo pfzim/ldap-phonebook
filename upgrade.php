@@ -298,7 +298,7 @@ require_once(ROOT_DIR.'inc.config.php');
 			}
 			*/
 
-			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `adid` VARCHAR(35) NOT NULL DEFAULT \'\' AFTER `id`')))
+			if(!$core->db->put(rpv('ALTER TABLE `@contacts` ADD COLUMN `adid` VARCHAR(32) NOT NULL DEFAULT \'\' AFTER `id`')))
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}

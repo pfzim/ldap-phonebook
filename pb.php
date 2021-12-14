@@ -258,6 +258,7 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('handshakes', 'handshakes');
 		$core->Router->add_route('contacts_sync', 'contacts_sync', TRUE);
 		$core->Router->add_route('contacts_hide_disabled', 'contacts_hide_disabled', TRUE);
+		$core->Router->add_route('contacts_show_all_enabled', 'contacts_show_all_enabled', TRUE);
 		$core->Router->add_route('contacts_dump_db', 'contacts_dump_db', TRUE);
 		$core->Router->add_route('contacts_export', 'contacts_export', TRUE);
 		$core->Router->add_route('contacts_export_selected', 'contacts_export_selected', TRUE);
