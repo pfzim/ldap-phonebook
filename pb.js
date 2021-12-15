@@ -752,14 +752,36 @@ function f_delete(ev)
 	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
 	f_http(
 		g_link_prefix + 'contact_delete',
+		function(data, id)
+		{
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				var row = gi('row' + id);
+				row.parentNode.removeChild(row);
+				gi('contact-menu').style.display = 'none';
+			}
+		},
+		id,
+		'application/x-www-form-urlencoded',
+		json2url({'id': id })
+	);
+};
+
+function f_delete_photo(ev)
+{
+	var el_src = ev.target || ev.srcElement;
+	var id = el_src.parentNode.parentNode.parentNode.getAttribute('data-id');
+	f_http(
+		g_link_prefix + 'contact_photo_delete',
 		function(data, el)
 		{
 			f_notify(data.message, data.code?"error":"success");
 			if(!data.code)
 			{
-				var row = el.parentNode.parentNode;
-				row.parentNode.removeChild(row);
-
+				gi('contact-menu').style.display = 'none';
+				//var row = el.parentNode.parentNode;
+				//row.parentNode.removeChild(row);
 			}
 		},
 		el_src,
@@ -767,7 +789,6 @@ function f_delete(ev)
 		json2url({'id': id })
 	);
 };
-
 
 function on_action_success(el, action, data)
 {
@@ -806,6 +827,16 @@ function f_call_action(ev, action)
 		'application/x-www-form-urlencoded',
 		json2url({id: id})
 	);
+}
+
+function f_delete_perm(ev)
+{
+	if(window.confirm(LL.ConfirmDelete))
+	{
+		f_call_action(ev, 'permission_delete');
+	}
+
+	return false;
 }
 
 function f_deactivate_user(ev)
@@ -925,7 +956,7 @@ function f_update_row(id)
 				var menuCell 				= gi("mainMenuCell"+data.data.id);				// Меню
 				
 				// Заполняем найденные ячейки данными
-				nameCell.textContent 		= data.data.firstname + ' ' + data.data.lastname;
+				nameCell.textContent 		= data.data.last_name + ' ' + data.data.first_name + ' ' + data.data.middle_name;
 				if(data.data.photo) {
 					nameCell.className = 'userwithphoto';
 				}
@@ -935,9 +966,9 @@ function f_update_row(id)
 				nameCell.onmouseleave 		= function(event) { gi('imgblock').style.display = 'none'; };
 				nameCell.onmousemove 		= function(event) { f_mv_img(event); };
 				
-				phoneCell.textContent 		= data.data.phone;				
-				phoneCityCell.textContent 	= data.data.phonecity;
-				mobileCell.textContent 		= data.data.mobile;
+				phoneCell.textContent 		= data.data.phone_internal;				
+				phoneCityCell.textContent 	= data.data.phone_external;
+				mobileCell.textContent 		= data.data.phone_mobile;
 				mailCell.innerHTML 			= '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
 				positionCell.textContent 	= data.data.position;
 				departmentCell.textContent 	= data.data.department;
@@ -1065,6 +1096,7 @@ function f_menu_id(ev, el_src, id)
 		gi('menu-cmd-edit').style.display = 'none';
 		gi('menu-cmd-photo').style.display = 'none';
 		gi('menu-cmd-delete').style.display = 'none';
+		gi('menu-cmd-delete-photo').style.display = 'none';
 		gi('menu-cmd-show').style.display = 'none';
 		gi('menu-cmd-hide').style.display = 'none';
 		gi('menu-cmd-connect-0').style.display = 'none';
@@ -1090,8 +1122,15 @@ function f_menu_id(ev, el_src, id)
 					if(data.data.adid == '')
 					{
 						gi('menu-cmd-edit').style.display = 'block';
-						gi('menu-cmd-photo').style.display = 'block';
 						gi('menu-cmd-delete').style.display = 'block';
+						if(data.data.flags & 0x0008)
+						{
+							gi('menu-cmd-delete-photo').style.display = 'block';
+						}
+						else
+						{
+							gi('menu-cmd-photo').style.display = 'block';
+						}
 					}
 					if(data.data.flags & 0x0001)
 					{

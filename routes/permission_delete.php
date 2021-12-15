@@ -4,7 +4,7 @@ function permission_delete(&$core, $params, $post_data)
 {
 	$id = intval(@$post_data['id']);
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	if(!$id || !$core->db->put(rpv("DELETE FROM `@access` WHERE `id` = # LIMIT 1", $id)))
 	{

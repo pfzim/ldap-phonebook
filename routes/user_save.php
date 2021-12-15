@@ -8,7 +8,7 @@ function user_save(&$core, $params, $post_data)
 		'errors' => array()
 	);
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	$user_id = intval(@$post_data['id']);
 	$login = @$post_data['login'];

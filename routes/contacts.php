@@ -2,6 +2,8 @@
 
 function contacts(&$core, $params, $post_data)
 {
+	global $map_names;
+
 	$action = @$params[0];
 	$offset = 0;
 	$sort = intval($core->Config->get_user('contacts_sort', @$_SESSION['contacts_sort']));

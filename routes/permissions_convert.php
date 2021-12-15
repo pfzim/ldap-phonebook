@@ -2,7 +2,7 @@
 
 function permissions_convert(&$core, $params, $post_data)
 {
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	if(!$core->db->select_assoc_ex($permissions, rpv("SELECT m.`id`, m.`oid`, m.`sid`, m.`dn`, m.`allow_bits` FROM `@access` AS m", $id)))
 	{

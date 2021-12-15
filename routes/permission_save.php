@@ -26,7 +26,7 @@ function permission_save(&$core, $params, $post_data)
 		}
 	}
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);	// level 0 having access mean admin
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);	// level 0 having access mean admin
 
 	if(empty($v_dn))
 	{

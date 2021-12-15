@@ -4,7 +4,7 @@ function permission_new(&$core, $params, $post_data)
 {
 	$id = @$params[1];
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	$result_json = array(
 		'code' => 0,
@@ -35,7 +35,7 @@ function permission_new(&$core, $params, $post_data)
 				'name' => 'allow_bits',
 				'title' => LL('AllowRights'),
 				'value' => 0,
-				'list' => array(LL('List'), LL('Execute'))
+				'list' => array(LL('Admin'))
 			),
 			array(
 				'type' => 'flags',

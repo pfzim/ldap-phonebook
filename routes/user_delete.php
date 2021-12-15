@@ -4,7 +4,7 @@ function user_delete(&$core, $params, $post_data)
 {
 	$user_id = intval(@$post_data['id']);
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	if(!$user_id)
 	{

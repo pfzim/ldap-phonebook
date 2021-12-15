@@ -1,11 +1,15 @@
 <?php include(TEMPLATES_DIR.'tpl.header.php'); ?>
 		<h3 align="center"><?php L('Phonebook') ?></h3>
 		<div>
-			<span><b><?php L('Brithdays') ?></b></span>
+			<?php if($is_admin) { ?>
+				<span class="command f-right" onclick="f_show_form('<?php ln('contact_edit/0') ?>');"><?php L('AddСontact') ?></span>
+			<?php } ?>
+
+			<span><b><?php L('Brithdays') ?>:</b></span>
 			<?php 
 				if($birthdays) {
 					foreach($birthdays as &$row) {?>
-						<br><span><b><?php eh($row['DayMonth']); ?></b></span>&nbsp;<span><?php eh($row['last_name'].' '.$row['first_name'].' '.$row['middle_name']); ?></span>
+						<br /><span><b><?php eh($row['DayMonth']); ?></b></span>&nbsp;<span><?php eh($row['last_name'].' '.$row['first_name'].' '.$row['middle_name']); ?></span>
 			<?php 
 					} 
 				} else { ?>
@@ -13,16 +17,15 @@
 			<?php 
 				}?>
 		</div>
+
 		<div id="imgblock" class="user-photo"><img id="userphoto" src=""/></div>
 
+		<br />
 		<form id="search_form" action="<?php ln($action.'/search'); ?>" method="get" onsubmit="return f_search(this);">
 			<?php L('Find') ?>: <input type="text" id="search" class="form-field" placeholder="<?php L('Search') ?>..." value="<?php if(isset($search)) eh($search); ?>">
 			<input class="button-other" type="submit" value="<?php L('Search') ?>" /><br />
 		</form>
 
-		<?php if($is_admin) { ?>
-		<span class="command f-right" onclick="f_show_form('<?php ln('contact_edit/0') ?>');"><?php L('AddСontact') ?></span>
-		<?php } ?>
 		<table id="table" class="main-table">
 			<thead>
 			<tr>

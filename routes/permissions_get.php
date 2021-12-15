@@ -4,7 +4,7 @@ function permissions_get(&$core, $params, $post_data)
 {
 	$id = @$params[1];
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);	// level 0 having access mean admin
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);	// level 0 having access mean admin
 
 	if(empty($id) || intval($id) == 0)
 	{

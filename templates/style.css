@@ -519,10 +519,11 @@ body {
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
-	white-space: nowrap;
+	/*white-space: nowrap;*/
 	padding-left: 25px;
 	background-repeat: no-repeat;
 	background-position: 3px 7px;
+	max-width: 100vw;
 }
 .notifyjs-bootstrap-error {
 	color: #B94A48;

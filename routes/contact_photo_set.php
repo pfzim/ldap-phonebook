@@ -11,13 +11,14 @@ function contact_photo_set(&$core, $params, $post_data)
 		echo '{"code": 1, "message": "Invalid identifier"}';
 		exit;
 	}
-	if(!file_exists(@$_FILES['photo']['tmp_name']))
+
+	if(!file_exists(@$_FILES['file']['tmp_name']))
 	{
 		echo '{"code": 1, "message": "Invalid photo"}';
 		exit;
 	}
 
-	$s_photo = file_get_contents(@$_FILES['photo']['tmp_name']);
+	$s_photo = file_get_contents(@$_FILES['file']['tmp_name']);
 	$w = 64;
 	$h = 64;
 	list($width, $height) = getimagesizefromstring($s_photo);

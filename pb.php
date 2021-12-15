@@ -275,6 +275,8 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('tools', 'tools');
 
 		$core->Router->add_route('complete_account', 'complete_account', TRUE);
+		$core->Router->add_route('complete_computer', 'complete_computer', TRUE);
+		$core->Router->add_route('complete_mail', 'complete_mail', TRUE);
 		$core->Router->add_route('complete_group', 'complete_group', TRUE);
 
 		$core->Router->add_route('permissions', 'permissions');

@@ -40,7 +40,7 @@ function contacts_import_xml(&$core, $params, $post_data)
 					$values .= ', ';
 				}
 				$keys .= '`'.sql_escape($key).'`';
-				$values .= '\''.sql_escape($value).'\'';
+				$values .= (($key == 'birthday') && empty($value))?'NULL':'\''.sql_escape($value).'\'';
 			}
 		}
 

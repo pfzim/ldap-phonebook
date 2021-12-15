@@ -5,7 +5,7 @@ function permissions(&$core, $params, $post_data)
 	//$id = @$params[1];
 	$id = 0;
 
-	if(!$core->UserAuth->check_permission(0, RB_ACCESS_EXECUTE))
+	if(!$core->UserAuth->check_permission(0, PB_ACCESS_ADMIN))
 	{
 		$error_msg = LL('AccessDeniedToSection').' 0 '.LL('forUser').' '.$core->UserAuth->get_login().'!';
 		include(TEMPLATES_DIR.'tpl.message.php');

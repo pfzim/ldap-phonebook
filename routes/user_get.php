@@ -4,7 +4,7 @@ function user_get(&$core, $params, $post_data)
 {
 	$user_id = intval(@$params[1]);
 
-	assert_permission_ajax(0, RB_ACCESS_EXECUTE);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	$login = '';
 	$mail = '';
