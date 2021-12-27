@@ -75,7 +75,7 @@ function contacts_sync(&$core, $params, $post_data)
 				$v_phone_mobile = @$entries[$i]['mobile'][0];
 				$v_mail = @$entries[$i]['mail'][0];
 				$v_type = 0;
-				$v_birthday = '0000-00-00';
+				$v_birthday = 'NULL';  // raw value
 				$v_reserved1 = '';
 				$v_reserved2 = '';
 				$v_reserved3 = '';
@@ -103,27 +103,27 @@ function contacts_sync(&$core, $params, $post_data)
 					$v_id = $data[0][0];
 					$core->db->put(rpv('
 							UPDATE `@contacts` SET
-								`samaccountname` = !,
-								`last_name` = !,
-								`first_name` = !,
-								`middle_name` = !,
-								`department` = !,
-								`organization` = !,
-								`position` = !,
-								`phone_internal` = !,
-								`phone_external` = !,
-								`phone_mobile` = !,
-								`mail` = !,
-								`birthday` = !,
-								`reserved1` = !,
-								`reserved2` = !,
-								`reserved3` = !,
-								`reserved4` = !,
-								`reserved5` = !,
-								`type` = #,
-								`flags` = ((`flags` & ~{%PB_CONTACT_AD_DELETED}) | #)
+								`samaccountname` = {s0},
+								`last_name` = {s1},
+								`first_name` = {s2},
+								`middle_name` = {s3},
+								`department` = {s4},
+								`organization` = {s5},
+								`position` = {s6},
+								`phone_internal` = {s7},
+								`phone_external` = {s8},
+								`phone_mobile` = {s9},
+								`mail` = {s10},
+								`birthday` = {r11},
+								`reserved1` = {s12},
+								`reserved2` = {s13},
+								`reserved3` = {s14},
+								`reserved4` = {s15},
+								`reserved5` = {s16},
+								`type` = {d17},
+								`flags` = ((`flags` & ~{%PB_CONTACT_AD_DELETED}) | {d18})
 							WHERE
-								`id` = #
+								`id` = {d19}
 							LIMIT 1
 						',
 						$v_samaccountname,
@@ -174,7 +174,7 @@ function contacts_sync(&$core, $params, $post_data)
 								`reserved5`,
 								`type`,
 								`flags`
-							) VALUES (!, !, !, !, !, !, !, !, !, !, !, !, !, !, !, !, !, !, #, #)
+							) VALUES ({s0}, {s1}, {s2}, {s3}, {s4}, {s5}, {s6}, {s7}, {s8}, {s9}, {s10}, {s11}, {r12}, {s13}, {s14}, {s14}, {s16}, {s17}, {d18}, {d19})
 						',
 						$v_adid,
 						$v_samaccountname,

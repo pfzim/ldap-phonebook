@@ -1,5 +1,10 @@
+var is_admin = 0;
 var map = 0;
 var map_count = 0;
+var PB_CONTACT_VISIBLE     = 0x0001;
+var PB_CONTACT_AD_DELETED  = 0x0002;
+var PB_CONTACT_AD_DISABLED = 0x0004;
+var PB_CONTACT_WITH_PHOTO  = 0x0008;
 
 function gi(name)
 {
@@ -509,7 +514,8 @@ function on_saved(action, data)
 	}
 	else if(action == 'contact_save')
 	{
-		window.location = window.location;
+		//window.location = window.location;
+		f_update_row(data.id);
 	}
 	else if(action == 'register')
 	{
@@ -927,15 +933,6 @@ function f_update_row(id)
 					row.insertCell(6);
 					row.insertCell(7);
 					row.insertCell(8);
-					// Заполняем атрибут id у ячеек строки
-					row.cells[1].setAttribute('id', "nameCell"+data.data.id);				// ФИО
-					row.cells[2].setAttribute('id', "pintCell"+data.data.id);				// Внутренний телефон
-					row.cells[3].setAttribute('id', "pcityCell"+data.data.id);				// Городской телефон
-					row.cells[4].setAttribute('id', "pcellCell"+data.data.id);				// Мобильный телефон
-					row.cells[5].setAttribute('id', "mailCell"+data.data.id);				// Электронная почта
-					row.cells[6].setAttribute('id', "posCell"+data.data.id);				// Должность
-					row.cells[7].setAttribute('id', "depCell"+data.data.id);				// Подразделение
-					row.cells[8].setAttribute('id', "mainMenuCell"+data.data.id);			// Меню
 				}
 
 				row.id = 'row'+data.data.id;
@@ -945,34 +942,26 @@ function f_update_row(id)
 				row.setAttribute("data-y", 		data.data.y);
 				row.setAttribute("data-flags", 	data.data.flags);
 				
-				// Получаем ячейки таблицы по ID
-				var nameCell 				= gi("nameCell"+data.data.id);					// ФИО
-				var phoneCell 				= gi("pintCell"+data.data.id);					// Внутренний телефон
-				var phoneCityCell 			= gi("pcityCell"+data.data.id);					// Городской телефон
-				var mobileCell 				= gi("pcellCell"+data.data.id);					// Мобильный телефон
-				var mailCell 				= gi("mailCell"+data.data.id);					// Электронная почта
-				var positionCell 			= gi("posCell"+data.data.id);					// Должность
-				var departmentCell 			= gi("depCell"+data.data.id);					// Подразделение
-				var menuCell 				= gi("mainMenuCell"+data.data.id);				// Меню
-				
 				// Заполняем найденные ячейки данными
-				nameCell.textContent 		= data.data.last_name + ' ' + data.data.first_name + ' ' + data.data.middle_name;
-				if(data.data.photo) {
-					nameCell.className = 'userwithphoto';
+				row.cells[1].textContent 		= data.data.last_name + ' ' + data.data.first_name + ' ' + data.data.middle_name;
+				if(data.data.photo)
+				{
+					row.cells[1].className = 'userwithphoto';
 				}
-				nameCell.style.cursor 		= 'pointer';
-				nameCell.onclick 			= function(event) { f_sw_map(event); };
-				nameCell.onmouseenter 		= function(event) { f_sw_img(event); };
-				nameCell.onmouseleave 		= function(event) { gi('imgblock').style.display = 'none'; };
-				nameCell.onmousemove 		= function(event) { f_mv_img(event); };
 				
-				phoneCell.textContent 		= data.data.phone_internal;				
-				phoneCityCell.textContent 	= data.data.phone_external;
-				mobileCell.textContent 		= data.data.phone_mobile;
-				mailCell.innerHTML 			= '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
-				positionCell.textContent 	= data.data.position;
-				departmentCell.textContent 	= data.data.department;
-				menuCell.innerHTML 			= '<span class="command" onclick="f_menu(event);">Menu</span>';
+				row.cells[1].style.cursor 		= 'pointer';
+				row.cells[1].onclick 			= function(event) { f_sw_map(event); };
+				row.cells[1].onmouseenter 		= function(event) { f_sw_img(event); };
+				row.cells[1].onmouseleave 		= function(event) { gi('imgblock').style.display = 'none'; };
+				row.cells[1].onmousemove 		= function(event) { f_mv_img(event); };
+				
+				row.cells[2].textContent 		= data.data.phone_internal;				
+				row.cells[3].textContent 		= data.data.phone_external;
+				row.cells[4].textContent 		= data.data.phone_mobile;
+				row.cells[5].innerHTML 			= '<a href="mailto:'+escapeHtml(data.data.mail)+'">'+escapeHtml(data.data.mail)+'</a>';
+				row.cells[6].textContent 		= data.data.position;
+				row.cells[7].textContent 		= data.data.department;
+				row.cells[8].innerHTML 			= '<span class="command" onclick="f_menu(event);">' + LL.Menu + '</span>';
 			}
 		}
 	);
@@ -1391,6 +1380,68 @@ function filter_table() {
 	}
 	tr[i].style.display = sh;
   }
+}
+
+function fill_contacts(action, query, offset, total, contacts)
+{
+	var table_data = gi('table-data');
+	var pages = gi('pages');
+	var i;
+	
+	html = '';
+	
+	for(i = 0, j = contacts.length; i < j; i++)
+	{
+		html += '<tr id="row' + contacts[i].id +'" data-id="' + contacts[i].id +'" data-map="' + contacts[i].map +'" data-x="' + contacts[i].x +'" data-y="' + contacts[i].y +'" data-flags="' + contacts[i].flags + '">'
+				+ (is_admin ? '<td><input type="checkbox" name="check" value="' + contacts[i].id +'"/></td>' : '')
+				+ '<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi(\'imgblock\').style.display = \'none\'" onmousemove="f_mv_img(event);" style="cursor: pointer;" ' + ((contacts[i].flags & PB_CONTACT_WITH_PHOTO) ? ' class="userwithphoto"' : '' ) + '>' + contacts[i].last_name + ' ' + contacts[i].first_name + ' ' + contacts[i].middle_name + '</td>'
+				+ '<td>' + contacts[i].phone_internal + '</td>'
+				+ '<td>' + contacts[i].phone_external + '</td>'
+				+ '<td>' + contacts[i].phone_mobile + '</td>'
+				+ '<td><a href="mailto:' + contacts[i].mail + '">' + contacts[i].mail + '</a></td>'
+				+ '<td>' + contacts[i].position + '</td>'
+				+ '<td>' + contacts[i].department + '</td>'
+				+ (is_admin ? '<td><span class="command" onclick="f_menu(event);">' + LL.Menu + '</span></td>' : '')
+				+ '</tr>';
+	}
+	
+	table_data.innerHTML = html;
+
+	var max = Math.min(offset + 1000, total - (total % 100));
+
+	html = '<a class="page-number boldtext" href="' + g_link_prefix + action + '/offset/0/search/' + query + '">1</a>';
+
+	for(i = 100; i <= max; i += 100)
+	{
+		html += '<a class="page-number" href="' + g_link_prefix + action + '/offset/' + i + '/search/' + query + '">' + (i/100 + 1) + '</a>';
+	}
+
+	max = total - (total % 100);
+
+	if(i < max)
+	{
+		html += '&nbsp;...&nbsp;<a class="page-number" href="' + g_link_prefix + action + '/offset/' + max + '/search/' + query + '">' + (max/100 + 1) + '</a>';
+	}
+
+	pages.innerHTML = html;
+}
+
+function contacts_search(action)
+{
+  var search = gi("search").value.toLowerCase();
+  f_http(
+		g_link_prefix + action + '/json/1/search/' + search,
+		function(data, params)
+		{
+			if(!data.code)
+			{
+				fill_contacts(params.action, params.query, data.offset, data.total, data.data);
+			}
+		},
+		{query: search, action: action},
+		'application/x-www-form-urlencoded',
+		null
+	);
 }
 
 function autocomplete_on_click(id, value)

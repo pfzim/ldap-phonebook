@@ -8,7 +8,7 @@
 <a href="<?php ln('contacts_export') ?>"><?php L('Export') ?></a><br />
 <a href="<?php ln('contacts_dump_db') ?>"><?php L('DumpDB') ?></a><br />
 <a href="<?php ln('contacts_export_xml') ?>"><?php L('ExportXML') ?></a><br />
-<a href="#" onclick="f_import_xml(); return false;"><?php L('ImportXML') ?></a><br />
+<a href="<?php ln('contacts_import_xml') ?>" onclick="f_import_xml(); return false;"><?php L('ImportXML') ?></a><br />
 
 <p>
 	<?php L('CurrentUserToken') ?>: <b><?php eh($core->UserAuth->get_token()); ?></b><br />
@@ -29,7 +29,7 @@
 
 
 <?php if(!$core->UserAuth->is_ldap_user() && $core->UserAuth->get_id()) { ?>
-<a href="#" onclick="f_show_form('<?php ln('password_change_form') ?>');"><?php L('ChangePassword') ?></a><br />
+<a href="<?php ln('password_change_form') ?>" onclick="f_show_form('<?php ln('password_change_form') ?>'); return false;"><?php L('ChangePassword') ?></a><br />
 <?php } ?>
 
 <form method="post" id="form-file-upload" name="form-file-upload">

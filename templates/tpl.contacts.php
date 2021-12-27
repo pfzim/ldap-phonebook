@@ -22,7 +22,7 @@
 
 		<br />
 		<form id="search_form" action="<?php ln($action.'/search'); ?>" method="get" onsubmit="return f_search(this);">
-			<?php L('Find') ?>: <input type="text" id="search" class="form-field" placeholder="<?php L('Search') ?>..." value="<?php if(isset($search)) eh($search); ?>">
+			<?php L('Find') ?>: <input type="text" id="search" class="form-field" placeholder="<?php L('Search') ?>..." value="<?php if(isset($search)) eh($search); ?>" onkeyup="contacts_search('<?php eh($action); ?>');">
 			<input class="button-other" type="submit" value="<?php L('Search') ?>" /><br />
 		</form>
 
@@ -49,25 +49,25 @@
 		<?php $i = 0; foreach($phones as &$row) { $i++; ?>
 			<tr id="<?php eh("row".$row['id']);?>" data-id=<?php eh($row['id']);?> data-map=<?php eh($row['map']); ?> data-x=<?php eh($row['x']); ?> data-y=<?php eh($row['y']); ?> data-flags=<?php eh($row['flags']); ?>>
 				<?php if($is_admin) { ?>
-				<td><input type="checkbox" name="check" value="<?php eh($row['id']); ?>"/></td>
+					<td><input type="checkbox" name="check" value="<?php eh($row['id']); ?>"/></td>
 				<?php } ?>
-				<td id="<?php eh("nameCell".$row['id']);?>" onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(intval($row['flags']) & PB_CONTACT_WITH_PHOTO) { eh('userwithphoto'); } ?>"><?php eh($row['last_name'].' '.$row['first_name'].' '.$row['middle_name']); ?></td>
-				<td id="<?php eh("pintCell".$row['id']);?>"><?php eh($row['phone_internal']); ?></td>
-				<td id="<?php eh("pcityCell".$row['id']);?>"><?php eh($row['phone_external']); ?></td>
-				<td id="<?php eh("pcellCell".$row['id']);?>"><?php eh($row['phone_mobile']); ?></td>
-				<td id="<?php eh("mailCell".$row['id']);?>"><a href="mailto:<?php eh($row['mail']); ?>"><?php eh($row['mail']); ?></a></td>
-				<td id="<?php eh("posCell".$row['id']);?>"><?php eh($row['position']); ?></td>
-				<td id="<?php eh("depCell".$row['id']);?>"><?php eh($row['department']); ?></td>
+				<td onclick="f_sw_map(event);" onmouseenter="f_sw_img(event);" onmouseleave="gi('imgblock').style.display = 'none'" onmousemove="f_mv_img(event);" style="cursor: pointer;" class="<?php if(intval($row['flags']) & PB_CONTACT_WITH_PHOTO) { eh('userwithphoto'); } ?>"><?php eh($row['last_name'].' '.$row['first_name'].' '.$row['middle_name']); ?></td>
+				<td><?php eh($row['phone_internal']); ?></td>
+				<td><?php eh($row['phone_external']); ?></td>
+				<td><?php eh($row['phone_mobile']); ?></td>
+				<td><a href="mailto:<?php eh($row['mail']); ?>"><?php eh($row['mail']); ?></a></td>
+				<td><?php eh($row['position']); ?></td>
+				<td><?php eh($row['department']); ?></td>
 				<?php if($is_admin) { ?>
-				<td id="<?php eh("mainMenuCell".$row['id']);?>">
-					<span class="command" onclick="f_menu(event);"><?php L('Menu') ?></span>
-				</td>
+					<td>
+						<span class="command" onclick="f_menu(event);"><?php L('Menu') ?></span>
+					</td>
 				<?php } ?>
 			</tr>
 		<?php } ?>
 			</tbody>
 		</table>
-		
+
 		<?php if($is_admin) { ?>
 		<form id="contacts" method="post" action="<?php ln('contacts_export_selected'); ?>">
 			<input id="list" type="hidden" name="list" value="" />
@@ -77,28 +77,30 @@
 
 		<br />
 
-		<a class="page-number<?php if($offset == 0) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/0/search/'.urlencode($search)); ?>">1</a>
-		<?php 
-			$min = max(100, $offset - 1000);
-			$max = min($offset + 1000, $total - ($total % 100));
+		<div id="pages">
+			<a class="page-number<?php if($offset == 0) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/0/search/'.urlencode($search)); ?>">1</a>
+			<?php 
+				$min = max(100, $offset - 1000);
+				$max = min($offset + 1000, $total - ($total % 100));
 
-			if($min > 100) { echo '&nbsp;...&nbsp;'; }
+				if($min > 100) { echo '&nbsp;...&nbsp;'; }
 
-			for($i = $min; $i <= $max; $i += 100)
-			{
+				for($i = $min; $i <= $max; $i += 100)
+				{
+				?>
+					<a class="page-number<?php if($offset == $i) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$i.'/search/'.urlencode($search)); ?>"><?php eh($i/100 + 1); ?></a>
+				<?php
+				}
+
+				$max = $total - ($total % 100);
+				if($i < $max)
+				{
+				?>
+					&nbsp;...&nbsp;<a class="page-number<?php if($offset == $max) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$max.'/search/'.urlencode($search)); ?>"><?php eh($max/100 + 1); ?></a>
+				<?php
+				}
 			?>
-				<a class="page-number<?php if($offset == $i) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$i.'/search/'.urlencode($search)); ?>"><?php eh($i/100 + 1); ?></a>
-			<?php
-			}
-
-			$max = $total - ($total % 100);
-			if($i < $max)
-			{
-			?>
-				&nbsp;...&nbsp;<a class="page-number<?php if($offset == $max) eh(' boldtext'); ?>" href="<?php ln($action.'/offset/'.$max.'/search/'.urlencode($search)); ?>"><?php eh($max/100 + 1); ?></a>
-			<?php
-			}
-		?>
+		</div>
 
 		<br />
 

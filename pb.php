@@ -240,6 +240,7 @@ function exception_handler_ajax($exception)
 	//$core->Router->add_route('info', 'info');
 
 	$core->Router->add_route('contacts', 'contacts');						// default route
+	$core->Router->add_route('contacts_search', 'contacts', TRUE);
 
 	$core->Router->add_route('map', 'map');
 	$core->Router->add_route('hello', 'hello', TRUE);

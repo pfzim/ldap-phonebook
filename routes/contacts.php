@@ -8,6 +8,7 @@ function contacts(&$core, $params, $post_data)
 	$offset = 0;
 	$sort = intval($core->Config->get_user('contacts_sort', @$_SESSION['contacts_sort']));
 	$search = '';
+	$need_json = 0;
 	
 	$i = 1;
 	$params_count = count($params);
@@ -23,6 +24,16 @@ function contacts(&$core, $params, $post_data)
 						$sort = intval($params[$i]);
 						$_SESSION['contacts_sort'] = $sort;
 						$core->Config->set_user('contacts_sort', $sort);
+					}
+				}
+				break;
+
+			case 'json':
+				{
+					$i++;
+					if($i < $params_count)
+					{
+						$need_json = intval($params[$i]);
 					}
 				}
 				break;
@@ -133,9 +144,11 @@ function contacts(&$core, $params, $post_data)
 			`@contacts` AS c
 		WHERE
 			(c.`flags` & {%PB_CONTACT_VISIBLE}) = {%PB_CONTACT_VISIBLE}
-			AND MONTH(c.`birthday`) = MONTH(NOW())
-			AND DAY(c.`birthday`) >= DAY(NOW())
-			AND DAY(c.`birthday`) <= DAY(NOW() + INTERVAL 7 DAY)
+			AND c.`birthday` IS NOT NULL
+			AND DATE_ADD(
+				c.`birthday`,
+				INTERVAL (YEAR(CURDATE()) - YEAR(c.`birthday`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(c.`birthday`), 1, 0)) YEAR
+			) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
 		ORDER BY
 			MONTH(c.`birthday`),
 			DAY(c.`birthday`),
@@ -173,5 +186,20 @@ function contacts(&$core, $params, $post_data)
 		$offset
 	));
 
-	include(TEMPLATES_DIR.'tpl.contacts.php');
+	if($need_json || ($action === 'contacts_search'))
+	{
+		$result_json = array(
+			'code' => 0,
+			'message' => '',
+			'offset' => $offset,
+			'total' => $total,
+			'data' => &$phones
+		);
+
+		echo json_encode($result_json);
+	}
+	else
+	{
+		include(TEMPLATES_DIR.'tpl.contacts.php');
+	}
 }
