@@ -68,7 +68,7 @@ EOT;
 
 		$plain = 'To approve new registered user follow this link: '.WEB_LINK_EXTERNAL.'register_approve_form/'.$user_id;
 
-		$core->Mailer->send_mail(array(MAIL_TO_ADMIN), LL('ApproveRequestSubject'), $html, $plain);
+		$core->Mailer->send_mail(array(MAIL_ADMIN), LL('ApproveRequestSubject'), $html, $plain);
 
 		log_db('Registered new user', '{id='.$user_id.',login="'.$login.'"}', 0);
 		$result_json['message'] = LL('UserRegistered');

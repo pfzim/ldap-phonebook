@@ -1446,7 +1446,7 @@ input:checked + .slider:after
 			<div class="form-group">
 				<label for="db_name" class="control-label col-sm-2">DB name:</label>
 				<div class="col-sm-5">
-					<input id="db_name" name="db_name" class="form-control" type="text" value="websco" />
+					<input id="db_name" name="db_name" class="form-control" type="text" value="pb" />
 				</div>
 			</div>
 			<div class="form-group">
@@ -1660,7 +1660,7 @@ input:checked + .slider:after
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="web_url" class="control-label col-sm-2">WebSCO URL (with trailing slash):</label>
+				<label for="web_url" class="control-label col-sm-2">URL (with trailing slash):</label>
 				<div class="col-sm-5">
 					<input id="web_url" name="web_url" class="form-control" type="text" value="<?php eh($web_url) ?>" />
 				</div>

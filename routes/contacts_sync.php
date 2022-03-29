@@ -39,9 +39,14 @@ function contacts_sync(&$core, $params, $post_data)
 			throw new Exception('ldap_search return error: '.ldap_error($core->LDAP->get_link()));
 		}
 
+		$matcheddn = NULL;
+		$referrals = NULL;
+		$errcode = NULL;
+		$errmsg = NULL;
+		
 		if(!ldap_parse_result($core->LDAP->get_link(), $result, $errcode , $matcheddn , $errmsg , $referrals, $controls))
 		{
-			throw new Exception('ldap_parse_result return error: '.ldap_error($core->LDAP->get_link()));
+			throw new Exception('ldap_parse_result return error code: '.$errcode.', message: '.$errmsg.', ldap_error: '.ldap_error($core->LDAP->get_link()));
 		}
 
 		$entries = ldap_get_entries($core->LDAP->get_link(), $result);
