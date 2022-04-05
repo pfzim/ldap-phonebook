@@ -133,6 +133,3 @@ Plug-ins in php.ini or compile PHP with LDAP support
 ## Installation
 - Open in the browser `install.php` and fill in the proposed parameters
 - Replace the images of the maps `templates/map[1-5].png` with their schemes
-
-
-Dmitry V. Zimin <pfzim@mail.ru> Ask in [Issues](https://github.com/pfzim/ldap-phonebook/issues?q=) before mail me.
