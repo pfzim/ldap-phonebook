@@ -27,8 +27,8 @@
 Справочник и его код **ЗАПРЕЩЕНО ИСПОЛЬЗОВАТЬ** в структурах МВД и близких к ним!!!
 
 ## Системные требования
-- Apache (nginx)
-- MariaDB (MySQL)
+- Apache or Nginx
+- MariaDB or MySQL
 - PHP
 - Active Directory (опционально)
 - memcaсhed (опционально)
@@ -39,6 +39,15 @@
 - `extension=php_fileinfo.dll`
 
 ## Установка
+
+```
+sudo apt-get install mariadb-server
+sudo apt-get install php php-mysql php-ldap php-curl php-xml php-gd
+sudo apt-get install apache2 libapache2-mod-php
+#sudo apt-get install nginx php-fpm
+sudo apt-get install memcached php-memcached
+```
+
 - Открыть в браузере `install.php` и заполнить предлагаемые параметры
 - Заменить изображения карт `templates/map[1-5].png` своими схемами
 
@@ -121,15 +130,24 @@ Functionality:
 Maps are stored in the files `templates/map[1-5].png`
 
 ## System requirements
-- Apache
-- MariaDB (MySQL)
+- Apache or Nginx
+- MariaDB or MySQL
 - PHP
 - Active Directory (optional)
 
-Plug-ins in php.ini or compile PHP with LDAP support
+Enable plug-ins in php.ini or compile PHP with LDAP support
 - `extension = php_ldap.dll`
 - `extension = php_fileinfo.dll`
 
 ## Installation
+
+```
+sudo apt-get install mariadb-server
+sudo apt-get install php php-mysql php-ldap php-curl php-xml php-gd
+sudo apt-get install apache2 libapache2-mod-php
+#sudo apt-get install nginx php-fpm
+sudo apt-get install memcached php-memcached
+```
+
 - Open in the browser `install.php` and fill in the proposed parameters
 - Replace the images of the maps `templates/map[1-5].png` with their schemes
