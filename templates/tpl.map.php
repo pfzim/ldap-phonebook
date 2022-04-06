@@ -17,7 +17,7 @@
 			tel.&nbsp;<span id="u_phone"></span>
 		</div>
 
-<?php include(TEMPLATES_DIR.'tpl.form-edit.php'); ?>
+<?php include(TEMPLATES_DIR.'tpl.universal-form.php'); ?>
 <?php include(TEMPLATES_DIR.'tpl.form-upload.php'); ?>
 <?php include(TEMPLATES_DIR.'tpl.map-container.php'); ?>
 <?php include(TEMPLATES_DIR.'tpl.menu-contact.php'); ?>
