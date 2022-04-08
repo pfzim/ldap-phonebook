@@ -109,12 +109,14 @@ if (defined('USE_PRETTY_LINKS') && USE_PRETTY_LINKS
 		|| (function_exists('apache_get_modules') && in_array('mod_rewrite', apache_get_modules()))
 	))
 {
-	define('WEB_LINK_PREFIX', PRETTY_LINKS_BASE_PATH);			// '/websco/'
-	define('WEB_LINK_STATIC_PREFIX', PRETTY_LINKS_BASE_PATH);
+	define('PRETTY_LINKS_BASE_PATH', WEB_LINK_BASE_PATH);
+	define('WEB_LINK_PREFIX', WEB_LINK_BASE_PATH);			// '/websco/'
+	define('WEB_LINK_STATIC_PREFIX', WEB_LINK_BASE_PATH);
 	define('WEB_LINK_EXTERNAL', WEB_URL);
 }
 else
 {
+	define('PRETTY_LINKS_BASE_PATH', '');
 	define('WEB_LINK_PREFIX', basename(__FILE__).'?path=');
 	define('WEB_LINK_STATIC_PREFIX', '');
 	define('WEB_LINK_EXTERNAL', WEB_URL.WEB_LINK_PREFIX);

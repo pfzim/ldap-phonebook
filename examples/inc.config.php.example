@@ -34,9 +34,10 @@
 	define('USE_MEMCACHED', TRUE);
 
 	define('WEB_URL', 'https://pb.contoso.com/pb/');
+	define('WEB_LINK_BASE_PATH', '/pb/');
 	define('USE_PRETTY_LINKS', FALSE);
 	define('USE_PRETTY_LINKS_FORCE', FALSE);
-	define('PRETTY_LINKS_BASE_PATH', '/pb/');
+	//define('PRETTY_LINKS_BASE_PATH', '/pb/');   // TODO: replace with WEB_LINK_BASE_PATH
 	
 	define('LOG_FILE', '/var/log/pb/pb.log');
 

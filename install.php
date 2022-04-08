@@ -171,9 +171,9 @@ $config = <<<'EOT'
 	define('USE_MEMCACHED', #use_memcached#);
 
 	define('WEB_URL', '#web_url#');
+	define('WEB_LINK_BASE_PATH', '#pretty_links_base_path#');
 	define('USE_PRETTY_LINKS', #use_pretty_links#);
 	define('USE_PRETTY_LINKS_FORCE', #use_pretty_links_force#);
-	define('PRETTY_LINKS_BASE_PATH', '#pretty_links_base_path#');
 
 	define('LOG_FILE', '#log_file#');
 
@@ -1666,6 +1666,12 @@ input:checked + .slider:after
 				</div>
 			</div>
 			<div class="form-group">
+				<label for="pretty_links_base_path" class="control-label col-sm-2">Links base path (with leading and trailing slash):</label>
+				<div class="col-sm-5">
+					<input id="pretty_links_base_path" name="pretty_links_base_path" class="form-control" type="text" value="<?php eh($pretty_links_base_path) ?>" />
+				</div>
+			</div>
+			<div class="form-group">
 				<label for="use_pretty_links" class="control-label col-sm-2">Use pretty links (mod_rewrite required):</label>
 				<div class="col-sm-5">
 					<label class="switch"><input id="use_pretty_links" name="use_pretty_links" class="form-control" type="checkbox" value="1" /><div class="slider round"></div></label>
@@ -1675,12 +1681,6 @@ input:checked + .slider:after
 				<label for="use_pretty_links_force" class="control-label col-sm-2">Use pretty links force (if used nginx rewrite):</label>
 				<div class="col-sm-5">
 					<label class="switch"><input id="use_pretty_links_force" name="use_pretty_links_force" class="form-control" type="checkbox" value="1" /><div class="slider round"></div></label>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="pretty_links_base_path" class="control-label col-sm-2">Pretty links base path:</label>
-				<div class="col-sm-5">
-					<input id="pretty_links_base_path" name="pretty_links_base_path" class="form-control" type="text" value="<?php eh($pretty_links_base_path) ?>" />
 				</div>
 			</div>
 			<div class="form-group">
