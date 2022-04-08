@@ -32,6 +32,9 @@ Maps are stored in the files `templates/map[1-5].png`
 - MariaDB or MySQL
 - PHP
 - Active Directory (optional)
+- memcached (optional)
+- Kerberos (optional)
+- mod_rewrite (optional)
 
 Enable plug-ins in php.ini or compile PHP with LDAP support
 - `extension = php_ldap.dll`
@@ -45,6 +48,7 @@ sudo apt-get install php php-mysql php-ldap php-curl php-xml php-gd
 sudo apt-get install apache2 libapache2-mod-php
 #sudo apt-get install nginx php-fpm
 sudo apt-get install memcached php-memcached
+sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
 - Open in the browser `install.php` and fill in the proposed parameters
@@ -93,6 +97,7 @@ define('APP_LANGUAGE', 'en');
 - Active Directory (опционально)
 - memcaсhed (опционально)
 - Kerberos (опционально)
+- mod_rewrite (опционально)
 
 Подключить модули расширения в php.ini или скомпилировать PHP с поддержкой LDAP
 - `extension=php_ldap.dll`
@@ -106,6 +111,7 @@ sudo apt-get install php php-mysql php-ldap php-curl php-xml php-gd
 sudo apt-get install apache2 libapache2-mod-php
 #sudo apt-get install nginx php-fpm
 sudo apt-get install memcached php-memcached
+sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
 - Открыть в браузере `install.php` и заполнить предлагаемые параметры
