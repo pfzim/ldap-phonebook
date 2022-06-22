@@ -149,7 +149,7 @@ function exception_handler_ajax($exception)
 	$core = new Core(TRUE);
 	$core->load_ex('db', 'MySQLDB');
 
-	if(intval($core->Config->get_global('db_version', 0)) != 6)
+	if(intval($core->Config->get_global('db_version', 0)) != 7)
 	{
 		header('Location: '.WEB_LINK_STATIC_PREFIX.'upgrade.php');
 		exit;

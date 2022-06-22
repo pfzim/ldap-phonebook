@@ -82,6 +82,7 @@ require_once(ROOT_DIR.'inc.config.php');
 
 	$core = new Core(TRUE);
 	$core->load_ex('db', 'MySQLDB');
+	$core->load('UserAuth');
 
 	if(!$core->db->select_ex($data, rpv("SHOW COLUMNS FROM @config LIKE 'uid'")))
 	{
@@ -528,12 +529,28 @@ require_once(ROOT_DIR.'inc.config.php');
 			echo "  and other missing parameters look at examples/inc.config.php.example\n";
 			echo "\n\nUpgrade to version 6 complete!\n";
 		}
-		break;
 		case 6:
+		{
+			echo "Update users flags...\n";
+			if(!$core->db->put(rpv("UPDATE @users SET `flags` = (`flags` | {%UA_ADMIN}) WHERE (`flags` & {%UA_LDAP}) = 0")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "Set db_version = '7'...\n";
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 7 WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "\n\nUpgrade to version 7 complete!\n";
+		}
+		break;
+
+		case 7:
 		{
 			echo "Upgrade doesn't required\n";
 		}
 		break;
+
 		default:
 		{
 			echo "ERROR: Unknown DB version\n";

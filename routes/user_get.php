@@ -8,6 +8,7 @@ function user_get(&$core, $params, $post_data)
 
 	$login = '';
 	$mail = '';
+	$flags = 0;
 
 	if($user_id)
 	{
@@ -19,6 +20,7 @@ function user_get(&$core, $params, $post_data)
 		
 		$login = @$user_info[0]['login'];
 		$mail = @$user_info[0]['mail'];
+		$flags = (intval(@$user_info[0]['flags']) & UA_ADMIN) ? 0x0001 : 0;
 	}
 
 	$result_json = array(
@@ -44,6 +46,13 @@ function user_get(&$core, $params, $post_data)
 				'title' => LL('Mail').'*',
 				'value' => $mail,
 				'autocomplete' => 'complete_mail'
+			),
+			array(
+				'type' => 'flags',
+				'name' => 'flags',
+				'title' => LL('AllowRights'),
+				'value' => $flags,
+				'list' => array(LL('Admin'))
 			)
 		)
 	);

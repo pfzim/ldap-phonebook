@@ -13,6 +13,7 @@ function user_save(&$core, $params, $post_data)
 	$user_id = intval(@$post_data['id']);
 	$login = @$post_data['login'];
 	$mail = @$post_data['mail'];
+	$flags = intval(@$post_data['flags']);
 
 	if(empty($login))
 	{
@@ -30,7 +31,7 @@ function user_save(&$core, $params, $post_data)
 	{
 		$result_json['message'] = LL('NotAllFilled');
 	}
-	elseif($core->UserAuth->set_user_info_ex($user_id, $login, $mail))
+	elseif($core->UserAuth->set_user_info_ex($user_id, $login, $mail, $flags & 0x0001))
 	{
 		log_db('Updated user', '{id='.$user_id.',login="'.$login.'"}', 0);
 		$result_json['message'] = LL('SuccessfulUpdated');

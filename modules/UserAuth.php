@@ -34,6 +34,7 @@
 define('UA_DISABLED',	0x0001);  /// Ignored for LDAP user
 define('UA_LDAP',		0x0002);  /// Is a LDAP user (overwise is internal user)
 define('UA_DELETED',	0x0004);  /// User is deleted
+define('UA_ADMIN',		0x0008);  /// User is admin
 
 class UserAuth
 {
@@ -385,16 +386,17 @@ class UserAuth
 	 *  \param [in] $uid User ID. If 0 then user will be created
 	 *  \param [in] $login User login
 	 *  \param [in] $mail User mail address for send notification
+	 *  \param [in] $is_admin User is local administrator
 	 *  \return true - if activated successfully
 	 */
 
-	public function set_user_info_ex($uid, $login, $mail)
+	public function set_user_info_ex($uid, $login, $mail, $is_admin = FALSE)
 	{
 		$affected = 0;
 
 		if($uid)
 		{
-			if($this->core->db->put(rpv('UPDATE `@users` SET `login` = !, `mail` = ! WHERE `id` = # AND (`flags` & ({%UA_LDAP})) = 0 LIMIT 1', $login, $mail, $uid), $affected))
+			if($this->core->db->put(rpv('UPDATE `@users` SET `login` = !, `mail` = !, `flags` = ((`flags` & ~{%UA_ADMIN}) | #) WHERE `id` = # AND (`flags` & ({%UA_LDAP})) = 0 LIMIT 1', $login, $mail, $is_admin ? UA_ADMIN : 0, $uid), $affected))
 			{
 				//return ($affected > 0);
 				return TRUE;
@@ -404,7 +406,7 @@ class UserAuth
 		{
 			if(!$this->core->db->select_ex($users, rpv('SELECT u.`id` FROM `@users` AS u WHERE (u.`login` = ! OR u.`mail` = !) AND (u.`flags` & ({%UA_DELETED} | {%UA_LDAP})) = 0 LIMIT 1', $login, $mail)))
 			{
-				if($this->core->db->put(rpv('INSERT INTO `@users` (`login`, `mail`, `passwd`, `flags`) VALUES (!, !, \'\', 0)', $login, $mail)))
+				if($this->core->db->put(rpv('INSERT INTO `@users` (`login`, `mail`, `passwd`, `flags`) VALUES (!, !, \'\', #)', $login, $mail, $is_admin ? UA_ADMIN : 0)))
 				{
 					return TRUE;
 				}
@@ -477,7 +479,7 @@ class UserAuth
 
 	public function activate($id, $login, &$mail)
 	{
-		if($this->uid && !$this->is_ldap_user())  // Only internal user can activate
+		if($this->uid && !$this->is_ldap_user() && (($this->flags & UA_ADMIN) == UA_ADMIN))  // Only internal admin user can activate
 		{
 			if($this->core->db->put(rpv('UPDATE @users SET `flags` = (`flags` & ~{%UA_DISABLED}) WHERE `login` = ! AND `id` = #', $login, $id)))
 			{
@@ -598,7 +600,7 @@ class UserAuth
 		{
 			if(!$this->is_ldap_user())
 			{
-				return TRUE;  // Internal user is always admin
+				return (($this->flags & UA_ADMIN) == UA_ADMIN);  // Return TRUE if internal user is admin
 			}
 			else
 			{
@@ -736,9 +738,9 @@ class UserAuth
 			return FALSE;  /// Not logged in user always return FALSE
 		}
 
-		if($this->uid && !$this->is_ldap_user())
+		if(!$this->is_ldap_user())
 		{
-			return TRUE;  /// Internal user is always admin
+			return (($this->flags & UA_ADMIN) == UA_ADMIN);  /// Return TRUE if internal user is admin
 		}
 
 		if(!isset($this->rights[$object_id]))  // local cache empty
