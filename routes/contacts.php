@@ -83,21 +83,33 @@ function contacts(&$core, $params, $post_data)
 		{
 			$where .= ' AND ';
 		}
+		
+		$search_phone = preg_replace('/[^0-9]/', '', $search);
+		
+		if(!empty($search_phone))
+		{
+			$search_phone = rpv('
+					OR REGEXP_REPLACE(c.`phone_internal`, \'[^0-9]\', \'\') LIKE \'%{r0}%\'
+					OR REGEXP_REPLACE(c.`phone_external`, \'[^0-9]\', \'\') LIKE \'%{r0}%\'
+					OR REGEXP_REPLACE(c.`phone_mobile`, \'[^0-9]\', \'\') LIKE \'%{r0}%\'
+				',
+				sql_escape($search_phone)
+			);
+		}
 
 		$where .= rpv('
 				(
 					c.`last_name` LIKE \'%{r0}%\'
 					OR c.`first_name` LIKE \'%{r0}%\'
 					OR c.`middle_name` LIKE \'%{r0}%\'
-					OR c.`phone_internal` LIKE \'%{r0}%\'
-					OR c.`phone_external` LIKE \'%{r0}%\'
-					OR c.`phone_mobile` LIKE \'%{r0}%\'
 					OR c.`mail` LIKE \'%{r0}%\'
 					OR c.`position` LIKE \'%{r0}%\'
 					OR c.`department` LIKE \'%{r0}%\'
+					{r1}
 				)
 			',
-			sql_escape($search)
+			sql_escape($search),
+			$search_phone
 		);
 	}
 	

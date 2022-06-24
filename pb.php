@@ -17,6 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+define('DB_VERSION', 7);
+
 if(!defined('ROOT_DIR'))
 {
 	define('ROOT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
@@ -149,7 +151,7 @@ function exception_handler_ajax($exception)
 	$core = new Core(TRUE);
 	$core->load_ex('db', 'MySQLDB');
 
-	if(intval($core->Config->get_global('db_version', 0)) != 7)
+	if(intval($core->Config->get_global('db_version', 0)) != DB_VERSION)
 	{
 		header('Location: '.WEB_LINK_STATIC_PREFIX.'upgrade.php');
 		exit;
