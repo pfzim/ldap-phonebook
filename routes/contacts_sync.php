@@ -26,7 +26,7 @@ function contacts_sync(&$core, $params, $post_data)
 			$core->LDAP->get_link(),
 			LDAP_BASE_DN,
 			PB_LDAP_FILTER,
-			['objectguid', 'samaccountname' , 'sn', 'initials', 'middleName', 'givenname', 'mail', 'department', 'company', 'title', 'telephonenumber', 'mobile', 'thumbnailphoto', 'useraccountcontrol'],
+			['objectguid', 'samaccountname' , 'sn', 'initials', 'middleName', 'givenname', 'mail', 'department', 'company', 'title', 'telephonenumber', 'mobile', 'thumbnailphoto', 'useraccountcontrol', 'info'],
 			0,
 			0,
 			0,
@@ -43,7 +43,7 @@ function contacts_sync(&$core, $params, $post_data)
 		$referrals = NULL;
 		$errcode = NULL;
 		$errmsg = NULL;
-		
+
 		if(!ldap_parse_result($core->LDAP->get_link(), $result, $errcode , $matcheddn , $errmsg , $referrals, $controls))
 		{
 			throw new Exception('ldap_parse_result return error code: '.$errcode.', message: '.$errmsg.', ldap_error: '.ldap_error($core->LDAP->get_link()));
@@ -66,7 +66,7 @@ function contacts_sync(&$core, $params, $post_data)
 
 				// *********************************************************
 
-				$v_flags = 0;				
+				$v_flags = 0;
 				$v_adid = bin2hex(@$entries[$i]['objectguid'][0]);  // unique active directory id
 				$v_samaccountname = @$entries[$i]['samaccountname'][0];
 				$v_first_name = @$entries[$i]['givenname'][0];
@@ -80,7 +80,20 @@ function contacts_sync(&$core, $params, $post_data)
 				$v_phone_mobile = @$entries[$i]['mobile'][0];
 				$v_mail = @$entries[$i]['mail'][0];
 				$v_type = 0;
+
 				$v_birthday = 'NULL';  // raw value
+				if(!empty($entries[$i]['info'][0]) && preg_match('/BIRTHDAY: (\d{2})\.(\d{2})\.(\d{4})/', $entries[$i]['info'][0], $match))
+				{
+					$nd = intval($match[1]);
+					$nm = intval($match[2]);
+					$ny = intval($match[3]);
+
+					if(datecheck($nd, $nm, $ny))
+					{
+						$v_birthday = sprintf('\'%04d-%02d-%02d\'', $ny, $nm, $nd);
+					}
+				}
+
 				$v_reserved1 = '';
 				$v_reserved2 = '';
 				$v_reserved3 = '';
