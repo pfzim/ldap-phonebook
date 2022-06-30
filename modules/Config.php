@@ -103,4 +103,22 @@ class Config
 
 		return $this->get_ex($this->core->UserAuth->get_id(), $key, $def_value);
 	}
+
+	public function get_all()
+	{
+		if(!isset($this->config[0]))
+		{
+			$this->load(0);
+		}
+
+		$uid = $this->core->UserAuth->get_id();
+
+		if(!isset($this->config[$uid]))
+		{
+			$this->load($uid);
+		}
+
+		return $this->config;
+	}
+
 }
