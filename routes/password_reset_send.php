@@ -27,7 +27,13 @@ function password_reset_send(&$core, $params, $post_data)
 		$result_json['errors'][] = array('name' => 'mail', 'msg' => LL('UserNotFound'));
 	}
 
-	$html = <<<'EOT'
+	if($result_json['code'])
+	{
+		$result_json['message'] = LL('NotAllFilled');
+	}
+	else
+	{
+		$html = <<<'EOT'
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -35,25 +41,22 @@ function password_reset_send(&$core, $params, $post_data)
 	<body>
 EOT;
 
-	$html .= 'To reset password follow this link: <a href="'.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token.'">'.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token.'</a>';
+		$html .= 'To reset password follow this link: <a href="'.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token.'">'.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token.'</a>';
 
-	$html .= '</body></html>';
+		$html .= '</body></html>';
 
-	$plain = 'To reset password follow this link: '.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token;
+		$plain = 'To reset password follow this link: '.WEB_LINK_EXTERNAL.'password_reset_form/'.$user_id.'/'.$reset_token;
 
-	if($result_json['code'])
-	{
-		$result_json['message'] = LL('NotAllFilled');
-	}
-	elseif($core->Mailer->send_mail(array($mail), LL('ResetPasswordSubject'), $html, $plain))
-	{
-		log_db('Send mail to reset password', '{id='.$user_id.'}', 0);
-		$result_json['message'] = LL('MailWasSent');
-	}
-	else
-	{
-		$result_json['code'] = 1;
-		$result_json['message'] = LL('UnknownError');
+		if($core->Mailer->send_mail(array($mail), LL('ResetPasswordSubject'), $html, $plain))
+		{
+			log_db('Send mail to reset password', '{id='.$user_id.'}', 0);
+			$result_json['message'] = LL('MailWasSent');
+		}
+		else
+		{
+			$result_json['code'] = 1;
+			$result_json['message'] = LL('UnknownError');
+		}
 	}
 
 	//log_file('Password changed: '.json_encode($result_json, JSON_UNESCAPED_UNICODE));
