@@ -32,7 +32,7 @@
 */
 
 define('UA_DISABLED',	0x0001);  /// Ignored for LDAP user
-define('UA_LDAP',		0x0002);  /// Is a LDAP user (overwise is internal user)
+define('UA_LDAP',		0x0002);  /// Is a LDAP user (otherwise is internal user)
 define('UA_DELETED',	0x0004);  /// User is deleted
 define('UA_ADMIN',		0x0008);  /// User is admin
 
