@@ -13,7 +13,18 @@ function user_save(&$core, $params, $post_data)
 	$user_id = intval(@$post_data['id']);
 	$login = @$post_data['login'];
 	$mail = @$post_data['mail'];
-	$flags = intval(@$post_data['flags']);
+	$flags = 0;
+
+	if(isset($post_data['flags']))
+	{
+		foreach($post_data['flags'] as $bit => $bit_value)
+		{
+			if(intval($bit_value))
+			{
+				$flags |= 1 << intval($bit);
+			}
+		}
+	}
 
 	if(empty($login))
 	{
