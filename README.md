@@ -1,4 +1,7 @@
-# STOP WAR - NO WAR - LDAP phonebook
+# STOP WAR - NO WAR! LDAP phonebook
+
+ИТшники, обслуживающие госсектор, вам как по ночам спится?
+
 [:ru:](#корпоративный-телефонный-справочник-с-отображением-контактов-на-карте-офиса) [:us:](#corporate-phone-directory-with-contacts-displayed-on-the-office-map)  
 [Development ветка](https://github.com/pfzim/ldap-phonebook/tree/dev)  
 Вопросы предпочтительнее [задавать в Issues](https://github.com/pfzim/ldap-phonebook/issues?q=), а не по почте
