@@ -11,6 +11,7 @@
 	define('USE_GSSAPI', FALSE);  // look for details https://github.com/pfzim/websco
 
 	define('USE_LDAP', TRUE);
+	define('LDAP_CERT_IGNORE', FALSE);
 	define('LDAP_URI', 'ldap://dc-01.contoso.com ldap://dc-02.contoso.com:389 ldaps://dc-03.contoso.com');
 	define('LDAP_USER', 'domain\\login');
 	define('LDAP_PASSWD', 'password');

@@ -26,6 +26,7 @@ class LDAP
 	private $core = NULL;
 	private $rise_exception = FALSE;
 	private $use_gssapi = FALSE;
+	private $cert_ignore = FALSE;
 
 	function __construct(&$core)
 	{
@@ -37,6 +38,7 @@ class LDAP
 		$this->link = NULL;
 		$this->rise_exception = FALSE;
 		$this->use_gssapi = (defined('USE_GSSAPI') && USE_GSSAPI);
+		$this->cert_ignore = (defined('LDAP_CERT_IGNORE') && LDAP_CERT_IGNORE);
 	}
 
 	private function connect()
@@ -51,6 +53,11 @@ class LDAP
 
 		ldap_set_option($this->link, LDAP_OPT_PROTOCOL_VERSION, 3);
 		ldap_set_option($this->link, LDAP_OPT_REFERRALS, 0);
+
+		if($this->cert_ignore)
+		{
+			ldap_set_option($this->link, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER);
+		}
 
 		if($this->use_gssapi)
 		{
