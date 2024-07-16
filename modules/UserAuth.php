@@ -283,8 +283,8 @@ class UserAuth
 		}
 
 		$_SESSION[DB_PREFIX.'uid'] = 0;
-		setcookie('zh', NULL, time() - 60, $this->cookie_path);
-		setcookie('zl', NULL, time() - 60, $this->cookie_path);
+		setcookie('zh', '', time() - 60, $this->cookie_path);
+		setcookie('zl', '', time() - 60, $this->cookie_path);
 
 		$this->loaded = FALSE;
 		$this->uid = 0;
