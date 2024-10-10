@@ -3,6 +3,7 @@
 function contacts(&$core, $params, $post_data)
 {
 	global $map_names;
+	global $g_maps_count;
 
 	$action = @$params[0];
 	$offset = 0;

@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-define('DB_VERSION', 7);
+define('DB_VERSION', 8);
 
 if(!defined('ROOT_DIR'))
 {
@@ -157,6 +157,8 @@ function exception_handler_ajax($exception)
 		exit;
 	}
 
+	$g_maps_count = $core->Config->get_global('maps_count', 0);
+
 	define('PB_ACCESS_ADMIN', 1);
 	$core->UserAuth->set_bits_representation('a');
 
@@ -277,7 +279,12 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('contact_photo_delete', 'contact_photo_delete', TRUE);
 		$core->Router->add_route('contact_photo_set', 'contact_photo_set', TRUE);
 
+		$core->Router->add_route('map_set', ' map_set', TRUE);
+
 		$core->Router->add_route('tools', 'tools');
+
+		$core->Router->add_route('setting_get', 'setting_get', TRUE);
+		$core->Router->add_route('setting_save', 'setting_save', TRUE);
 
 		$core->Router->add_route('complete_account', 'complete_account', TRUE);
 		$core->Router->add_route('complete_computer', 'complete_computer', TRUE);

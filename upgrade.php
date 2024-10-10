@@ -547,6 +547,32 @@ require_once(ROOT_DIR.'inc.config.php');
 
 		case 7:
 		{
+			echo "Adding column `description` to table @config...\n";
+			if(!$core->db->put(rpv("ALTER TABLE `@config` ADD COLUMN `description` VARCHAR(2048) DEFAULT NULL AFTER `value`")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "Add new config parameter 'maps_count'...\n";
+			if(!$core->db->put(rpv("INSERT INTO @config (`uid`, `name`, `value`, `description`) VALUES (0, 'maps_count', '".PB_MAPS_COUNT."', 'Maps count')")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "Set db_version = '8'...\n";
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 8, `description` = 'DB schema version. Do not change!' WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "\n\nUpgrade to version 8 complete!\n";
+
+			for($i = 1; $i <= PB_MAPS_COUNT; $i++)
+			{
+				copy(ROOT_DIR.'templates'.DIRECTORY_SEPARATOR.'map'.$i.'.jpg', ROOT_DIR.'photos'.DIRECTORY_SEPARATOR.'map'.$i.'.jpg');
+			}
+		}
+		break;
+
+		case 8:
+		{
 			echo "Upgrade doesn't required\n";
 		}
 		break;

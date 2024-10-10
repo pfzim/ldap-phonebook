@@ -127,6 +127,7 @@ $lang = array(
 	'ExportXML'					=> 'Експортувати контакти у форматі XML',
 	'ImportXML'					=> 'Імпортувати контакти з XML файлу (всі контакти будуть видалені)',
 	'Map'						=> 'Мапа',
+	'ReplaceMapImage'			=> 'Replace map image',
 	'ShowAll'					=> 'Показати все',
 	'Handshakes'				=> 'Рукостискання',
 	'Sync'						=> 'Синхронізувати',

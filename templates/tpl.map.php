@@ -1,9 +1,9 @@
 <?php include(TEMPLATES_DIR.'tpl.header.php'); ?>
 		<script>
 			map = <?php eh(intval($map_id));?>;
-			map_count = <?php eh(intval(PB_MAPS_COUNT));?>;
+			map_count = <?php eh($g_maps_count);?>;
 		</script>
-		<h3 align="center">Map<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>&nbsp;<a href="<?php ln('map/'.$i) ?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?></h3>
+		<h3 align="center">Map<?php for($i = 1; $i <= $g_maps_count; $i++) { ?>&nbsp;<a href="<?php ln('map/'.$i) ?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?></h3><?php if($core->UserAuth->check_permission(0, PB_ACCESS_ADMIN)) { ?>&nbsp;<a href="#" onclick="f_map_image(map); return false;"><?php L('ReplaceMapImage') ?></a><?php } ?>
 		<div style="position: relative;">
 				<img id="map-image-drag" src="<?php ls('templates/map'.$map_id.'.png') ?>" style="left: 0px; top: 0px;"/>
 		<?php $i = 0; foreach($contacts as &$row) { $i++; ?>
@@ -33,4 +33,3 @@
 			}, false);
 		</script>
 <?php include(TEMPLATES_DIR.'tpl.footer.php'); ?>
-

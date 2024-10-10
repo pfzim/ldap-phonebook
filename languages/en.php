@@ -127,6 +127,7 @@
 		'ExportXML'					=> 'Export XML',
 		'ImportXML'					=> 'Import XML (clear all existing contacts)',
 		'Map'						=> 'Map',
+		'ReplaceMapImage'			=> 'Replace map image',
 		'ShowAll'					=> 'Show all',
 		'Handshakes'				=> 'Handshakes',
 		'Sync'						=> 'Sync',
