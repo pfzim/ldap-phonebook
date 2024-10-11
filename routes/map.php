@@ -5,8 +5,9 @@ function map(&$core, $params, $post_data)
 	$map_id = intval(@$params[1]);
 	
 	global $map_names;
+	global $g_maps_count;
 
-	if($map_id < 1 || $map_id > PB_MAPS_COUNT)
+	if($map_id < 1 || $map_id > $g_maps_count)
 	{
 		$map_id = 1;
 	}

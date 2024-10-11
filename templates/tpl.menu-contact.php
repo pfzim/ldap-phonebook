@@ -1,7 +1,7 @@
 <?php if(!defined('Z_PROTECTED')) exit; ?>
 		<div id="contact-menu" class="contact-menu" data-id="0">
 			<ul>
-				<?php for($i = 1; $i <= PB_MAPS_COUNT; $i++) { ?>
+				<?php for($i = 1; $i <= $g_maps_count; $i++) { ?>
 					<li><a href="#" data-map="<?php eh($i); ?>" onclick="f_map_set(event); return false;"><?php L('ContactLocate') ?>&nbsp;<?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a></li>
 				<?php } ?>
 				<hr></hr>

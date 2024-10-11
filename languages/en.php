@@ -79,6 +79,10 @@
 		'AccessDeniedToSection'		=> 'Access denied to section',
 		'forUser'					=> 'for user',
 		'AddPermission'				=> 'Add permission group',
+		'Settings'					=> 'Settings',
+		'Parameter'					=> 'Parameter',
+		'Value'						=> 'Value',
+		'Description'				=> 'Description',
 
 		'ApproveNewUser'			=> 'Approve new registered user with administrator rights',
 		'Approve'					=> 'Approve',
@@ -127,6 +131,7 @@
 		'ExportXML'					=> 'Export XML',
 		'ImportXML'					=> 'Import XML (clear all existing contacts)',
 		'Map'						=> 'Map',
+		'ReplaceMapImage'			=> 'Replace map image',
 		'ShowAll'					=> 'Show all',
 		'Handshakes'				=> 'Handshakes',
 		'Sync'						=> 'Sync',

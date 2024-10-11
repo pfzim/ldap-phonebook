@@ -269,11 +269,29 @@ function f_append_fields(el, fields, form_id, spoiler_id)
 			wrapper.innerHTML = html;
 			el.appendChild(wrapper);
 		}
+		else if(fields[i].type == 'readonly')
+		{
+			html = '<div class="form-title"><label for="'+ escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
+				+ '<input class="form-field" id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="text" readonly="readonly" value="'+ escapeHtml(fields[i].value) + '"/>'
+				+ '<div id="'+ escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
+		else if(fields[i].type == 'description')
+		{
+			html = '<div class="form-description">'+ escapeHtml(fields[i].value) + '</div>';
+
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = html;
+			el.appendChild(wrapper);
+		}
 		else if(fields[i].type == 'upload')
 		{
 			html = '<div class="form-title"><label for="'+ escapeHtml(form_id + fields[i].name) + '">' + escapeHtml(fields[i].title) + ':</label></div>'
 				+ '<span class="form-upload" id="' + escapeHtml(form_id + fields[i].name) + '-file">&nbsp;</span> <a href="#" onclick="gi(\'' + escapeHtml(form_id + fields[i].name) + '\').click(); return false;"/>' + LL.SelectFile + '</a>'
-				+ '<input id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="file" style="display: none"/>'
+				+ '<input id="' + escapeHtml(form_id + fields[i].name) + '" name="'+ escapeHtml(fields[i].name) + '" type="file" accept="' + escapeHtml(fields[i].accept?fields[i].accept:'') + '" style="display: none"/>'
 				+ '<div id="' + escapeHtml(form_id + fields[i].name) + '-error" class="form-error"></div>';
 
 			var wrapper = document.createElement('div');
@@ -577,7 +595,7 @@ function f_sw_map(ev)
 				}
 			}
 		}(x, y);
-		map.src = g_link_static_prefix + 'templates/map' + id + '.png';
+		map.src = g_link_static_prefix + 'photos/map' + id + '.png';
 	}
 }
 
@@ -613,7 +631,7 @@ function f_map_set(ev)
 	var map = el_src.getAttribute('data-map');
 	gi('map-container').onclick = null;
 	gi('map-image').onload = null;
-	gi('map-image').src = g_link_static_prefix + 'templates/map'+map+'.png';
+	gi('map-image').src = g_link_static_prefix + 'photos/map'+map+'.png';
 	gi('map-container').style.display='block';
 	gi('map-marker').style.display='none';
 	gi('map-image').onclick = function(event)
@@ -1034,6 +1052,40 @@ function f_photo(ev)
 		}(id);
 		gi('file-upload').click();
 	}
+}
+
+function f_upload_map(id)
+{
+	gi('loading').style.display = 'block';
+	var fd = new FormData(gi("form-file-upload"));
+	fd.append('id', id);
+	f_http(
+		g_link_prefix + 'map_set',
+		function(data, params)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				window.location = window.location;
+			}
+		},
+		null,
+		null,
+		fd
+	);
+
+	return false;
+}
+
+function f_map_image(id)
+{
+	gi('file-upload').onchange = function(id) {
+		return function() {
+			f_upload_map(id);
+		}
+	}(id);
+	gi('file-upload').click();
 }
 
 var parentElement;

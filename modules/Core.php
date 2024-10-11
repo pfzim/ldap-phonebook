@@ -22,6 +22,7 @@
 	This class is designed to provide communication between modules.
 */
 
+#[\AllowDynamicProperties]
 class Core
 {
 	private $error_msg = '';

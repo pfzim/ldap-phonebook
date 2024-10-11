@@ -547,6 +547,34 @@ require_once(ROOT_DIR.'inc.config.php');
 
 		case 7:
 		{
+			global $map_names;
+
+			echo "Adding column `description` to table @config...\n";
+			if(!$core->db->put(rpv("ALTER TABLE `@config` ADD COLUMN `description` VARCHAR(2048) DEFAULT NULL AFTER `value`")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "Add new config parameter 'map_names_json'...\n";
+			if(!$core->db->put(rpv("INSERT INTO @config (`uid`, `name`, `value`, `description`) VALUES (0, 'map_names_json', {s0}, 'Map names')", json_encode($map_names, JSON_UNESCAPED_UNICODE))))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "Set db_version = '8'...\n";
+			if(!$core->db->put(rpv("UPDATE @config SET `value` = 8, `description` = 'DB schema version. Do not change{!' WHERE `name` = 'db_version' LIMIT 1")))
+			{
+				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
+			}
+			echo "\n\nUpgrade to version 8 complete!\n";
+
+			for($i = 1; $i <= PB_MAPS_COUNT; $i++)
+			{
+				copy(ROOT_DIR.'templates'.DIRECTORY_SEPARATOR.'map'.$i.'.png', ROOT_DIR.'photos'.DIRECTORY_SEPARATOR.'map'.$i.'.png');
+			}
+		}
+		break;
+
+		case 8:
+		{
 			echo "Upgrade doesn't required\n";
 		}
 		break;

@@ -40,6 +40,7 @@ class UserAuth
 {
 	private $uid = 0;                    /// User ID
 
+	private $core = NULL;
 	private $loaded = FALSE;
 	private $login = NULL;				/// sAMAccountName, zl cookie
 	private $token = NULL;				/// zh cookie
@@ -283,8 +284,8 @@ class UserAuth
 		}
 
 		$_SESSION[DB_PREFIX.'uid'] = 0;
-		setcookie('zh', NULL, time() - 60, $this->cookie_path);
-		setcookie('zl', NULL, time() - 60, $this->cookie_path);
+		setcookie('zh', '', time() - 60, $this->cookie_path);
+		setcookie('zl', '', time() - 60, $this->cookie_path);
 
 		$this->loaded = FALSE;
 		$this->uid = 0;
