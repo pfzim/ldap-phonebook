@@ -92,7 +92,6 @@ class LDAP
 
 	public function __destruct()
 	{
-		$this->data = array();
 		$this->disconnect();
 	}
 

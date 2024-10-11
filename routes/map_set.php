@@ -20,7 +20,7 @@ function map_set(&$core, $params, $post_data)
 
 	$s_photo = file_get_contents(@$_FILES['file']['tmp_name']);
 	$src = imagecreatefromstring($s_photo);
-	imagejpeg($src, ROOT_DIR.'photos'.DIRECTORY_SEPARATOR.'map'.$id.'.jpg', 100);
+	imagepng($src, ROOT_DIR.'photos'.DIRECTORY_SEPARATOR.'map'.$id.'.png');
 	imagedestroy($src);
 
 	echo '{"code": 0, "id": '.$id.', "message": "Map image changed (ID '.$id.')"}';

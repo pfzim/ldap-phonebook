@@ -158,6 +158,7 @@ function exception_handler_ajax($exception)
 	}
 
 	$g_maps_count = $core->Config->get_global('maps_count', 0);
+	$map_names = json_decode($core->Config->get_global('map_names_json', 0), TRUE);
 
 	define('PB_ACCESS_ADMIN', 1);
 	$core->UserAuth->set_bits_representation('a');
@@ -279,7 +280,7 @@ function exception_handler_ajax($exception)
 		$core->Router->add_route('contact_photo_delete', 'contact_photo_delete', TRUE);
 		$core->Router->add_route('contact_photo_set', 'contact_photo_set', TRUE);
 
-		$core->Router->add_route('map_set', ' map_set', TRUE);
+		$core->Router->add_route('map_set', 'map_set', TRUE);
 
 		$core->Router->add_route('tools', 'tools');
 

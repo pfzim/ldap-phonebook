@@ -2,6 +2,8 @@
 
 function contact_location_set(&$core, $params, $post_data)
 {
+	global $g_maps_count;
+
 	$id = intval(@$post_data['id']);
 	$map_id = intval(@$post_data['map']);
 	$pos_x = intval(@$post_data['x']);

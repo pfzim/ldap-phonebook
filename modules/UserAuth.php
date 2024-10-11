@@ -40,6 +40,7 @@ class UserAuth
 {
 	private $uid = 0;                    /// User ID
 
+	private $core = NULL;
 	private $loaded = FALSE;
 	private $login = NULL;				/// sAMAccountName, zl cookie
 	private $token = NULL;				/// zh cookie
