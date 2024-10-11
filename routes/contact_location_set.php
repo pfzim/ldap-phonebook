@@ -11,7 +11,7 @@ function contact_location_set(&$core, $params, $post_data)
 
 	assert_permission_ajax(0, PB_ACCESS_ADMIN);	// level 0 having Write access mean admin
 	
-	if(($map_id < 0) || ($map_id >= $g_maps_count))
+	if(($map_id < 0) || ($map_id > $g_maps_count))
 	{
 		echo '{"code": 1, "message": "Invalid map identifier"}';
 		exit;

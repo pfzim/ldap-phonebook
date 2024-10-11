@@ -131,7 +131,10 @@ CREATE TABLE `#DB_NAME#`.`pb_config` (
 EOT
 ,
 <<<'EOT'
-INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`, `description`) VALUES(0, 'db_version', 8, 'DB schema version. Do not change{!');
+INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`, `description`) VALUES(0, 'db_version', 8, 'DB schema version. Do not change!');
+EOT
+,
+<<<'EOT'
 INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`, `description`) VALUES(0, 'map_names_json', '["Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25"]', 'Map names');
 EOT
 );
