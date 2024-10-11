@@ -595,7 +595,7 @@ function f_sw_map(ev)
 				}
 			}
 		}(x, y);
-		map.src = g_link_static_prefix + 'templates/map' + id + '.png';
+		map.src = g_link_static_prefix + 'photos/map' + id + '.png';
 	}
 }
 
@@ -631,7 +631,7 @@ function f_map_set(ev)
 	var map = el_src.getAttribute('data-map');
 	gi('map-container').onclick = null;
 	gi('map-image').onload = null;
-	gi('map-image').src = g_link_static_prefix + 'templates/map'+map+'.png';
+	gi('map-image').src = g_link_static_prefix + 'photos/map'+map+'.png';
 	gi('map-container').style.display='block';
 	gi('map-marker').style.display='none';
 	gi('map-image').onclick = function(event)

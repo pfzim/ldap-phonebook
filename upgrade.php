@@ -554,11 +554,6 @@ require_once(ROOT_DIR.'inc.config.php');
 			{
 				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
 			}
-			echo "Add new config parameter 'maps_count'...\n";
-			if(!$core->db->put(rpv("INSERT INTO @config (`uid`, `name`, `value`, `description`) VALUES (0, 'maps_count', {d0}, 'Maps count')", PB_MAPS_COUNT)))
-			{
-				echo 'ERROR['.__LINE__.']: '.$core->db->get_last_error().PHP_EOL;
-			}
 			echo "Add new config parameter 'map_names_json'...\n";
 			if(!$core->db->put(rpv("INSERT INTO @config (`uid`, `name`, `value`, `description`) VALUES (0, 'map_names_json', {s0}, 'Map names')", json_encode($map_names, JSON_UNESCAPED_UNICODE))))
 			{

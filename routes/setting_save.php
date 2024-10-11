@@ -13,7 +13,7 @@ function setting_save(&$core, $params, $post_data)
 		'errors' => array()
 	);
 
-	assert_permission_ajax(0, USER_ACCESS_ADMIN);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	$user_id = intval(@$post_data['uid']);
 	$setting_key = @$post_data['key'];

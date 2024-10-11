@@ -125,12 +125,14 @@ CREATE TABLE `#DB_NAME#`.`pb_config` (
   `uid` int(10) unsigned NOT NULL,
   `name` varchar(255) NOT NULL DEFAULT '',
   `value` varchar(8192) NOT NULL DEFAULT '',
+  `description` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`name`,`uid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOT
 ,
 <<<'EOT'
-INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`) VALUES(0, 'db_version', 7);
+INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`, `description`) VALUES(0, 'db_version', 8, 'DB schema version. Do not change{!');
+INSERT INTO `#DB_NAME#`.`pb_config` (`uid`, `name`, `value`, `description`) VALUES(0, 'map_names_json', '["Floor 1", "Floor 3", "Floor 6", "Floor 14", "Floor 25"]', 'Map names');
 EOT
 );
 
@@ -178,9 +180,7 @@ $config = <<<'EOT'
 	define('LOG_FILE', '#log_file#');
 
 	define('PB_LDAP_FILTER', '#ldap_filter#');
-	define('PB_MAPS_COUNT', 5);
 
-	$map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25 (change inc.config.php)');
 	$g_icons = array('Human', 'Printer', 'Fax (change inc.config.php)');
 
 EOT;

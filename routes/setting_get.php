@@ -5,7 +5,7 @@ function setting_get(&$core, $params, $post_data)
 	$user_id = intval(@$params[1]);
 	$setting_key = @$params[2];
 
-	assert_permission_ajax(0, USER_ACCESS_ADMIN);
+	assert_permission_ajax(0, PB_ACCESS_ADMIN);
 
 	if($user_id)
 	{

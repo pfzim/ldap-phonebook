@@ -157,8 +157,8 @@ function exception_handler_ajax($exception)
 		exit;
 	}
 
-	$g_maps_count = $core->Config->get_global('maps_count', 0);
 	$map_names = json_decode($core->Config->get_global('map_names_json', 0), TRUE);
+	$g_maps_count = count($map_names);
 
 	define('PB_ACCESS_ADMIN', 1);
 	$core->UserAuth->set_bits_representation('a');

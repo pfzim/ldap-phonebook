@@ -79,6 +79,10 @@
 		'AccessDeniedToSection'		=> 'Access denied to section',
 		'forUser'					=> 'for user',
 		'AddPermission'				=> 'Add permission group',
+		'Settings'					=> 'Settings',
+		'Parameter'					=> 'Parameter',
+		'Value'						=> 'Value',
+		'Description'				=> 'Description',
 
 		'ApproveNewUser'			=> 'Approve new registered user with administrator rights',
 		'Approve'					=> 'Approve',

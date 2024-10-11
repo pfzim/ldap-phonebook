@@ -3,13 +3,14 @@
 			map = <?php eh(intval($map_id));?>;
 			map_count = <?php eh($g_maps_count);?>;
 		</script>
-		<h3 align="center">Map<?php for($i = 1; $i <= $g_maps_count; $i++) { ?>&nbsp;<a href="<?php ln('map/'.$i) ?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?><?php if($core->UserAuth->check_permission(0, PB_ACCESS_ADMIN)) { ?>&nbsp;<small><a href="#" onclick="f_map_image(map); return false;"><?php L('ReplaceMapImage') ?></a></small><?php } ?></h3>
+		<h3 align="center">Map<?php for($i = 1; $i <= $g_maps_count; $i++) { ?>&nbsp;<a href="<?php ln('map/'.$i) ?>"><?php eh(empty($map_names[$i-1])?$i:$map_names[$i-1]);?></a><?php } ?></h3>
 		<div style="position: relative;">
 				<img id="map-image-drag" src="<?php ls('photos/map'.$map_id.'.png') ?>" style="left: 0px; top: 0px;"/>
 		<?php $i = 0; foreach($contacts as &$row) { $i++; ?>
 				<img id="<?php eh('u'.$row['id']);?>" class="mm" src="<?php ls('templates/marker-static-'.$row['type'].'.png') ?>" data-id=<?php eh($row['id']);?> data-name="<?php eh($row['first_name'].' '.$row['last_name']); ?>" data-position="<?php eh($row['position']); ?>" data-phone="<?php eh($row['phone_internal']); ?>" data-flags="<?php eh($row['flags']); ?>" style="position: absolute; <?php eh('left: '.($row['x']-16).'px; top: '.($row['y']-22).'px');?>" onmouseenter="si(event)" onmouseleave="document.getElementById('popup').style.display='none'" onmousemove="mi(event);" onmousedown="f_drag(event);" ondragstart="return false;"/>
 		<?php } ?>
 		</div>
+		<?php if($core->UserAuth->check_permission(0, PB_ACCESS_ADMIN)) { ?><small><a href="#" onclick="f_map_image(map); return false;"><?php L('ReplaceMapImage') ?></a></small><?php } ?>
 		<div id="popup" class="tooltip-user" style="display: none;">
 			<img id="u_photo"/>
 			<span id="u_name" class="boldtext"></span><br />
