@@ -22,17 +22,18 @@
 	This class is designed to provide communication between modules.
 */
 
-#[\AllowDynamicProperties]
 class Core
 {
 	private $error_msg = '';
 	private $rise_exception = FALSE;
 	private $config = NULL;
+	private $loaded_classes = array();
 
 	function __construct($rise_exception = FALSE)
 	{
 		$this->config = NULL;
 		$this->error_msg = '';
+		$this->loaded_classes = array();
 		$this->rise_exception = $rise_exception;
 	}
 	
@@ -46,9 +47,9 @@ class Core
 
 	public function load_ex($name, $module)
 	{
-		if(isset($this->$module))
+		if(isset($this->loaded_classes[$name]))
 		{
-			return $this->$module;
+			return $this->loaded_classes[$name];
 		}
 
 		$filepath = MODULES_DIR.$module.'.php';
@@ -60,9 +61,9 @@ class Core
 		
 		require_once($filepath);
 
-		$this->$name = new $module($this);
+		$this->loaded_classes[$name] = new $module($this);
 
-		return $this->$module;
+		return $this->loaded_classes[$name];
 	}
 
 	public function load($module)

@@ -1,4 +1,6 @@
-# STOP WAR - NO WAR! LDAP phonebook
+# STOP WAR - NO WAR!
+
+# LDAP phonebook
 
 ИТшники, обслуживающие госсектор, вам как по ночам спится?
 

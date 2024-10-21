@@ -25,7 +25,7 @@
 						$group_name = &$matches[1];
 					}
 					
-					if($core->LDAP->search($result, '(&(objectCategory=group)(distinguishedName='.ldap_escape($row['dn'], null, LDAP_ESCAPE_FILTER).'))', array('distinguishedName')) == 1)
+					if($core->LDAP->search($result, '(&(objectCategory=group)(distinguishedName='.ldap_escape($row['dn'], '', LDAP_ESCAPE_FILTER).'))', array('distinguishedName')) == 1)
 					{
 						$icon_title = 'Group exists in AD';
 						$icon_path = 'templates/check_mark.png';

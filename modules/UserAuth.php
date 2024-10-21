@@ -609,7 +609,7 @@ class UserAuth
 				$cookie = '';
 				ldap_control_paged_result($this->ldap->get_link(), 200, true, $cookie);
 
-				$sr = ldap_search($this->ldap->get_link(), LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.ldap_escape($group, null, LDAP_ESCAPE_FILTER).'))', array('samaccountname', 'objectsid'));
+				$sr = ldap_search($this->ldap->get_link(), LDAP_BASE_DN, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), '', LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.ldap_escape($group, '', LDAP_ESCAPE_FILTER).'))', array('samaccountname', 'objectsid'));
 				if(!$sr)
 				{
 					$this->error($this->ldap->get_last_error());
@@ -622,7 +622,7 @@ class UserAuth
 					return TRUE;
 				}
 				*/
-				if($this->ldap->search($records, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.ldap_escape($group, null, LDAP_ESCAPE_FILTER).'))', array('samaccountname', 'objectsid')) != 1)
+				if($this->ldap->search($records, '(&(objectCategory=person)(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), '', LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.ldap_escape($group, '', LDAP_ESCAPE_FILTER).'))', array('samaccountname', 'objectsid')) != 1)
 				{
 					return FALSE;
 				}
@@ -661,8 +661,8 @@ class UserAuth
 				/*
 				$cookie = '';
 				ldap_control_paged_result($link, 2, true, $cookie);
-				//echo '(&(objectClass=user)(sAMAccountName='.ldap_escape($this->sam_account_name, null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$row[0].'))';
-				$sr = ldap_search($link, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$row[0].'))', array('samaccountname', 'objectsid'));
+				//echo '(&(objectClass=user)(sAMAccountName='.ldap_escape($this->sam_account_name, '', LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$row[0].'))';
+				$sr = ldap_search($link, LDAP_BASE_DN, '(&(objectClass=user)(sAMAccountName='.ldap_escape($this->get_login(), '', LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$row[0].'))', array('samaccountname', 'objectsid'));
 				if($sr)
 				{
 					$records = ldap_get_entries($link, $sr);
@@ -691,7 +691,7 @@ class UserAuth
 					$group_dn = $row[1];
 				}
 				
-				if($this->ldap->search($records, '(&(objectClass=user)(objectCategory=person)(sAMAccountName='.ldap_escape($this->get_login(), null, LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$group_dn.'))', array('samaccountname', 'objectsid')) == 1)
+				if($this->ldap->search($records, '(&(objectClass=user)(objectCategory=person)(sAMAccountName='.ldap_escape($this->get_login(), '', LDAP_ESCAPE_FILTER).')(memberOf:1.2.840.113556.1.4.1941:='.$group_dn.'))', array('samaccountname', 'objectsid')) == 1)
 				{
 					$this->rights[$object_id] = $this->merge_permissions($this->rights[$object_id], $row[2]);
 
