@@ -50,22 +50,32 @@ Enable plug-ins in php.ini or compile PHP with LDAP support
 ```
 sudo apt-get install mariadb-server
 sudo apt-get install php php-mysql php-ldap php-curl php-xml php-gd
+```
+
+If you want to use Nginx web server:
+```
+sudo apt-get install nginx php-fpm
+```
+
+Or if you want to use Apache web server:
+```
 sudo apt-get install apache2 libapache2-mod-php
-#sudo apt-get install nginx php-fpm
+```
+
+Optional: if you want to cache LDAP queries:
+```
+sudo apt-get install memcached php-memcached
+```
+
+Optional: if you want to use keytab instead of login/password:
+```
 sudo apt-get install memcached php-memcached
 sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
 - Open in the browser `install.php` and fill in the proposed parameters
-- Replace the images of the maps `templates/map[1-5].png` with their schemes
 
 ## Additional settings in inc.config.php (optional)
-
-Change the number and names of maps:
-```
-define('PB_MAPS_COUNT', 5);
-$map_names = array('Floor 1', 'Floor 3', 'Floor 6', 'Floor 14', 'Floor 25');
-```
 
 Change language:
 ```
