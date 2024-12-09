@@ -72,7 +72,11 @@ Optional: if you want to use keytab instead of login/password:
 sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
-- Open in the browser `install.php` and fill in the proposed parameters
+Open in the browser `install.php` and fill in the proposed parameters
+
+```
+http://<your_server_ip>/websco/install.php
+```
 
 ## Additional settings in inc.config.php (optional)
 
