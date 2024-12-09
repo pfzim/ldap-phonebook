@@ -69,7 +69,6 @@ sudo apt-get install memcached php-memcached
 
 Optional: if you want to use keytab instead of login/password:
 ```
-sudo apt-get install memcached php-memcached
 sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
