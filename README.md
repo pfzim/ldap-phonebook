@@ -72,11 +72,8 @@ Optional: if you want to use keytab instead of login/password:
 sudo apt-get install krb5 krb5-clients krb5-user libsasl2-modules-gssapi-mit libsasl2-2 gss-ntlmssp ldap-utils 
 ```
 
-Open in the browser `install.php` and fill in the proposed parameters
-
-```
-http://<your_server_ip>/websco/install.php
-```
+- Unpack [the content](https://github.com/pfzim/ldap-phonebook/archive/refs/heads/master.zip) in a directory served by your web server (for example `/var/www/html/pb/`).
+- Point your web browser to the URL corresponding to the directory where the files have been unpacked (for example `http://<your_server_ip>/pb/install.php`) and follow the indications on the screen.
 
 ## Additional settings in inc.config.php (optional)
 
