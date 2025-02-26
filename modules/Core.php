@@ -104,6 +104,8 @@ class Core
 
 	public function error_ex($str, $rise_exception)
 	{
+		error_log($str, 0);
+
 		if($rise_exception)
 		{
 			throw new Exception(__CLASS__.': '.$str);
