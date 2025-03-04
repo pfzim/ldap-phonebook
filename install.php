@@ -189,7 +189,7 @@ $config = <<<'EOT'
 EOT;
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+// use PHPMailer\PHPMailer\Exception;
 
 require_once ROOT_DIR.'libs/PHPMailer/src/Exception.php';
 require_once ROOT_DIR.'libs/PHPMailer/src/PHPMailer.php';
