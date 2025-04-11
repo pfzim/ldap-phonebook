@@ -146,6 +146,7 @@
 		'ContactDeletePhoto'		=> 'Видалити фото',
 		'HideDisabledContacts'		=> 'Приховати контакти, які були відключені чи видалені з AD',
 		'ShowEnabledContacts'		=> 'Показати контакти, які не відключені та не видалені з AD',
+		'PurgeADDeletedContacts'	=> 'Purge contacts deleted from AD',
 		'EditContact'				=> 'Редагувати',
 		'MiddleName'				=> 'По батькові',
 		'Organization'				=> 'Організація',

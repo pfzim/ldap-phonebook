@@ -5,6 +5,7 @@
 <a href="<?php ln('contacts_sync') ?>" onclick="return f_confirm_async(this);"><?php L('Sync') ?></a><br />
 <a href="<?php ln('contacts_hide_disabled') ?>" onclick="return f_confirm_async(this);"><?php L('HideDisabledContacts') ?></a><br />
 <a href="<?php ln('contacts_show_all_enabled') ?>" onclick="return f_confirm_async(this);"><?php L('ShowEnabledContacts') ?></a><br />
+<a href="<?php ln('contacts_purge_deleted') ?>" onclick="return f_confirm_async(this);"><?php L('PurgeADDeletedContacts') ?></a><br />
 <a href="<?php ln('contacts_export') ?>"><?php L('Export') ?></a><br />
 <a href="<?php ln('contacts_dump_db') ?>"><?php L('DumpDB') ?></a><br />
 <a href="<?php ln('contacts_export_xml') ?>"><?php L('ExportXML') ?></a><br />

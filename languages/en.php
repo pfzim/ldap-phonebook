@@ -146,6 +146,7 @@
 		'ContactDeletePhoto'		=> 'Delete photo',
 		'HideDisabledContacts'		=> 'Hide disabled and deleted in AD contacts',
 		'ShowEnabledContacts'		=> 'Show enabled and not deleted from AD contacts',
+		'PurgeADDeletedContacts'	=> 'Purge contacts deleted from AD',
 		'EditContact'				=> 'Edit local contact',
 		'MiddleName'				=> 'Middle name',
 		'Organization'				=> 'Organization',
