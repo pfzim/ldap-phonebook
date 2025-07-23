@@ -10,7 +10,8 @@
 					<?php if(!empty($error_msg)) { ?>
 					<p><?php eh($error_msg); ?></p>
 					<?php } ?>
-					<input type="submit" value="<?php L('LoginBtn') ?>" /><br />
+					<button type="submit"><?php L('LoginBtn') ?></button><br />
+					<br />
 				</form>
 				<a href="<?php ln('register_form') ?>" onclick="return f_show_form(this.href);"><?php L('Register') ?></a> &VerticalSeparator; <a href="<?php ln('password_reset_send_form') ?>" onclick="return f_show_form(this.href);"><?php L('ResetPasswordBtn') ?></a><br />
 			</div>

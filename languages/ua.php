@@ -3,6 +3,8 @@
 		'Title'						=> 'Телефонний довідник',
 		'Phonebook'					=> 'Телефонний довідник',
 		'Home'						=> 'Головна',
+		'Theme'						=> 'Theme',
+		'Language'					=> 'Language',
 		'Logout'					=> 'Вихід',
 		'Login'						=> 'Логін',
 		'LoginHdr'					=> 'Вхід',

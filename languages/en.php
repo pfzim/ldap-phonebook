@@ -3,6 +3,8 @@
 		'Title'						=> 'Phonebook',
 		'Phonebook'					=> 'Phonebook',
 		'Home'						=> 'Home',
+		'Theme'						=> 'Theme',
+		'Language'					=> 'Language',
 		'Logout'					=> 'Logout',
 		'Login'						=> 'Login',
 		'LoginHdr'					=> 'Login',

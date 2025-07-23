@@ -54,7 +54,7 @@ require_once(ROOT_DIR.'inc.config.php');
 	}
 
 	require_once(ROOT_DIR.'modules'.DIRECTORY_SEPARATOR.'Core.php');
-	require_once(ROOT_DIR.'languages'.DIRECTORY_SEPARATOR.APP_LANGUAGE.'.php');
+	// require_once(ROOT_DIR.'languages'.DIRECTORY_SEPARATOR.APP_LANGUAGE.'.php');
 	require_once(ROOT_DIR.'inc.utils.php');
 
 function assert_permission_ajax($section_id, $allow_bit)
@@ -132,6 +132,22 @@ function ln($path)
 function ls($path)
 {
 	eh(WEB_LINK_STATIC_PREFIX.$path);
+}
+
+function languages_list()
+{
+	$files = scandir(ROOT_DIR . 'languages' . DIRECTORY_SEPARATOR);
+	$themes = [];
+
+	foreach($files as $file)
+	{
+		if(preg_match('/^(.+)\.php$/', $file, $matches))
+		{
+			$themes[] = $matches[1];
+		}
+	}
+
+	return $themes;
 }
 
 function exception_handler($exception)
@@ -244,6 +260,15 @@ function exception_handler_ajax($exception)
 	define('PB_CONTACT_AD_DISABLED',   0x0004);
 	define('PB_CONTACT_WITH_PHOTO',    0x0008);
 
+	global $g_app_language;
+	$g_app_language = $core->Config->get_user('language', isset($_COOKIE['lang']) ? $_COOKIE['lang'] : APP_LANGUAGE);
+	if(!file_exists(ROOT_DIR.'languages'.DIRECTORY_SEPARATOR.$g_app_language.'.php'))
+	{
+		$g_app_language = APP_LANGUAGE;
+	}
+
+	require_once(ROOT_DIR.'languages'.DIRECTORY_SEPARATOR.$g_app_language.'.php');
+
 	//$core->Router->add_route('info', 'info');
 
 	$core->Router->add_route('contacts', 'contacts');						// default route
@@ -287,6 +312,7 @@ function exception_handler_ajax($exception)
 
 		$core->Router->add_route('setting_get', 'setting_get', TRUE);
 		$core->Router->add_route('setting_save', 'setting_save', TRUE);
+		$core->Router->add_route('setting_user_save', 'setting_user_save', TRUE);
 
 		$core->Router->add_route('complete_account', 'complete_account', TRUE);
 		$core->Router->add_route('complete_computer', 'complete_computer', TRUE);
@@ -317,6 +343,8 @@ function exception_handler_ajax($exception)
 	}
 	
 	$core->Router->add_route('logoff', 'logoff');
+
+	$core->Router->add_route('language_change', 'language_change', TRUE);
 
 	$core->Router->add_route('password_reset_send_form', 'password_reset_send_form', TRUE);
 	$core->Router->add_route('password_reset_send', 'password_reset_send', TRUE);

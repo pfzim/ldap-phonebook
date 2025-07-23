@@ -913,6 +913,35 @@ function f_async_ex(url)
 	return false;
 }
 
+function f_theme_change(theme)
+{
+	document.documentElement.setAttribute('data-theme-color', theme);
+	localStorage.setItem('theme-color', theme);
+	return false;
+}
+
+function f_language_change(theme)
+{
+	gi('loading').style.display = 'block';
+	f_http(
+		g_link_prefix + 'language_change',
+		function(data, el)
+		{
+			gi('loading').style.display = 'none';
+			f_notify(data.message, data.code?"error":"success");
+			if(!data.code)
+			{
+				window.location = window.location;
+			}
+		},
+		null,
+		'application/x-www-form-urlencoded',
+		json2url({key: 'language', value: theme})
+	);
+
+	return false;
+}
+
 function f_search(f)
 {
     //f.action = f.action + '/' + encodeURIComponent(gi('search').value);

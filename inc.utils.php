@@ -579,7 +579,7 @@ function build_query($qa)
 
 function eh($str)
 {
-	echo htmlspecialchars($str);
+	echo htmlspecialchars((string) $str);
 }
 
 function formatBytes($bytes, $precision = 3) {
